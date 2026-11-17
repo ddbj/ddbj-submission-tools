@@ -15,7 +15,7 @@ def test_organelle_circular_source_and_topology(tmp_path):
         "CP\tLiftoff\tCDS\t1\t9\t.\t+\t0\tID=c1;Parent=g1.t1;product=50S ribosomal protein L5;transl_table=11\n")
     fasta = _write(tmp_path, "o.fa", ">CP\nATGAAATAA\n")
     mss_cfg = _write(tmp_path, "o.toml",
-        '[source]\norganism="x"\nmol_type="genomic DNA"\n[locus_tag]\nprefix="HAKA"\n[cds]\ntransl_table=1\n')
+        '[locus_tag]\nprefix="HAKA"\n[cds]\ntransl_table=1\n')
     common = _write(tmp_path, "c.json",
         '{"DATE":{"hold_date":"2099-12-31"},'
         '"SOURCE":{"organism":"Heterosigma akashiwo","mol_type":"genomic DNA"},'
@@ -37,13 +37,15 @@ def test_nuclear_wgs_submitter_seqid(tmp_path):
         "scaffold_1\tS\tCDS\t1\t9\t.\t+\t0\tID=c1;Parent=g1.t1\n")
     fasta = _write(tmp_path, "n.fa", ">scaffold_1\nATGAAATAA\n")
     mss_cfg = _write(tmp_path, "n.toml",
-        '[source]\norganism="x"\nmol_type="genomic DNA"\n[locus_tag]\nprefix="HAKA"\n[cds]\ntransl_table=1\n[product]\ndefault="hypothetical protein"\n')
+        '[locus_tag]\nprefix="HAKA"\n[cds]\ntransl_table=1\n[product]\ndefault="hypothetical protein"\n')
     common = _write(tmp_path, "c.json",
         '{"DATE":{"hold_date":"2099-12-31"},'
         '"SOURCE":{"organism":"Heterosigma akashiwo","mol_type":"genomic DNA"},'
         '"SOURCE_IDENTIFIER":"strain"}')
     # no roles file -> all unplaced -> WGS
     text, _ = build_ann_text(gff, fasta, mss_cfg, common, None, "WGS")
-    assert "submitter_seqid\tscaffold_1" in text
+    # WGS: one COMMON source (as mss_builder writes it); the entry name opens its first feature row
+    assert "\t\t\tsubmitter_seqid\t@@[entry]@@" in text
+    assert "scaffold_1\tmRNA\t" in text
     assert "TOPOLOGY" not in text          # linear WGS
     assert "hypothetical protein" in text  # no product -> default

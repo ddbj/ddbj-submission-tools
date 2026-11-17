@@ -4,7 +4,7 @@ from gff2mss.convert import build_noncoding_features
 
 
 def cfg():
-    return MssConfig(source={})
+    return MssConfig()
 
 
 def test_mirna_gene_maps_to_precursor_and_ncrna():

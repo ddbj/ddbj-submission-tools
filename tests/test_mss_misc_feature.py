@@ -7,7 +7,7 @@ from gff2mss.locus_tag import LocusTagAssigner
 
 
 def cfg():
-    return MssConfig(source={}, transl_table=1, product_default="hypothetical protein")
+    return MssConfig(transl_table=1, product_default="hypothetical protein")
 
 
 def _gene_with_internal_stop():
@@ -37,7 +37,7 @@ def test_emit_mrna_false_suppresses_mrna_keeps_cds():
     cds = Feature("cds", "S", "CDS", [Span("c", 1, 9, "+", 0)], {"ID": ["cds"]}, ["g.t1"])
     mrna.children = [cds]
     gene.children = [mrna]
-    cfg2 = MssConfig(source={}, transl_table=1, product_default="hypothetical protein", emit_mrna=False)
+    cfg2 = MssConfig(transl_table=1, product_default="hypothetical protein", emit_mrna=False)
     feats = build_gene_features(gene, "nonredundant", LocusTagAssigner("L", 6, 10, 10),
                                 Seq("ATGAAATAA"), cfg2, [])
     keys = [f.key for f in feats]

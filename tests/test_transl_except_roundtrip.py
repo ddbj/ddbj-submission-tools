@@ -1,3 +1,4 @@
+from tests.mss_helpers import ann_text
 import os
 from Bio import SeqIO
 from ddbj_gff import parse
@@ -13,7 +14,7 @@ def _cds_feats():
     rec = SeqIO.read(FIX, "genbank")
     doc = parse(write(flatfile_to_gff(rec)))               # flatfile -> canonical GFF (recoded_codon child)
     seqs = {rec.id: rec.seq}
-    cfg = MssConfig(source={}, transl_table=1, product_default="hypothetical protein")
+    cfg = MssConfig(transl_table=1, product_default="hypothetical protein")
     cfg.emit_mrna = False                                   # virus 2-level
     per_entry = build_entry_features(doc, seqs, cfg, [])
     return [f for feats in per_entry.values() for f in feats]
@@ -28,15 +29,12 @@ def test_transl_except_qualifier_emitted_on_clean_cds():
 
 
 def test_transl_except_full_roundtrip(tmp_path):
-    from gff2mss.convert import convert
-    from gff2mss.emit import emit_ann
     import mss2ff.cli
     rec = SeqIO.read(FIX, "genbank")
     doc = parse(write(flatfile_to_gff(rec)))
-    cfg = MssConfig(source={}, transl_table=1, product_default="hypothetical protein")
+    cfg = MssConfig(transl_table=1, product_default="hypothetical protein")
     cfg.emit_mrna = False
-    mss_doc, _ = convert(doc, {rec.id: rec.seq}, cfg, common_rows=[])
-    ann = emit_ann(mss_doc)
+    ann = ann_text(doc, {rec.id: rec.seq}, cfg)
     assert "\ttransl_except\t(pos:746..748,aa:Pyl)" in ann     # qualifier in the .ann
 
     ann_p = tmp_path / "o.ann"; ann_p.write_text(ann, encoding="utf-8")

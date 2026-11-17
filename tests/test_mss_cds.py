@@ -5,7 +5,7 @@ from gff2mss.convert import build_cds_feature
 
 
 def cfg():
-    return MssConfig(source={}, transl_table=1, product_default="hypothetical protein")
+    return MssConfig(transl_table=1, product_default="hypothetical protein")
 
 
 def mrna_with_cds(cds_spans, strand="+", phase0=0, mrna_attr=None):
@@ -116,7 +116,7 @@ def test_recoded_codon_child_avoids_internal_stop_warning():
     mrna = Feature("m1", "S", "mRNA", [Span("s", 1, 12, "+")], {"ID": ["m1"]}, ["g1"])
     mrna.children = [cds]
     gene = Feature("g1", "S", "gene", [Span("s", 1, 12, "+")], {"ID": ["g1"]}, [])
-    cfg = MssConfig(source={"organism": "x", "mol_type": "genomic DNA"})
+    cfg = MssConfig()
     diags: list = []
     feat = build_cds_feature(mrna, gene, "LT_1", genome, cfg, diags)
     assert feat is not None

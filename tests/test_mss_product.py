@@ -14,26 +14,26 @@ def _mrna(mid, gid, product=None):
 
 def test_product_map_hit_by_transcript_id():
     mrna, gene = _mrna("g1.t1", "g1")
-    cfg = MssConfig(source={}, product_map={"g1.t1": "tubulin-tyrosine ligase"})
+    cfg = MssConfig(product_map={"g1.t1": "tubulin-tyrosine ligase"})
     assert _product(mrna, gene, cfg) == "tubulin-tyrosine ligase"
 
 
 def test_product_map_hit_by_gene_id_when_transcript_misses():
     mrna, gene = _mrna("g1.t2", "g1")
-    cfg = MssConfig(source={}, product_map={"g1": "some kinase"})
+    cfg = MssConfig(product_map={"g1": "some kinase"})
     assert _product(mrna, gene, cfg) == "some kinase"
 
 
 def test_product_falls_back_to_col9():
     mrna, gene = _mrna("g1.t1", "g1", product="50S ribosomal protein L5")
-    cfg = MssConfig(source={})
+    cfg = MssConfig()
     assert _product(mrna, gene, cfg) == "50S ribosomal protein L5"
 
 
 def test_product_defaults_to_hypothetical_no_gene_name_fallback():
     mrna, gene = _mrna("g1.t1", "g1")
     mrna.attributes["gene"] = ["MpX"]  # 旧仕様なら "protein MpX" だったが廃止
-    cfg = MssConfig(source={}, product_default="hypothetical protein")
+    cfg = MssConfig(product_default="hypothetical protein")
     assert _product(mrna, gene, cfg) == "hypothetical protein"
 
 
@@ -43,7 +43,7 @@ def test_product_from_cds_child_when_mrna_has_none():
     cds = Feature("cds1", "S", "CDS", [Span("c", 1, 9, "+")],
                   {"product": ["50S ribosomal protein L5"]}, ["g1.t1"])
     mrna.children = [cds]
-    cfg = MssConfig(source={})
+    cfg = MssConfig()
     assert _product(mrna, gene, cfg) == "50S ribosomal protein L5"
 
 

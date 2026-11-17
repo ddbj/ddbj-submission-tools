@@ -5,24 +5,19 @@ from dataclasses import dataclass, field
 
 from ddbj_gff.errors import Diagnostic, GffParseError, Severity
 
-_KNOWN_SECTIONS = {"source", "locus_tag", "cds", "assembly_gap", "product", "transcript"}
+_KNOWN_SECTIONS = {"locus_tag", "cds", "product", "transcript"}
+# Metadata now comes from the common JSON (and sequence roles), as in mss_builder.
+_MOVED_TO_COMMON = {"source": "SOURCE", "assembly_gap": "ASSEMBLY_GAP"}
 
 
 @dataclass
 class MssConfig:
-    source: dict[str, str]
-    chromosome_pattern: str | None = None
-    ff_def_chromosome: str | None = None
-    ff_def_default: str | None = None
+    """Annotation conversion settings. Metadata (source, gaps) is in the common JSON."""
     locus_tag_prefix: str = ""
     locus_tag_width: int = 6
     locus_tag_start: int = 10
     locus_tag_step: int = 10
     transl_table: int = 1
-    gap_min_length: int = 10
-    gap_type: str = "within scaffold"
-    gap_linkage_evidence: str = "align genus"
-    gap_estimated_length: str = "known"
     product_default: str = "hypothetical protein"
     product_map_path: str | None = None
     product_map: dict = field(default_factory=dict)
@@ -35,26 +30,19 @@ def load_config(path: str) -> tuple[MssConfig, list[Diagnostic]]:
         data = tomllib.load(fh)
     diags: list[Diagnostic] = []
     for key in data:
-        if key not in _KNOWN_SECTIONS:
+        if key in _MOVED_TO_COMMON:
+            diags.append(Diagnostic(Severity.WARNING, None, "moved-to-common",
+                                    f"[{key}] in the gff2mss config is ignored; put it in the "
+                                    f"common JSON ({_MOVED_TO_COMMON[key]})"))
+        elif key not in _KNOWN_SECTIONS:
             diags.append(Diagnostic(Severity.WARNING, None, "unknown-config-key",
                                     f"unknown config section [{key}] ignored"))
-
-    if "source" not in data or not isinstance(data["source"], dict):
-        raise GffParseError(Diagnostic(Severity.ERROR, None, "config-missing",
-                                       "config requires a [source] table"))
-    source_tbl = data["source"]
-    chromosome = source_tbl.get("chromosome", {})
-    ff = source_tbl.get("ff_definition", {})
-    # plain source qualifiers = scalar entries of [source] (exclude the nested tables)
-    source_qual = {k: str(v) for k, v in source_tbl.items()
-                   if k not in ("chromosome", "ff_definition")}
 
     lt = data.get("locus_tag", {})
     if "prefix" not in lt:
         raise GffParseError(Diagnostic(Severity.ERROR, None, "config-missing",
                                        "config requires [locus_tag].prefix"))
     cds = data.get("cds", {})
-    gap = data.get("assembly_gap", {})
     product = data.get("product", {})
     transcript = data.get("transcript", {})
     mode = transcript.get("mode", "nonredundant")
@@ -63,37 +51,14 @@ def load_config(path: str) -> tuple[MssConfig, list[Diagnostic]]:
                                        f"transcript mode {mode!r} must be one of minimal/nonredundant/full"))
 
     cfg = MssConfig(
-        source=source_qual,
-        chromosome_pattern=chromosome.get("pattern"),
-        ff_def_chromosome=ff.get("chromosome"),
-        ff_def_default=ff.get("default"),
         locus_tag_prefix=lt["prefix"],
         locus_tag_width=lt.get("width", 6),
         locus_tag_start=lt.get("start", 10),
         locus_tag_step=lt.get("step", 10),
         transl_table=cds.get("transl_table", 1),
-        gap_min_length=gap.get("min_length", 10),
-        gap_type=gap.get("gap_type", "within scaffold"),
-        gap_linkage_evidence=gap.get("linkage_evidence", "align genus"),
-        gap_estimated_length=gap.get("estimated_length", "known"),
         product_default=product.get("default", "hypothetical protein"),
         product_map_path=product.get("map"),
         transcript_mode=mode,
         emit_mrna=transcript.get("emit_mrna", True),
     )
-    for required in ("organism", "mol_type"):
-        if required not in source_qual:
-            diags.append(Diagnostic(Severity.WARNING, None, "source-missing-qualifier",
-                                    f"[source].{required} is recommended for DDBJ submission"))
     return cfg, diags
-
-
-def load_common(path: str) -> list[str]:
-    with open(path, encoding="ascii") as fh:
-        rows = [line.rstrip("\r\n") for line in fh]
-    while rows and rows[-1] == "":
-        rows.pop()
-    if not rows or not rows[0].startswith("COMMON"):
-        raise GffParseError(Diagnostic(Severity.ERROR, None, "common-invalid",
-                                       "common metadata must be non-empty and start with COMMON"))
-    return rows

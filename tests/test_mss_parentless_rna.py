@@ -11,7 +11,7 @@ c1\tpybarrnap\trRNA\t100\t200\t.\t+\t.\tID=r1;product=18S ribosomal RNA
 
 
 def cfg():
-    return MssConfig(source={}, locus_tag_prefix="PFX")
+    return MssConfig(locus_tag_prefix="PFX")
 
 
 def test_parentless_rna_emitted_as_toplevel_with_locus_tag():

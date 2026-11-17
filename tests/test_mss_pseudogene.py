@@ -13,7 +13,7 @@ def test_pseudogene_excluded():
     doc = parse(GFF)
     diags = []
     per = build_entry_features(doc, {"c1": Seq("A" * 300)},
-                               MssConfig(source={}, locus_tag_prefix="P"), diags)
+                               MssConfig(locus_tag_prefix="P"), diags)
     keys = [f.key for f in per["c1"]]
     assert "pseudogene" not in keys
     assert keys == ["tRNA"]

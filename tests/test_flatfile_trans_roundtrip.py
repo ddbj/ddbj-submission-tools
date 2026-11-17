@@ -1,10 +1,9 @@
+from tests.mss_helpers import ann_text
 import os, tempfile
 from Bio import SeqIO
 from ddbj_gff import parse
 from ddbj_gff.flatfile import flatfile_to_gff
 from ddbj_gff.writer import write
-from gff2mss.convert import convert
-from gff2mss.emit import emit_ann
 from gff2mss.config import MssConfig
 import mss2ff.cli
 
@@ -17,10 +16,9 @@ def test_trans_splicing_flatfile_roundtrip(tmp_path):
     rec = SeqIO.read(FIX, "genbank")
     # forward: flatfile -> canonical GFF -> gff2mss (.ann), organelle emit_mrna=false
     doc = parse(write(flatfile_to_gff(rec)))
-    cfg = MssConfig(source={}, transl_table=11, product_default="hypothetical protein")
+    cfg = MssConfig(transl_table=11, product_default="hypothetical protein")
     cfg.emit_mrna = False
-    mss_doc, _ = convert(doc, {rec.id: rec.seq}, cfg, common_rows=[])
-    ann = emit_ann(mss_doc)
+    ann = ann_text(doc, {rec.id: rec.seq}, cfg)
 
     # the .ann carries the trans CDS (join complement) + /trans_splicing + both introns
     assert "join(complement(1641..1754),93..324,829..854)" in ann

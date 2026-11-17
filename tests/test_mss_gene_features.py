@@ -6,7 +6,7 @@ from gff2mss.convert import build_gene_features
 
 
 def cfg():
-    return MssConfig(source={}, locus_tag_prefix="PFX")
+    return MssConfig(locus_tag_prefix="PFX")
 
 
 def assigner():

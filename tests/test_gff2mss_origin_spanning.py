@@ -11,8 +11,7 @@ FIX = os.path.join(os.path.dirname(__file__), "mss_fixtures")
 
 def _cfg(tmp_path):
     p = tmp_path / "cp.toml"
-    p.write_text('[source]\norganism="Aliinostoc maniaoense"\nmol_type="genomic DNA"\n'
-                 '[locus_tag]\nprefix="ACPZ3T"\n[cds]\ntransl_table=11\n'
+    p.write_text('[locus_tag]\nprefix="ACPZ3T"\n[cds]\ntransl_table=11\n'
                  '[transcript]\nemit_mrna=false\n', encoding="utf-8")
     cfg, _ = load_config(str(p))
     return cfg

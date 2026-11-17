@@ -9,8 +9,8 @@ def main(argv=None) -> int:
     ap.add_argument("--fasta", required=True)
     ap.add_argument("--mss-config", required=True)
     ap.add_argument("--common", required=True)
-    ap.add_argument("--sequence-roles")
-    ap.add_argument("--submission-category", default="")
+    ap.add_argument("--sequence-roles", "--sequence_roles", dest="sequence_roles")
+    ap.add_argument("--submission-category", "--submission_category", dest="submission_category", default="")
     ap.add_argument("--locus-tag-start", type=int, default=None,
                     help="override [locus_tag].start (e.g. continue organelle numbering after nuclear)")
     ap.add_argument("--out", required=True)

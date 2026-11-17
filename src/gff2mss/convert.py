@@ -14,9 +14,8 @@ from ddbj_gff.errors import Diagnostic, GffParseError, Severity
 from ddbj_gff import aa_names
 from ddbj_gff.model import Span
 from .config import MssConfig
-from .gaps import assembly_gap_features
 from .locus_tag import LocusTagAssigner
-from .model import MssDocument, MssEntry, MssFeature, MssQualifier
+from .model import MssFeature, MssQualifier
 from .translate import translate_cds_with_transl_except
 
 _STRAND = {"+": 1, "-": -1}
@@ -112,24 +111,6 @@ def extract_seq(spans: list, genome_seq):
     locs = [FeatureLocation(s.start - 1, s.end, strand=bio) for s in ordered]
     compound = locs[0] if len(locs) == 1 else CompoundLocation(locs)
     return compound.extract(genome_seq)
-
-
-def build_source_feature(seqid: str, seqlen: int, cfg: MssConfig) -> MssFeature:
-    quals = [MssQualifier(k, v) for k, v in cfg.source.items()]
-    chromosome = None
-    if cfg.chromosome_pattern:
-        m = re.match(cfg.chromosome_pattern, seqid)
-        if m:
-            chromosome = m.group(1)
-    if chromosome is not None:
-        quals.append(MssQualifier("chromosome", chromosome))
-        if cfg.ff_def_chromosome:
-            quals.append(MssQualifier("ff_definition", cfg.ff_def_chromosome))
-    else:
-        quals.append(MssQualifier("submitter_seqid", seqid))
-        if cfg.ff_def_default:
-            quals.append(MssQualifier("ff_definition", cfg.ff_def_default))
-    return MssFeature("source", f"1..{seqlen}", quals)
 
 
 def _submitter_note(gene, mrna) -> MssQualifier:
@@ -583,20 +564,3 @@ def build_entry_features(doc, seqs, cfg, diagnostics: list) -> dict:
                                                 len(genome_seq), feat.id, feat.id, feat.gene))
         result[seqid] = feats
     return result
-
-
-def convert(doc, seqs, cfg, common_rows, *, strict: bool = False):
-    diagnostics: list = []
-    per_entry = build_entry_features(doc, seqs, cfg, diagnostics)
-    entries: list = []
-    for seqid, feats in per_entry.items():
-        genome_seq = seqs[seqid]
-        entry_feats = [build_source_feature(seqid, len(genome_seq), cfg)]
-        entry_feats.extend(assembly_gap_features(str(genome_seq), cfg))
-        entry_feats.extend(feats)
-        entries.append(MssEntry(seqid, entry_feats))
-    if strict:
-        for d in diagnostics:
-            if d.severity == Severity.ERROR:
-                raise GffParseError(d)
-    return MssDocument(common_rows, entries), diagnostics

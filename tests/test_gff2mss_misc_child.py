@@ -7,7 +7,7 @@ from gff2mss.locus_tag import LocusTagAssigner
 
 
 def cfg():
-    return MssConfig(source={}, transl_table=1, product_default="hypothetical protein", locus_tag_prefix="PFX")
+    return MssConfig(transl_table=1, product_default="hypothetical protein", locus_tag_prefix="PFX")
 
 
 def test_gff_level_misc_feature_child_is_emitted():
@@ -46,7 +46,7 @@ def test_cli_prints_root_ignored_warning(tmp_path, capsys):
     gff = tmp_path / "in.gff3"
     gff.write_text("##gff-version 3\nc1\tS\tmRNA\t1\t9\t.\t+\t.\tID=m1\nc1\tS\tCDS\t1\t9\t.\t+\t0\tID=m1.c;Parent=m1\n")
     fa = tmp_path / "g.fa"; fa.write_text(">c1\nATGAAATAA\n")
-    toml = tmp_path / "m.toml"; toml.write_text('[source]\norganism = "X"\nmol_type = "genomic DNA"\n[locus_tag]\nprefix = "PFX"\n')
+    toml = tmp_path / "m.toml"; toml.write_text('[locus_tag]\nprefix = "PFX"\n')
     common = tmp_path / "c.json"
     common.write_text(json.dumps({"SUBMITTER": {"contact": "a", "email": "a@b", "institute": "i", "country": "Japan",
                                                 "zip": "0", "state": "s", "city": "c", "street": "st", "ab_name": ["A,B"]},

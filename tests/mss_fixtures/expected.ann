@@ -3,7 +3,7 @@ COMMON	DBLINK		project	PRJDB16711
 chr1	source	1..120	organism	Marchantia polymorpha subsp. ruderalis
 			mol_type	genomic DNA
 			chromosome	1
-			ff_definition	@@[organism]@@ DNA, chromosome: @@[chromosome]@@
+			ff_definition	@@[organism]@@ DNA, chromosome, complete genome
 	mRNA	<1..30	locus_tag	MPTK1_000010
 			gene	MpX
 			note	submitter_gene_id: g1, submitter_transcript_id: g1.1

@@ -1,6 +1,6 @@
 from __future__ import annotations
 
-from .model import MssDocument, MssFeature, MssQualifier
+from .model import MssFeature, MssQualifier
 
 
 def feature_rows(feat: MssFeature) -> list[list[str]]:
@@ -11,19 +11,6 @@ def feature_rows(feat: MssFeature) -> list[list[str]]:
         col3 = feat.location if i == 0 else ""
         rows.append(["", col2, col3, q.key, q.value])
     return rows
-
-
-def emit_ann(doc: MssDocument) -> str:
-    lines: list[str] = list(doc.common_rows)
-    for entry in doc.entries:
-        rows: list[list[str]] = []
-        for feat in entry.features:
-            rows.extend(feature_rows(feat))
-        if rows:
-            rows[0][0] = entry.name
-        for r in rows:
-            lines.append("\t".join(r))
-    return "\n".join(lines) + "\n"
 
 
 def emit_fasta(seqs: dict[str, object]) -> str:

@@ -78,7 +78,7 @@ def test_multi_exon_wrap_warns():
     mrna = Feature("m", "S", "mRNA", [Span("c", 1, 14, "+")], {}, [])
     mrna.children = [cds]
     gene = Feature("g", "S", "gene", [Span("c", 1, 14, "+")], {}, [])
-    cfg = MssConfig(source={}, transl_table=1, product_default="hypothetical protein")
+    cfg = MssConfig(transl_table=1, product_default="hypothetical protein")
     diags = []
     build_cds_feature(mrna, gene, "T_0001", Seq("ATGAAATAACC"[:10] + "A"), cfg, diags)
     assert any(d.code == "multi-exon-origin-spanning" for d in diags)
@@ -96,7 +96,7 @@ def test_transl_except_origin_spanning_warns():
     mrna = Feature("m", "S", "mRNA", [Span("c", 7, 12, "+")], {}, [])
     mrna.children = [cds]
     gene = Feature("g", "S", "gene", [Span("c", 7, 12, "+")], {}, [])
-    cfg = MssConfig(source={}, transl_table=1, product_default="hypothetical protein")
+    cfg = MssConfig(transl_table=1, product_default="hypothetical protein")
     diags = []
     build_cds_feature(mrna, gene, "T_0001", genome, cfg, diags)
     assert any(d.code == "transl-except-origin-spanning" for d in diags)

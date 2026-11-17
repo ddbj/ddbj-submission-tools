@@ -1,3 +1,4 @@
+from tests.mss_helpers import ann_text
 import os
 from Bio import SeqIO
 from Bio.Seq import Seq
@@ -5,8 +6,6 @@ from Bio.SeqRecord import SeqRecord
 from ddbj_gff import parse
 from ddbj_gff.flatfile import flatfile_to_gff
 from ddbj_gff.writer import write
-from gff2mss.convert import convert
-from gff2mss.emit import emit_ann
 from gff2mss.config import MssConfig
 import mss2ff.cli
 
@@ -29,10 +28,9 @@ def test_flatfile_to_gff_roundtrip_cds_translation():
     gff_text = write(flatfile_to_gff(rec))
     doc = parse(gff_text)
     seqs = {rec.id: rec.seq}
-    cfg = MssConfig(source={}, transl_table=1, product_default="hypothetical protein")
+    cfg = MssConfig(transl_table=1, product_default="hypothetical protein")
     cfg.emit_mrna = True                                   # nuclear 3-level
-    mss_doc, _ = convert(doc, seqs, cfg, common_rows=[])
-    ann = emit_ann(mss_doc)
+    ann = ann_text(doc, seqs, cfg)
 
     # the .ann (which mss2ff renders verbatim to a flatfile) carries mRNA + CDS
     assert "\tCDS\t" in ann and "\tmRNA\t" in ann
@@ -65,16 +63,15 @@ def test_flatfile_to_gff_to_mss_to_flatfile_full_roundtrip(tmp_path):
     gff_text = write(flatfile_to_gff(rec))
     doc = parse(gff_text)
     seqs = {rec.id: rec.seq}
-    cfg = MssConfig(source={}, transl_table=1, product_default="hypothetical protein",
+    cfg = MssConfig(transl_table=1, product_default="hypothetical protein",
                      emit_mrna=True)
-    mss_doc, _ = convert(doc, seqs, cfg, common_rows=[])
-    ann_text = emit_ann(mss_doc)
-    assert "\tCDS\t" in ann_text and "\tmRNA\t" in ann_text
+    ann_txt = ann_text(doc, seqs, cfg)
+    assert "\tCDS\t" in ann_txt and "\tmRNA\t" in ann_txt
 
     ann_path = tmp_path / "entry.ann"
     fasta_path = tmp_path / "entry.fasta"
     out_path = tmp_path / "entry.regenerated.gbk"
-    ann_path.write_text(ann_text)
+    ann_path.write_text(ann_txt)
     SeqIO.write(SeqRecord(rec.seq, id=rec.id, description=""), str(fasta_path), "fasta")
 
     # reverse: mss2ff .ann + .fasta -> regenerated DDBJ flatfile

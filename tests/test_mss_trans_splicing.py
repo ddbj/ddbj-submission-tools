@@ -1,3 +1,4 @@
+from tests.mss_helpers import ann_text
 import os
 from Bio import SeqIO
 from ddbj_gff import parse
@@ -14,7 +15,7 @@ def _load():
     with open(os.path.join(FIX, "trans_splicing_rps12.gff3")) as fh:
         doc, _ = normalize(parse(fh.read()))
     seqs = {r.id: r.seq for r in SeqIO.parse(os.path.join(FIX, "trans_splicing_rps12.fasta"), "fasta")}
-    cfg = MssConfig(source={}, transl_table=11, product_default="hypothetical protein")
+    cfg = MssConfig(transl_table=11, product_default="hypothetical protein")
     cfg.emit_mrna = False
     return doc, seqs, cfg
 
@@ -60,11 +61,8 @@ def test_intron_features_emitted():
 
 
 def test_ann_text_end_to_end():
-    from gff2mss.convert import convert
-    from gff2mss.emit import emit_ann
     doc, seqs, cfg = _load()                     # parse + normalize (location= built)
-    mss_doc, _ = convert(doc, seqs, cfg, common_rows=[])
-    text = emit_ann(mss_doc)
+    text = ann_text(doc, seqs, cfg)
     assert "join(complement(1641..1754),93..324,829..854)" in text   # trans CDS
     assert "join(complement(855..1640),1..92)" in text               # trans intron 1
     assert "\ttrans_splicing\t" in text          # valueless qualifier row (empty value col)
