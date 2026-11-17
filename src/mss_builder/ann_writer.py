@@ -70,29 +70,19 @@ def _common_placeholder_nonwgs() -> list[Row]:
 
 # ── Main writer ───────────────────────────────────────────────────────────────
 
-def write_mss_ann(
-    fsa_path: str,
-    ann_path: str,
+def build_ann_rows(
+    sequences: dict[str, str],
     common: Optional["CommonModel"] = None,
     sequence_roles: Optional[dict[str, SequenceRoleEntry]] = None,
     submission_category: Optional[str] = None,
-) -> None:
+    entry_rows: Optional[dict[str, list[Row]]] = None,
+) -> list[Row]:
+    """Rows of a DDBJ MSS .ann for *sequences* (id -> sequence, FASTA order).
+
+    *entry_rows* maps an entry id to its feature rows (first column empty);
+    they are placed after the entry's source (non-WGS) and before its gaps.
+    See write_mss_ann for the WGS / non-WGS layout.
     """
-    Parse *fsa_path* (FASTA) and write a DDBJ MSS annotation file to *ann_path*.
-
-    If *common* is provided (a validated CommonModel), its values are written
-    into the COMMON section; otherwise placeholder lines are written.
-
-    For WGS submissions (no *sequence_roles* provided, or all entries unplaced):
-    - The source feature is placed in the COMMON block using ``@@[entry]@@`` and
-      ``@@[organism]@@ DNA, @@[submitter_seqid]@@`` meta-notation.
-    - Per-entry body contains only assembly_gap features (if any).
-
-    For non-WGS submissions (*sequence_roles* provided with placed sequences):
-    - Source features are written per entry with chromosome/organelle qualifiers.
-    - Assembly_gap features follow the source for each entry.
-    """
-    sequences = parse_fasta_sequences(fsa_path)
     lengths = {seq_id: len(seq) for seq_id, seq in sequences.items()}
     all_ids = list(lengths.keys())
 
@@ -111,8 +101,7 @@ def write_mss_ann(
             for cfg in cfgs
             if cfg.enabled
         ]
-    if not gap_annotators:
-        sequences = {}
+    gap_sequences = sequences if gap_annotators else {}
 
     # Determine WGS mode: no sequence_roles file, or every entry is unplaced
     def _is_unplaced(eid: str) -> bool:
@@ -193,14 +182,43 @@ def write_mss_ann(
             source_entry_col = "" if is_circular else entry_id
             rows.extend(source_feature_rows(source_entry_col, location, source_quals))
 
-        # Assembly gap features
-        if gap_annotators and entry_id in sequences:
-            # In WGS mode the first gap row carries the entry name (since source
-            # is in COMMON). In non-WGS mode source already opened the entry, so
-            # gap rows use an empty first column.
-            seq_name_for_gap = entry_id if is_wgs and not is_circular else None
-            gap_rows = annotate_gaps(gap_annotators, sequences[entry_id], seq_name=seq_name_for_gap)
-            rows.extend(gap_rows)
+        # Features (gff2mss), then assembly gaps. In WGS mode the source is in
+        # COMMON, so the entry's first body row carries the entry name; in
+        # non-WGS mode (or after a TOPOLOGY row) the first column stays empty.
+        body: list[Row] = [list(r) for r in (entry_rows or {}).get(entry_id, [])]
+        if gap_annotators and entry_id in gap_sequences:
+            body.extend(annotate_gaps(gap_annotators, gap_sequences[entry_id], seq_name=None))
+        if body and is_wgs and not is_circular:
+            body[0][0] = entry_id
+        rows.extend(body)
+
+    return rows
+
+
+def write_mss_ann(
+    fsa_path: str,
+    ann_path: str,
+    common: Optional["CommonModel"] = None,
+    sequence_roles: Optional[dict[str, SequenceRoleEntry]] = None,
+    submission_category: Optional[str] = None,
+) -> None:
+    """
+    Parse *fsa_path* (FASTA) and write a DDBJ MSS annotation file to *ann_path*.
+
+    If *common* is provided (a validated CommonModel), its values are written
+    into the COMMON section; otherwise placeholder lines are written.
+
+    For WGS submissions (no *sequence_roles* provided, or all entries unplaced):
+    - The source feature is placed in the COMMON block using ``@@[entry]@@`` and
+      ``@@[organism]@@ DNA, @@[submitter_seqid]@@`` meta-notation.
+    - Per-entry body contains only assembly_gap features (if any).
+
+    For non-WGS submissions (*sequence_roles* provided with placed sequences):
+    - Source features are written per entry with chromosome/organelle qualifiers.
+    - Assembly_gap features follow the source for each entry.
+    """
+    sequences = parse_fasta_sequences(fsa_path)
+    rows = build_ann_rows(sequences, common, sequence_roles, submission_category)
 
     with open(ann_path, "w") as fout:
         for row in rows:
