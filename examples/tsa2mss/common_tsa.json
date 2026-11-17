@@ -1,0 +1,44 @@
+{
+    "DBLINK": {
+        "project": "PRJDB99999",
+        "sample": "SAMD999999",
+        "sequence read archive": ["DRR999991", "DRR999992"]
+    },
+    "SUBMITTER": {
+        "ab_name": ["Suzuki,K.", "Doe,J."],
+        "contact": "Jane Doe",
+        "email": "xxx@ddbj.nig.ac.jp",
+        "institute": "National Institute of Genetics",
+        "department": "DDBJ",
+        "country": "Japan",
+        "state": "Shizuoka",
+        "city": "Mishima",
+        "street": "Yata 1111",
+        "zip": "411-8540"
+    },
+    "REFERENCE": [
+        {
+            "title": "Transcriptome assembly of XXX",
+            "ab_name": ["Suzuki,K.", "Doe,J."],
+            "status": "Unpublished"
+        }
+    ],
+    "ST_COMMENT": {
+        "tagset_id": "Assembly-Data",
+        "Assembly Method": "Trinity v. 2.15.1",
+        "Coverage": "Unknown",
+        "Sequencing Technology": "Illumina NovaSeq 6000"
+    },
+    "SOURCE": {
+        "organism": "Marchantia polymorpha subsp. ruderalis",
+        "strain": "Tak-1",
+        "sex": "male",
+        "geo_loc_name": "Japan: Shizuoka",
+        "collection_date": "2025-01-01"
+    },
+    "SOURCE_IDENTIFIER": "strain",
+    "ASSEMBLY_GAP": {
+        "linkage_evidence": "paired-ends",
+        "min_gap_length": 6
+    }
+}

@@ -1,0 +1,14 @@
+##gff-version 3
+#region chr1
+chr1	snap	CDS	6036	6218	.	-	Name=chr1-snap.1
+chr1	snap	CDS	6557	6784	.	-	Name=chr1-snap.2
+chr1	snap	CDS	7168	7273	.	-	Name=chr1-snap.3
+chr1	snap	CDS	6855	7090	.	-	Name=chr1-snap.3
+chr1	snap	CDS	12140	14245	.	-	Name=chr1-snap.4
+chr1	snap	CDS	12088	12096	.	-	Name=chr1-snap.4
+chr1	snap	CDS	15540	15788	.	+	Name=chr1-snap.5
+chr1	snap	CDS	32580	32762	.	-	Name=chr1-snap.6
+chr1	snap	CDS	33101	33328	.	-	Name=chr1-snap.7
+chr1	snap	CDS	33712	33817	.	-	Name=chr1-snap.8
+chr1	snap	CDS	33399	33673	.	-	Name=chr1-snap.8
+chr1	snap	CDS	38684	40786	.	-	Name=chr1-snap.9

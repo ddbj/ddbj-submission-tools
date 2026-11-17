@@ -1,0 +1,18 @@
+# start gene g1
+NC_001133.9	AUGUSTUS	gene	1807	2169	1	-	.	ID=g1
+NC_001133.9	AUGUSTUS	transcript	1807	2169	1	-	.	ID=g1.t1;Parent=g1
+NC_001133.9	AUGUSTUS	stop_codon	1807	1809	.	-	0	Parent=g1.t1
+NC_001133.9	AUGUSTUS	CDS	1810	2169	1	-	0	ID=g1.t1.cds;Parent=g1.t1
+NC_001133.9	AUGUSTUS	start_codon	2167	2169	.	-	0	Parent=g1.t1
+# protein sequence = [MVKLTSIAAGVAAIAATASATTTLAQSDERVNLVELGVYVSDIRAHLAQYYMFQAAHPTETYPVEVAEAVFNYGDFTT
+# MLTGIAPDQVTRMITGVPWYSSRLKPAISSALSKDGIYTIAN]
+# Evidence for and against this transcript:
+# % of transcript supported by hints (any source): 0
+# CDS exons: 0/1
+# CDS introns: 0/0
+# 5'UTR exons and introns: 0/0
+# 3'UTR exons and introns: 0/0
+# hint groups fully obeyed: 0
+# incompatible hint groups: 1
+#     RM:   1 
+# end gene g1

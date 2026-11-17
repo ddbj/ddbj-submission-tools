@@ -1,0 +1,6 @@
+##gff-version 3
+##sequence-region chr1 1 31851985
+chr1	GlimmerHMM	mRNA	2929	3249	.	+	.	ID=chr1.path1.gene1;Name=chr1.path1.gene1
+chr1	GlimmerHMM	CDS	2929	3249	.	+	0	ID=chr1.cds1.1;Parent=chr1.path1.gene1;Name=chr1.path1.gene1;Note=single-exon
+chr1	GlimmerHMM	mRNA	3246	3479	.	-	.	ID=chr1.path1.gene2;Name=chr1.path1.gene2
+chr1	GlimmerHMM	CDS	3246	3479	.	-	0	ID=chr1.cds2.1;Parent=chr1.path1.gene2;Name=chr1.path1.gene2;Note=single-exon

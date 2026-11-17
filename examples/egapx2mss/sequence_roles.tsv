@@ -1,0 +1,7 @@
+#seq_id	type	seq_name	status	topology
+chr_1	chromosome	1	complete    
+chr_2_1	chromosome	2	partial	
+chr_2_2	chromosome	2	partial	
+chr_3	chromosome	3	complete	circular
+mt	organelle	mitochondrion	complete	circular
+cl	organelle	chloroplast	partial

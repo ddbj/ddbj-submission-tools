@@ -1,0 +1,6 @@
+NC_001133.9	Helixer	gene	31345	33286	.	+	.	ID=Saccharomyces cerevisiae_NC_001133.9_000001
+NC_001133.9	Helixer	mRNA	31345	33286	.	+	.	ID=Saccharomyces cerevisiae_NC_001133.9_000001.1;Parent=Saccharomyces cerevisiae_NC_001133.9_000001
+NC_001133.9	Helixer	exon	31345	33286	.	+	.	ID=Saccharomyces cerevisiae_NC_001133.9_000001.1.exon.1;Parent=Saccharomyces cerevisiae_NC_001133.9_000001.1
+NC_001133.9	Helixer	five_prime_UTR	31345	31566	.	+	.	ID=Saccharomyces cerevisiae_NC_001133.9_000001.1.five_prime_UTR.1;Parent=Saccharomyces cerevisiae_NC_001133.9_000001.1
+NC_001133.9	Helixer	CDS	31567	32940	.	+	0	ID=Saccharomyces cerevisiae_NC_001133.9_000001.1.CDS.1;Parent=Saccharomyces cerevisiae_NC_001133.9_000001.1
+NC_001133.9	Helixer	three_prime_UTR	32941	33286	.	+	.	ID=Saccharomyces cerevisiae_NC_001133.9_000001.1.three_prime_UTR.1;Parent=Saccharomyces cerevisiae_NC_001133.9_000001.1

@@ -1,0 +1,9 @@
+chrV	GAF	gene	6295	8942	.	-	.	ID=gene_1478;transcripts=1;complete=1;maxTie=1.0
+chrV	GeMoMa	mRNA	6295	8942	.	-	.	ID=MpTak_MpUg00330.1_R0;ref-gene=MpTak_MpUg00330;aa=427;raa=427;score=2088;prediction=0;bestScore=2088;ce=7;rce=7;tae=1;tde=1;tie=1;minSplitReads=1169;tpc=1;minCov=1036;avgCov=1648.5433;pAA=0.993;iAA=0.9742;lpm=196;maxScore=2160;maxGap=0;nps=0;start=M;stop=*;evidence=1;Parent=gene_1478;sumWeight=1.0;
+chrV	GeMoMa	CDS	8598	8942	.	-	0	Parent=MpTak_MpUg00330.1_R0;de=true;pc=1;minCov=1159
+chrV	GeMoMa	CDS	8032	8307	.	-	0	Parent=MpTak_MpUg00330.1_R0;ae=true;de=true;pc=1;minCov=1036
+chrV	GeMoMa	CDS	7624	7704	.	-	0	Parent=MpTak_MpUg00330.1_R0;ae=true;de=true;pc=1;minCov=1188
+chrV	GeMoMa	CDS	7070	7351	.	-	0	Parent=MpTak_MpUg00330.1_R0;ae=true;de=true;pc=1;minCov=1038
+chrV	GeMoMa	CDS	6845	6955	.	-	0	Parent=MpTak_MpUg00330.1_R0;ae=true;de=true;pc=1;minCov=1683
+chrV	GeMoMa	CDS	6570	6656	.	-	0	Parent=MpTak_MpUg00330.1_R0;ae=true;de=true;pc=1;minCov=1665
+chrV	GeMoMa	CDS	6295	6393	.	-	0	Parent=MpTak_MpUg00330.1_R0;ae=true;pc=1;minCov=2580

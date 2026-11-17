@@ -1,0 +1,239 @@
+"""
+Write DDBJ MSS annotation (.ann) files.
+"""
+
+from __future__ import annotations
+
+from typing import TYPE_CHECKING, Optional
+
+from common.common_builder import create_common
+from common.gap_annotator import GapAnnotator, annotate_gaps
+from common.fasta import parse_fasta_sequences
+from common.submission_category import get_category_rules, inject_defaults, validate_and_fill
+from common.source_builder import (
+    SequenceRoleEntry,
+    load_sequence_roles,
+    source_qualifier,
+    ff_definition,
+    source_feature_rows,
+)
+from .tbl_parser import collect_qualifiers, format_location, parse_tbl
+
+if TYPE_CHECKING:
+    from common.models import CommonModel
+
+Row = list[str]
+
+
+# ── Internal helpers ──────────────────────────────────────────────────────────
+
+def _lookup_length(entry_id: str, lengths: dict[str, int]) -> int:
+    """Return sequence length for *entry_id*, with fallback to partial-match."""
+    if entry_id in lengths:
+        return lengths[entry_id]
+    for sid, slen in lengths.items():
+        if entry_id in sid or sid in entry_id:
+            return slen
+    return 0
+
+
+def _feature_rows(first_col: str, feat: dict, locus_tag_prefix: Optional[str] = None) -> list[Row]:
+    """Return rows for one feature block.
+
+    If *locus_tag_prefix* is given, the part of each locus_tag before the last
+    '_' (the EGAPx --locus-tag-prefix, e.g. ``egapxtmp``) is replaced with it.
+    """
+    quals = collect_qualifiers(feat)
+    if not quals:
+        return []
+    if locus_tag_prefix:
+        quals = [
+            (n, f"{locus_tag_prefix}_{v.rpartition('_')[2]}" if n == "locus_tag" and v else v)
+            for n, v in quals
+        ]
+
+    ftype    = feat["type"]
+    location = format_location(feat["intervals"])
+
+    rows: list[Row] = []
+    q0_name, q0_val = quals[0]
+    rows.append([first_col, ftype, location, q0_name, q0_val if q0_val is not None else ""])
+
+    for q_name, q_val in quals[1:]:
+        rows.append(["", "", "", q_name, q_val if q_val is not None else ""])
+
+    return rows
+
+
+# ── COMMON section builder ────────────────────────────────────────────────────
+
+def _common_placeholder() -> list[Row]:
+    """Return placeholder COMMON rows when no common JSON is provided."""
+    rows: list[Row] = [
+        ["COMMON", "DBLINK",     "", "project",    ""],
+        ["",       "",           "", "biosample",   ""],
+        ["",       "SUBMITTER",  "", "ab_name",     ""],
+        ["",       "",           "", "contact",     ""],
+        ["",       "",           "", "email",       ""],
+        ["",       "",           "", "institute",   ""],
+        ["",       "",           "", "country",     ""],
+        ["",       "REFERENCE",  "", "title",       ""],
+        ["",       "",           "", "ab_name",     ""],
+        ["",       "",           "", "status",      "Unpublished"],
+        ["",       "",           "", "year",        ""],
+        ["",       "DATE",       "", "hold_date",   ""],
+    ]
+    return rows
+
+
+# ── Main writer ───────────────────────────────────────────────────────────────
+
+def write_ddbj_ann(
+    tbl_path: str,
+    fsa_path: str,
+    ann_path: str,
+    common: Optional["CommonModel"] = None,
+    sequence_roles: Optional[dict[str, SequenceRoleEntry]] = None,
+    submission_category: Optional[str] = None,
+    add_gene: bool = False,
+    locus_tag_prefix: Optional[str] = None,
+) -> None:
+    """
+    Parse *tbl_path* (NCBI feature table) and *fsa_path* (FASTA),
+    then write a DDBJ MSS annotation file to *ann_path*.
+
+    If *common* is provided (a validated CommonModel), its values are written
+    into the COMMON section; otherwise placeholder lines are written.
+    Source feature qualifiers are taken from ``common.SOURCE`` if present.
+    Assembly gap detection is driven by ``common.ASSEMBLY_GAP`` if present.
+
+    If *sequence_roles* is provided (entry_name → (qualifier_key, qualifier_value, is_circular)),
+    the matching qualifier overrides the corresponding key in the source feature.
+    Entries absent from the table get ``submitter_seqid`` set to the entry name.
+
+    gene features are dropped (DDBJ does not use them) unless *add_gene* is True;
+    child features keep their own locus_tag / gene qualifiers, and the dropped
+    gene's gene_desc is added to its mRNA(s) as /note.
+    *locus_tag_prefix* replaces the EGAPx locus_tag prefix (see ``_feature_rows``).
+    """
+    import sys
+
+    entries = parse_tbl(tbl_path)
+    sequences = parse_fasta_sequences(fsa_path)
+    lengths = {seq_id: len(seq) for seq_id, seq in sequences.items()}
+
+    gap_cfg = common.ASSEMBLY_GAP if common is not None else None
+    gap_annotators: list[GapAnnotator] = []
+    if gap_cfg:
+        cfgs = gap_cfg if isinstance(gap_cfg, list) else [gap_cfg]
+        gap_annotators = [
+            GapAnnotator(
+                linkage_evidence=cfg.linkage_evidence,
+                min_gap_length=cfg.min_gap_length,
+                max_gap_length=cfg.max_gap_length,
+                gap_type=cfg.gap_type,
+                estimated_length=cfg.estimated_length,
+            )
+            for cfg in cfgs
+            if cfg.enabled
+        ]
+    if not gap_annotators:
+        sequences = {}
+
+    # Use FASTA entry order as the canonical list; fall back to .tbl order for
+    # any entries that appear only in the feature table.
+    all_ids = list(lengths.keys()) + [e for e in entries if e not in lengths]
+
+    # Base source qualifiers come entirely from common.SOURCE.
+    base_source: dict[str, str] = {}
+    if common is not None and common.SOURCE:
+        base_source.update(common.SOURCE)
+
+    # Effective category: CLI --submission_category overrides JSON's _submission_category
+    _extra = (common.model_extra or {}) if common is not None else {}
+    effective_category: str = submission_category or _extra.get("_submission_category", "")
+
+    source_id_key = common.SOURCE_IDENTIFIER if common is not None else None
+    if not source_id_key and effective_category:
+        source_id_key = get_category_rules(effective_category).source_identifier or None
+
+    # WGS mode: all entries are unplaced (not listed in sequence_roles, or all type==unplaced)
+    def _is_unplaced(eid: str) -> bool:
+        if sequence_roles is None:
+            return True
+        e = sequence_roles.get(eid)
+        return e is None or e.type == "unplaced"
+
+    is_wgs = all(_is_unplaced(eid) for eid in all_ids)
+
+    chromosome_count = 0
+    if sequence_roles:
+        chromosome_count = sum(
+            1 for e in sequence_roles.values() if e.type == "chromosome"
+        )
+
+    segment_count = 0
+    if sequence_roles:
+        segment_count = sum(
+            1 for e in sequence_roles.values() if e.type == "segment"
+        )
+
+    rows: list[Row] = []
+    if common is None:
+        rows.extend(_common_placeholder())
+    else:
+        common_dict = common.model_dump(exclude_none=True)
+        if effective_category:
+            common_dict["_submission_category"] = effective_category
+            inject_defaults(common_dict, effective_category)
+            validate_and_fill(common_dict, effective_category)
+        rows.extend(create_common(common_dict))
+
+    for entry_id in all_ids:
+        length = _lookup_length(entry_id, lengths)
+        location = f"1..{length}" if length else "1.."
+
+        # Resolve sequence role (None = unplaced/default)
+        role_entry: Optional[SequenceRoleEntry] = sequence_roles.get(entry_id) if sequence_roles else None
+
+        is_circular = role_entry.is_circular if role_entry is not None else False
+
+        if is_circular:
+            rows.append([entry_id, "TOPOLOGY", "", "circular", ""])
+
+        # Build per-entry source qualifiers: base + entry-specific + ff_definition
+        source_quals: dict[str, object] = dict(base_source)
+        source_quals.update(source_qualifier(role_entry, entry_id, is_wgs, segment_count=segment_count))
+        source_quals["ff_definition"] = ff_definition(
+            role_entry, source_id_key, base_source.get("mol_type", ""),
+            is_wgs, chromosome_count=chromosome_count, segment_count=segment_count,
+        )
+
+        # source feature: entry_id on the TOPOLOGY row if circular, else on source row
+        source_entry_col = "" if is_circular else entry_id
+        rows.extend(source_feature_rows(source_entry_col, location, source_quals))
+
+        feats = entries.get(entry_id, [])
+        # gene_desc of a dropped gene moves to its mRNA(s) as /note
+        gene_desc = {} if add_gene else {
+            f["qualifiers"]["locus_tag"][0]: f["qualifiers"]["gene_desc"]
+            for f in feats
+            if f["type"] == "gene" and "locus_tag" in f["qualifiers"] and "gene_desc" in f["qualifiers"]
+        }
+        for feat in feats:
+            if feat["type"] == "gene" and not add_gene:
+                continue
+            q = feat["qualifiers"]
+            if feat["type"] == "mRNA" and q.get("locus_tag", [None])[0] in gene_desc:
+                notes = gene_desc[q["locus_tag"][0]] + q.get("note", [])
+                feat = {**feat, "qualifiers": {**q, "note": notes}}
+            rows.extend(_feature_rows("", feat, locus_tag_prefix))
+
+        if gap_annotators and entry_id in sequences:
+            rows.extend(annotate_gaps(gap_annotators, sequences[entry_id]))
+
+    with open(ann_path, "w") as fout:
+        for row in rows:
+            fout.write("\t".join(row) + "\n")
+
+    print(f"[convert] → {ann_path}", file=sys.stderr)

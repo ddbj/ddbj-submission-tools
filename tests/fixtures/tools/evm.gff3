@@ -1,0 +1,4 @@
+NC_001142.9	EVM	gene	16767	18536	.	-	.	ID=evm.TU.NC_001142.9.1;Name=EVM%20prediction%20NC_001142.9.1
+NC_001142.9	EVM	mRNA	16767	18536	.	-	.	ID=evm.model.NC_001142.9.1;Parent=evm.TU.NC_001142.9.1;Name=EVM%20prediction%20NC_001142.9.1
+NC_001142.9	EVM	exon	16767	18536	.	-	.	ID=evm.model.NC_001142.9.1.exon1;Parent=evm.model.NC_001142.9.1
+NC_001142.9	EVM	CDS	16767	18536	.	-	0	ID=cds.evm.model.NC_001142.9.1;Parent=evm.model.NC_001142.9.1

@@ -1,0 +1,38 @@
+{
+    "DBLINK": {
+        "project": "PRJDB99998",
+        "sample": "SAMD999998",
+        "sequence read archive": ["DRR999993"]
+    },
+    "SUBMITTER": {
+        "ab_name": ["Doe,J."],
+        "contact": "Jane Doe",
+        "email": "xxx@ddbj.nig.ac.jp",
+        "institute": "National Institute of Genetics",
+        "department": "DDBJ",
+        "country": "Japan",
+        "state": "Shizuoka",
+        "city": "Mishima",
+        "street": "Yata 1111",
+        "zip": "411-8540"
+    },
+    "REFERENCE": [
+        {
+            "title": "Metatranscriptome assembly of XXX",
+            "ab_name": ["Doe,J."],
+            "status": "Unpublished"
+        }
+    ],
+    "ST_COMMENT": {
+        "tagset_id": "Assembly-Data",
+        "Assembly Method": "rnaSPAdes v. 3.15.5",
+        "Coverage": "Unknown",
+        "Sequencing Technology": "Illumina NovaSeq 6000"
+    },
+    "SOURCE": {
+        "organism": "zooplankton environmental sample",
+        "isolation_source": "coral reef",
+        "geo_loc_name": "Japan",
+        "collection_date": "2025-01-01"
+    }
+}

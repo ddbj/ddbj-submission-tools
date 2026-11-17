@@ -1,0 +1,6 @@
+NC_001133.9	Tiberius	gene	1807	2169	.	-	.	gene_id "g1";
+NC_001133.9	Tiberius	transcript	1807	2169	.	-	.	gene_id "g1"; transcript_id "g1_t1";
+NC_001133.9	Tiberius	start_codon	2167	2169	.	-	0	gene_id "g1"; transcript_id "g1_t1";
+NC_001133.9	Tiberius	stop_codon	1807	1809	.	-	0	gene_id "g1"; transcript_id "g1_t1";
+NC_001133.9	Tiberius	CDS	1807	2169	.	-	0	gene_id "g1"; transcript_id "g1_t1";
+NC_001133.9	Tiberius	exon	1807	2169	.	-	0	gene_id "g1"; transcript_id "g1_t1";

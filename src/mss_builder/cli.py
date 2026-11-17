@@ -1,0 +1,118 @@
+"""
+mss_builder — Create DDBJ MSS submission files from a FASTA file.
+
+Workflow
+--------
+1. Read input FASTA; write clean copy with '//' separators → .fa
+2. Build DDBJ MSS annotation → .ann
+   - COMMON block from --common JSON (or placeholder if omitted)
+   - WGS mode (default, no --sequence_roles): source in COMMON with @@[entry]@@ / @@[organism]@@ meta-notation
+   - Chromosome mode (--sequence_roles provided): per-entry source with chromosome/organelle qualifiers
+   - assembly_gap features detected from N-runs (requires ASSEMBLY_GAP in --common JSON)
+"""
+
+from __future__ import annotations
+
+import argparse
+import os
+import shutil
+import sys
+import tempfile
+from pathlib import Path
+from typing import Optional
+
+from common.cli_args import add_output_args, validate_prefix, resolve_output
+from common.fasta import write_clean_fasta
+from common.models import CommonModel, load_common_json
+from common.source_builder import load_sequence_roles
+
+from .ann_writer import write_mss_ann
+
+
+def main() -> None:
+    parser = argparse.ArgumentParser(
+        prog="mss_builder",
+        description="Create DDBJ MSS submission files from a FASTA file",
+        formatter_class=argparse.RawDescriptionHelpFormatter,
+        epilog=__doc__,
+    )
+    parser.add_argument("input", help="Input FASTA file (.fa / .fasta)")
+    add_output_args(parser)
+    parser.add_argument(
+        "--common",
+        help=(
+            "JSON file with common submission metadata "
+            "(DBLINK, SUBMITTER, REFERENCE, DATE, SOURCE, ASSEMBLY_GAP, …). "
+            "If omitted, placeholder lines are written."
+        ),
+    )
+    parser.add_argument(
+        "--submission_category",
+        metavar="CATEGORY",
+        help=(
+            "Submission category (e.g. WGS, MAG-WGS, GNM). "
+            "Overrides _submission_category in --common JSON."
+        ),
+    )
+    parser.add_argument(
+        "--sequence_roles", "--chromosomes",
+        dest="sequence_roles",
+        metavar="TSV",
+        help=(
+            "Sequence role file (5-column TSV): "
+            "seq_id <TAB> type <TAB> seq_name <TAB> status <TAB> topology. "
+            "type is one of: chromosome, organelle, plasmid, unplaced. "
+            "If omitted, all sequences are treated as WGS (unplaced) contigs. "
+            "(--chromosomes is accepted as a legacy alias.)"
+        ),
+    )
+    args = parser.parse_args()
+
+    # ── Resolve paths ─────────────────────────────────────────────────────────
+    validate_prefix(args, parser)
+    fasta_path = os.path.abspath(args.input)
+    ref_path   = Path(fasta_path)
+    out_prefix, out_dir = resolve_output(args, ref_path)
+    out_dir.mkdir(parents=True, exist_ok=True)
+    base    = out_dir / out_prefix
+    out_fsa = str(base) + ".fa"
+    out_ann = str(base) + ".ann"
+
+    # ── Load optional metadata ────────────────────────────────────────────────
+    common: Optional[CommonModel] = None
+    if args.common:
+        try:
+            common = load_common_json(args.common)
+        except Exception as exc:
+            sys.exit(f"Error: failed to load --common file '{args.common}':\n{exc}")
+
+    sequence_roles = None
+    if args.sequence_roles:
+        try:
+            sequence_roles = load_sequence_roles(args.sequence_roles)
+        except Exception as exc:
+            sys.exit(f"Error: failed to load sequence role file '{args.sequence_roles}':\n{exc}")
+
+    # ── Step 1: clean FASTA ───────────────────────────────────────────────────
+    print("[step 1/2] Writing clean FASTA with '//' separators ...", file=sys.stderr)
+    if os.path.abspath(fasta_path) == out_fsa:
+        # Input and output are the same path — use a temp file to avoid clobbering
+        tmp_fd, tmp_path = tempfile.mkstemp(suffix=".fa", prefix="mss_builder_")
+        os.close(tmp_fd)
+        try:
+            write_clean_fasta(fasta_path, tmp_path)
+            shutil.move(tmp_path, out_fsa)
+        except Exception:
+            os.unlink(tmp_path)
+            raise
+    else:
+        write_clean_fasta(fasta_path, out_fsa)
+
+    # ── Step 2: DDBJ MSS annotation ───────────────────────────────────────────
+    print("[step 2/2] Building DDBJ MSS annotation ...", file=sys.stderr)
+    write_mss_ann(out_fsa, out_ann, common=common, sequence_roles=sequence_roles,
+                  submission_category=args.submission_category)
+
+    print("\nDone.", file=sys.stderr)
+    print(f"  Annotation : {out_ann}", file=sys.stderr)
+    print(f"  FASTA      : {out_fsa}", file=sys.stderr)

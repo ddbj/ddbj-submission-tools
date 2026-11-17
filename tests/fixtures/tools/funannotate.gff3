@@ -1,0 +1,4 @@
+NC_001136.10	funannotate2	gene	1802	2953	.	+	.	ID=SCF2_000001;
+NC_001136.10	funannotate2	mRNA	1802	2953	.	+	.	ID=SCF2_000001-T1;Parent=SCF2_000001;product=hypothetical protein;
+NC_001136.10	funannotate2	exon	1802	2953	.	+	.	ID=SCF2_000001-T1.exon1;Parent=SCF2_000001-T1;
+NC_001136.10	funannotate2	CDS	1802	2953	.	+	0	ID=SCF2_000001-T1.cds;Parent=SCF2_000001-T1;

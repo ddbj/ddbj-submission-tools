@@ -1,0 +1,6 @@
+NC_001140.6	transdecoder	gene	227478	229077	.	-	.	ID=GENE.asmbl_1000~~asmbl_1000.p1^NC_001140.6^-;Name="ORF type:complete (-),score=115.51"
+NC_001140.6	transdecoder	mRNA	227478	229077	.	-	.	ID=asmbl_1000.p1;Parent=GENE.asmbl_1000~~asmbl_1000.p1^NC_001140.6^-;Name="ORF type:complete (-),score=115.51"
+NC_001140.6	transdecoder	five_prime_UTR	229038	229077	.	-	.	ID=asmbl_1000.p1.utr5p1;Parent=asmbl_1000.p1
+NC_001140.6	transdecoder	exon	227478	229077	.	-	.	ID=asmbl_1000.p1.exon1;Parent=asmbl_1000.p1
+NC_001140.6	transdecoder	CDS	227532	229037	.	-	0	ID=cds.asmbl_1000.p1;Parent=asmbl_1000.p1
+NC_001140.6	transdecoder	three_prime_UTR	227478	227531	.	-	.	ID=asmbl_1000.p1.utr3p1;Parent=asmbl_1000.p1

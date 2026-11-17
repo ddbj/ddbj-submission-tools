@@ -1,0 +1,5 @@
+# /usr/local/bin/stringtie -p 8 -o SRR453566.stringtie.gtf /path/to/SRR453566.R64.bam
+# StringTie version 3.0.3
+NC_001133.9	StringTie	transcript	87269	92518	1000	+	.	gene_id "STRG.1"; transcript_id "STRG.1.1"; cov "36.966128"; FPKM "37.018292"; TPM "68.092141";
+NC_001133.9	StringTie	exon	87269	87387	1000	+	.	gene_id "STRG.1"; transcript_id "STRG.1.1"; exon_number "1"; cov "70.126053";
+NC_001133.9	StringTie	exon	87501	92518	1000	+	.	gene_id "STRG.1"; transcript_id "STRG.1.1"; exon_number "2"; cov "36.179752";

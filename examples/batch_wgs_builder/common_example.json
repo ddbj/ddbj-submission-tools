@@ -1,0 +1,38 @@
+{
+    "SUBMITTER": {
+        "ab_name": [
+            "Suzuki,K.",
+            "Doe,J."
+        ],
+        "contact": "Jane Doe",
+        "email": "xxx@ddbj.nig.ac.jp",
+        "institute": "National Institute of Genetics",
+        "country": "Japan",
+        "city": "Mishima",
+        "street": "Yata 1111",
+        "zip": "411-8540",
+        "department": "DDBJ",
+        "state": "Shizuoka"
+    },
+    "REFERENCE": [
+        {
+            "ab_name": [
+                "Suzuki,K.",
+                "Smith,J.",
+                "Doe,J."
+            ],
+            "status": "Unpublished",
+            "title": "Genome sequences for XXXXX XXX"
+        }
+    ],
+    "SOURCE_IDENTIFIER": "strain",
+    "ASSEMBLY_GAP": [
+        {
+            "enabled": true,
+            "linkage_evidence": "paired-ends",
+            "min_gap_length": 10,
+            "gap_type": "within scaffold",
+            "estimated_length": "known"
+        }
+    ]
+}

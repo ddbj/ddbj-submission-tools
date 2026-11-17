@@ -1,0 +1,57 @@
+{
+    "DATATYPE": {
+        "type": "WGS"
+    },
+    "KEYWORD": {
+        "keyword": ["WGS", "STANDARD_DRAFT"]
+    },
+    "DBLINK": {
+        "project": "PRJD000001",
+        "sample": "SAMD000001",
+        "sequence read archive": ["DRA000001", "DRA000002"]
+    },
+    "SUBMITTER": {
+        "ab_name": [
+            "Suzuki,K.",
+            "Doe,J."
+        ],
+        "contact": "Jane Doe",
+        "email": "xxx@ddbj.nig.ac.jp",
+        "institute": "National Institute of Genetics",
+        "country": "Japan",
+        "city": "Mishima",
+        "street": "Yata 1111",
+        "zip": "411-8540",
+        "department": "DDBJ",
+        "state": "Shizuoka"
+    },
+    "REFERENCE": [
+        {
+            "ab_name": [
+                "Suzuki,K.",
+                "Smith,J.",
+                "Doe,J."
+            ],
+            "status": "Unpublished",
+            "title": "Draft genome sequencing of XXX"
+        }
+    ],
+    "ASSEMBLY_GAP": [
+        {
+            "enabled": true,
+            "linkage_evidence": "paired-ends",
+            "min_gap_length": 10,
+            "gap_type": "within scaffold",
+            "estimated_length": "known"
+        }
+    ],
+    "SOURCE_IDENTIFIER": "strain",
+    "SOURCE": {
+        "organism": "Lactobacillus paragasseri",
+        "strain": "JCM 5343",
+        "culture_collection": "JCM:5343",
+        "collection_date": "missing: lab stock",
+        "geo_loc_name": "Japan: Shizuoka",
+        "mol_type": "genomic DNA"
+    }
+}

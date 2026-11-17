@@ -1,0 +1,10 @@
+NC_001133.9	GeneMark.hmm3	stop_codon	1807	1809	.	-	0	gene_id "1_g"; transcript_id "1_t";
+NC_001133.9	GeneMark.hmm3	CDS	1807	2169	.	-	0	gene_id "1_g"; transcript_id "1_t"; cds_type "Single"; count "1_1";
+NC_001133.9	GeneMark.hmm3	gene	1807	2169	.	-	.	gene_id "1_g"; transcript_id "1_t";
+NC_001133.9	GeneMark.hmm3	mRNA	1807	2169	.	-	.	gene_id "1_g"; transcript_id "1_t";
+NC_001133.9	GeneMark.hmm3	start_codon	2167	2169	.	-	0	gene_id "1_g"; transcript_id "1_t";
+NC_001133.9	GeneMark.hmm3	start_codon	4067	4069	.	+	0	gene_id "2_g"; transcript_id "2_t";
+NC_001133.9	GeneMark.hmm3	CDS	4067	4354	.	+	0	gene_id "2_g"; transcript_id "2_t"; cds_type "Single"; count "1_1";
+NC_001133.9	GeneMark.hmm3	gene	4067	4354	.	+	.	gene_id "2_g"; transcript_id "2_t";
+NC_001133.9	GeneMark.hmm3	mRNA	4067	4354	.	+	.	gene_id "2_g"; transcript_id "2_t";
+NC_001133.9	GeneMark.hmm3	stop_codon	4352	4354	.	+	0	gene_id "2_g"; transcript_id "2_t";

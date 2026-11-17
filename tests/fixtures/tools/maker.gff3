@@ -1,0 +1,10 @@
+NC_001136.10	maker	gene	1802	2953	.	+	.	ID=augustus-NC_001136.10-processed-gene-0.215;Name=augustus-NC_001136.10-processed-gene-0.215
+NC_001136.10	maker	mRNA	1802	2953	.	+	.	ID=augustus-NC_001136.10-processed-gene-0.215-mRNA-1;Parent=augustus-NC_001136.10-processed-gene-0.215;Name=augustus-NC_001136.10-processed-gene-0.215-mRNA-1;_AED=0.31;_eAED=0.31;_QI=0|-1|0|1|-1|1|1|0|383;_merge_warning=1
+NC_001136.10	maker	exon	1802	2953	.	+	.	ID=augustus-NC_001136.10-processed-gene-0.215-mRNA-1:1;Parent=augustus-NC_001136.10-processed-gene-0.215-mRNA-1
+NC_001136.10	maker	CDS	1802	2953	.	+	0	ID=augustus-NC_001136.10-processed-gene-0.215-mRNA-1:cds;Parent=augustus-NC_001136.10-processed-gene-0.215-mRNA-1
+NC_001136.10	.	contig	1	1531933	.	.	.	ID=NC_001136.10;Name=NC_001136.10
+NC_001136.10	augustus	match	1802	2953	1	+	.	ID=NC_001136.10:hit:9189:4.5.0.0;Name=augustus-NC_001136.10-abinit-gene-0.215-mRNA-1;target_length=1531933
+NC_001136.10	augustus	match_part	1802	2953	1	+	.	ID=NC_001136.10:hsp:13086:4.5.0.0;Parent=NC_001136.10:hit:9189:4.5.0.0;Target=augustus-NC_001136.10-abinit-gene-0.215-mRNA-1 1 1152 +;Gap=M1152
+NC_001136.10	augustus	match	5985	7814	0.94	+	.	ID=NC_001136.10:hit:9190:4.5.0.0;Name=augustus-NC_001136.10-abinit-gene-0.216-mRNA-1;target_length=1531933
+NC_001136.10	augustus	match_part	5985	7814	0.94	+	.	ID=NC_001136.10:hsp:13087:4.5.0.0;Parent=NC_001136.10:hit:9190:4.5.0.0;Target=augustus-NC_001136.10-abinit-gene-0.216-mRNA-1 1 1830 +;Gap=M1830
+NC_001136.10	augustus	match	8683	9756	1	-	.	ID=NC_001136.10:hit:9191:4.5.0.0;Name=augustus-NC_001136.10-abinit-gene-0.285-mRNA-1;target_length=1531933

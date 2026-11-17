@@ -1,0 +1,57 @@
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
+
+[project]
+name = "ddbj-submission-tools"
+version = "0.1.0"
+description = "Tools to create and fix DDBJ MSS submission files (GFF3 canonicalization, MSS conversion, annotation fixes)"
+readme = "README.md"
+license = "MIT"
+license-files = ["LICENSE"]
+requires-python = ">=3.11"
+dependencies = [
+    "pydantic>=2.0",
+    "biopython>=1.83",
+    "pandas",
+    "openpyxl",
+    "jsonschema",
+]
+
+[project.scripts]
+# MSS conversion (the portal calls these; keep names, options and outputs stable)
+egapx2mss         = "egapx2mss.cli:main"
+mss_builder       = "mss_builder.cli:main"
+mss2ff            = "mss2ff.cli:main"
+batch_wgs_builder = "batch_wgs_builder.cli:main"
+tsa2mss           = "tsa2mss.cli:main"
+ann_meta          = "ann_meta.cli:main"
+# GFF -> MSS and annotation fixes
+gff2mss           = "gff2mss.cli:main"
+ann_fix           = "ann_fix.cli:main"
+# GFF3 canonicalization (ddbj_gff). Not named "ddbj-gff": that name is the separate Rust converter.
+gff_from_tool     = "ddbj_gff.tools.cli:main"
+gff_normalize     = "ddbj_gff.normalize.cli:main"
+gff_repair        = "ddbj_gff.repair.cli:main"
+gff_validate      = "ddbj_gff.validate.cli:main"
+flatfile2gff      = "ddbj_gff.flatfile.cli:main"
+
+[tool.hatch.build.targets.wheel]
+packages = [
+    "src/common",
+    "src/egapx2mss",
+    "src/mss_builder",
+    "src/mss2ff",
+    "src/batch_wgs_builder",
+    "src/gff2mss",
+    "src/ann_fix",
+    "src/tsa2mss",
+    "src/ann_meta",
+    "src/ddbj_gff",
+]
+
+[tool.hatch.build.targets.sdist]
+include = ["src", "tests", "README.md", "LICENSE"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]

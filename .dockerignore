@@ -1,0 +1,12 @@
+# Allowlist: send only what the image needs. Everything else (.git, .claude/,
+# devdata/, devdocs/, examples/, tests/, local submission files) stays out.
+*
+!requirements.txt
+!pyproject.toml
+!README.md
+!LICENSE
+!src/
+
+**/__pycache__
+**/*.py[cod]
+**/.DS_Store

@@ -1,0 +1,6 @@
+NC_001133.9	AUGUSTUS	gene	1807	2169	.	-	.	g1
+NC_001133.9	AUGUSTUS	transcript	1807	2169	0.9	-	.	g1.t1
+NC_001133.9	AUGUSTUS	stop_codon	1807	1809	.	-	0	transcript_id "g1.t1"; gene_id "g1";
+NC_001133.9	AUGUSTUS	CDS	1807	2169	0.9	-	0	transcript_id "g1.t1"; gene_id "g1";
+NC_001133.9	AUGUSTUS	exon	1807	2169	.	-	.	transcript_id "g1.t1"; gene_id "g1";
+NC_001133.9	AUGUSTUS	start_codon	2167	2169	.	-	0	transcript_id "g1.t1"; gene_id "g1";

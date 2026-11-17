@@ -1,0 +1,69 @@
+from pathlib import Path
+from ddbj_gff import parse
+from ddbj_gff.errors import Severity
+from ddbj_gff.validate import validate
+from ddbj_gff.writer import write
+from ddbj_gff.normalize import normalize, NormalizeConfig
+
+FIX = Path(__file__).parent / "normalize_fixtures"
+
+
+def test_messy_fixture_normalizes_and_validates():
+    doc = parse((FIX / "messy_input.gff3").read_text())
+    norm, report = normalize(doc, seq_lengths={"chr1": 5000}, config=NormalizeConfig(taxid=3702))
+    # SO terms normalized to INSDC names
+    types = {f.type for f in norm.features}
+    assert "exon" in types and "CDS" in types          # coding_exon->exon, pseudogenic_CDS->CDS
+    assert "coding_exon" not in types and "pseudogenic_CDS" not in types
+    # targeted ERRORs cleared by directive completion
+    errors = {d.code for d in validate(norm) if d.severity == Severity.ERROR}
+    assert "missing-insdc-gff-version" not in errors
+    assert "missing-species-taxid" not in errors
+    assert "missing-sequence-region" not in errors
+    # output is writable GFF text and round-trips through parse
+    text = write(norm)
+    assert "#!insdc-gff-version 1.0.0" in text
+    reparsed = parse(text)
+    assert reparsed.insdc_gff_version == "1.0.0"
+
+
+
+
+def test_finding_a_no_feature_type_warning_for_left_types():
+    # coding_exon/pseudogenic_CDS collapse to core types; miRNA/pre_miRNA/UTR are left for
+    # Phase 2. After normalize, the validator must NOT emit feature-type-not-insdc (Finding A).
+    gff = (
+        "##gff-version 3\n"
+        "##sequence-region chr1 1 10000\n"
+        "chr1\tS\tgene\t100\t900\t.\t+\t.\tID=g1;locus_tag=ABC_1\n"
+        "chr1\tS\tmRNA\t100\t900\t.\t+\t.\tID=m1;Parent=g1\n"
+        "chr1\tS\tfive_prime_UTR\t100\t129\t.\t+\t.\tID=u1;Parent=m1\n"
+        "chr1\tS\tcoding_exon\t130\t900\t.\t+\t.\tID=e1;Parent=m1\n"
+        "chr1\tS\tpseudogenic_CDS\t130\t870\t.\t+\t0\tID=c1;Parent=m1\n"
+        "chr1\tS\tmiRNA\t2000\t2100\t.\t+\t.\tID=r1\n"
+        "chr1\tS\tpre_miRNA\t3000\t3200\t.\t+\t.\tID=r2\n"
+    )
+    norm, _ = normalize(parse(gff), seq_lengths={"chr1": 10000}, config=NormalizeConfig(taxid=3702))
+    types = {f.type for f in norm.features}
+    assert "exon" in types and "CDS" in types                 # coding_exon/pseudogenic_CDS collapsed
+    assert "coding_exon" not in types and "pseudogenic_CDS" not in types
+    assert "miRNA" in types and "pre_miRNA" in types           # RNA leaves left for Phase 2
+    assert "five_prime_UTR" in types                           # UTR left alone
+    codes = {d.code for d in validate(norm)}
+    assert "feature-type-not-insdc" not in codes               # Finding A regression guard
+
+
+def test_anticodon_fixture_becomes_child():
+    gff = (
+        "##gff-version 3\n"
+        "##sequence-region chr1 1 20000\n"
+        "chr1\tS\ttRNA\t14674\t14742\t.\t-\t.\tID=t1;anticodon=(pos:complement(14710..14712)%2Caa:Glu%2Cseq:ttc)\n"
+    )
+    norm, _ = normalize(parse(gff), config=NormalizeConfig(taxid=1148))
+    anti = [f for f in norm.features if f.type == "anticodon"]
+    assert len(anti) == 1
+    assert anti[0].attributes["amino_acid"] == ["glutamic acid"]
+    # validator no longer flags the anticodon attribute (it was converted)
+    codes = {d.code for d in validate(norm)}
+    assert "noncanonical-special-case" not in codes
+

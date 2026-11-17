@@ -1,0 +1,8 @@
+NC_001140.6	transdecoder	gene	187112	187713	.	-	.	ID=STRG.1000^NC_001140.6^-;Name="ORF type:complete (+),score=41.36"
+NC_001140.6	transdecoder	mRNA	187112	187713	.	-	.	ID=STRG.1000.1.p1;Parent=STRG.1000^NC_001140.6^-;Name="ORF type:complete (+),score=41.36"
+NC_001140.6	transdecoder	five_prime_UTR	187680	187713	.	-	.	ID=STRG.1000.1.p1.utr5p1;Parent=STRG.1000.1.p1
+NC_001140.6	transdecoder	exon	187677	187713	.	-	.	ID=STRG.1000.1.p1.exon1;Parent=STRG.1000.1.p1
+NC_001140.6	transdecoder	CDS	187677	187679	.	-	0	ID=cds.STRG.1000.1.p1;Parent=STRG.1000.1.p1
+NC_001140.6	transdecoder	exon	187112	187514	.	-	.	ID=STRG.1000.1.p1.exon2;Parent=STRG.1000.1.p1
+NC_001140.6	transdecoder	CDS	187173	187514	.	-	0	ID=cds.STRG.1000.1.p1;Parent=STRG.1000.1.p1
+NC_001140.6	transdecoder	three_prime_UTR	187112	187172	.	-	.	ID=STRG.1000.1.p1.utr3p1;Parent=STRG.1000.1.p1
