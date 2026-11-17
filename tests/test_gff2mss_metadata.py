@@ -64,3 +64,21 @@ def test_out_directory_is_created(tmp_path):
             "--common", str(EX / "example.wgs.common.json"), "--out", str(tmp_path / "new" / "dir" / "x")]
     assert gff2mss_main(argv) == 0
     assert (tmp_path / "new" / "dir" / "x.ann").exists()
+
+
+def test_mss_style_fasta_reads_like_mss_builder(tmp_path, monkeypatch):
+    # MSS FASTA (records end with "//") and lcl| headers: same parsing as mss_builder
+    src = (EX / "example.gnm.fasta").read_text().replace(">", ">lcl|")
+    mss_fasta = src.replace("\n>", "\n//\n>").rstrip("\n") + "\n//\n"
+    fasta = _write(tmp_path, "mss.fasta", mss_fasta)
+    argv = ["--gff", _write(tmp_path, "in.gff3", EMPTY_GFF), "--fasta", fasta,
+            "--mss-config", _write(tmp_path, "mss.toml", MIN_TOML),
+            "--common", str(EX / "example.gnm.common.json"), "--sequence_roles", ROLES,
+            "--out", str(tmp_path / "g2m")]
+    assert gff2mss_main(argv) == 0
+    monkeypatch.setattr(sys, "argv", ["mss_builder", "--common", str(EX / "example.gnm.common.json"),
+                                      "--sequence_roles", ROLES, "-o", str(tmp_path / "mb"), "-p", "gnm", fasta])
+    mss_builder_main()
+    assert (tmp_path / "g2m.ann").read_text() == (tmp_path / "mb" / "gnm.ann").read_text()
+    assert "/" not in "".join(l for l in (tmp_path / "g2m.fasta").read_text().splitlines()
+                              if not l.startswith(">") and l != "//")
