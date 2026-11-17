@@ -58,12 +58,14 @@ cd ddbj-submission-tools
 pip install -e .
 ```
 
-Python 3.11 以上が必要です。コンテナを使う場合:
+Python 3.11 以上が必要です。コンテナを使う場合（`<version>` はリリースのタグから `v` を除いたもの、例 `0.1.0`）:
 
 ```bash
-podman build -t ddbj-submission-tools .
-podman run --rm -it -v $(pwd):/data ddbj-submission-tools
+podman pull ghcr.io/ddbj/ddbj-submission-tools:<version>
+podman run --rm -it -v $(pwd):/data ghcr.io/ddbj/ddbj-submission-tools:<version>
 ```
+
+手元でビルドする場合は `podman build -t ddbj-submission-tools .`
 
 ## GFF3 ツール
 
@@ -768,12 +770,14 @@ cd ddbj-submission-tools
 pip install -e .
 ```
 
-Requires Python 3.11 or later. Using a container:
+Requires Python 3.11 or later. Using a container (`<version>` is the release tag without the `v`, e.g. `0.1.0`):
 
 ```bash
-podman build -t ddbj-submission-tools .
-podman run --rm -it -v $(pwd):/data ddbj-submission-tools
+podman pull ghcr.io/ddbj/ddbj-submission-tools:<version>
+podman run --rm -it -v $(pwd):/data ghcr.io/ddbj/ddbj-submission-tools:<version>
 ```
+
+To build it locally: `podman build -t ddbj-submission-tools .`
 
 ## GFF3 tools
 
