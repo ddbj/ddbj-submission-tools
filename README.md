@@ -251,6 +251,16 @@ egapx2mss input.asn --preconvert-only --outdir tmp/
 コマンドラインオプション `--submission_category` を指定すると、JSON の値を上書きできます。
 対応カテゴリの一覧は [登録カテゴリ一覧](#登録カテゴリ-_submission_category) を参照してください。
 
+#### DATE（公開予定日）
+
+公開予定日を指定するときは `DATE` の `hold_date` に `YYYYMMDD` 形式で書きます。書かなければ、登録の処理が済みしだい公開されます。
+
+```json
+{
+    "DATE": {"hold_date": "20271231"}
+}
+```
+
 #### SOURCE セクション
 
 `SOURCE` に記載した qualifier がそのまま source フィーチャーに書き込まれます。
@@ -997,6 +1007,16 @@ Setting the `_submission_category` key automatically injects the appropriate DAT
 
 The `--submission_category` command-line option overrides the JSON value.
 See [Submission Categories](#submission-categories-_submission_category) for a full list of supported categories.
+
+#### DATE (release date)
+
+To hold the entries until a date, set `hold_date` in `DATE` as `YYYYMMDD`. Without it, the entries are released as soon as the submission is processed.
+
+```json
+{
+    "DATE": {"hold_date": "20271231"}
+}
+```
 
 #### SOURCE Section
 
