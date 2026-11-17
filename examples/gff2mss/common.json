@@ -1,0 +1,43 @@
+{
+    "_submission_category": "WGS",
+    "DBLINK": {
+        "project": "PRJDB90003",
+        "sample": "SAMD90000301",
+        "sequence read archive": ["DRR000003"]
+    },
+    "SUBMITTER": {
+        "ab_name": ["Mishima,T."],
+        "contact": "Taro Mishima",
+        "email": "example@example.org",
+        "institute": "Example Institute",
+        "country": "Japan",
+        "state": "Shizuoka",
+        "city": "Mishima",
+        "street": "1-1 Example",
+        "zip": "411-0000"
+    },
+    "REFERENCE": [
+        {
+            "title": "Draft genome sequence of Citrus unshiu",
+            "ab_name": ["Mishima,T."],
+            "status": "Unpublished"
+        }
+    ],
+    "ST_COMMENT": {
+        "tagset_id": "Genome-Assembly-Data",
+        "Assembly Method": ["Hifiasm v. 0.19"],
+        "Genome Coverage": "60x",
+        "Sequencing Technology": ["PacBio Revio"]
+    },
+    "SOURCE": {
+        "organism": "Citrus unshiu",
+        "mol_type": "genomic DNA",
+        "cultivar": "Miyagawa wase",
+        "collection_date": "2024-05-23",
+        "geo_loc_name": "Japan: Shizuoka"
+    },
+    "SOURCE_IDENTIFIER": "cultivar",
+    "ASSEMBLY_GAP": [
+        {"enabled": true, "linkage_evidence": "paired-ends", "min_gap_length": 10}
+    ]
+}

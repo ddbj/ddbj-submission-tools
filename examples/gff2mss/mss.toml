@@ -1,0 +1,9 @@
+# Annotation settings for gff2mss. Metadata (submitter, source, gaps) is in common.json.
+[locus_tag]
+prefix = "CIT"
+
+[cds]
+transl_table = 1
+
+[transcript]
+mode = "nonredundant"

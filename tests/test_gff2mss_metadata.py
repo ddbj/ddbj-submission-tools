@@ -56,3 +56,11 @@ def test_missing_sequence_still_reported(tmp_path, capsys):
     gff = EMPTY_GFF + "nosuchseq\tx\tgene\t1\t90\t.\t+\t.\tID=g1\n"
     assert _gff2mss(tmp_path, "wgs", gff=gff) == 0
     assert "missing-sequence" in capsys.readouterr().err
+
+
+def test_out_directory_is_created(tmp_path):
+    argv = ["--gff", _write(tmp_path, "in.gff3", EMPTY_GFF), "--fasta", str(EX / "example.wgs.fasta"),
+            "--mss-config", _write(tmp_path, "mss.toml", MIN_TOML),
+            "--common", str(EX / "example.wgs.common.json"), "--out", str(tmp_path / "new" / "dir" / "x")]
+    assert gff2mss_main(argv) == 0
+    assert (tmp_path / "new" / "dir" / "x.ann").exists()

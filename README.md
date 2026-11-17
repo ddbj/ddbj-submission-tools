@@ -26,6 +26,8 @@ DDBJ MSS (Mass Submission System) 登録ファイルを生成・修正するPyth
 
 - [インストール](#インストール)
 - [GFF3 ツール](#gff3-ツール)
+- [gff2mss の使い方](#gff2mss-の使い方)
+  - [設定ファイル（--mss-config）](#設定ファイル--mss-config)
 - [egapx2mss の使い方](#egapx2mss-の使い方)
   - [基本的な使い方](#基本的な使い方)
   - [オプション一覧](#オプション一覧)
@@ -78,6 +80,43 @@ podman run --rm -it -v $(pwd):/data ghcr.io/ddbj/ddbj-submission-tools:<version>
 | `gff_repair` | CDS の内部終止コドンなどを修復する |
 | `gff_validate` | INSDC / SO のプロファイルで検査する |
 | `flatfile2gff` | DDBJ フラットファイルを GFF3 に変換する |
+
+---
+
+## gff2mss の使い方
+
+正準化した GFF3（gene → mRNA → CDS/exon）と FASTA から、DDBJ MSS 形式の `.ann` / `.fasta` を作ります。各オプションは `gff2mss --help` を参照してください。
+
+- メタデータ（COMMON、source、assembly_gap、TOPOLOGY）の扱いは **mss_builder と同じ**です。common JSON（[common JSON ファイル](#common-json-ファイル)）と、染色体などがあれば sequence role ファイル（[Sequence role ファイル](#sequence-role-ファイル---sequence_roles)）を渡します。sequence role ファイルがない、またはすべて `unplaced` のときは WGS として、source を COMMON に 1 つ置きます
+- 注釈の変換方法だけを `--mss-config` の TOML に書きます
+- 遺伝子予測ツールの出力は、先に `gff_from_tool` → `gff_normalize` で正準 GFF3 にします（[GFF3 ツール](#gff3-ツール)）
+
+### 基本的な使い方
+
+```bash
+# 例（examples/gff2mss/）
+gff2mss --gff examples/gff2mss/citrus.gff3 --fasta examples/gff2mss/citrus.fasta \
+        --mss-config examples/gff2mss/mss.toml --common examples/gff2mss/common.json \
+        --out out/citrus
+# → out/citrus.ann と out/citrus.fasta
+
+# 染色体・オルガネラがある場合
+gff2mss ... --sequence_roles sequence_roles.tsv --out out/genome
+```
+
+### 設定ファイル（--mss-config）
+
+| セクション | キー | 既定値 | 意味 |
+|---|---|---|---|
+| `[locus_tag]` | `prefix` | （必須） | locus_tag の接頭辞（BioProject で登録したもの）。GFF に `locus_tag` があればそれを使う |
+| | `width` / `start` / `step` | `6` / `10` / `10` | 番号の桁数、最初の番号、増分（`CIT_000010`、`CIT_000020` …） |
+| `[cds]` | `transl_table` | `1` | 遺伝暗号表 |
+| `[product]` | `default` | `hypothetical protein` | GFF に product がないときの値 |
+| | `map` | なし | 2 列の TSV（mRNA または gene の ID、product）。GFF の値より優先 |
+| `[transcript]` | `mode` | `nonredundant` | `minimal`：遺伝子ごとに最初の転写産物だけ／`nonredundant`：mRNA はすべて、同じ CDS は 1 つにまとめる／`full`：mRNA ごとに CDS も出す |
+| | `emit_mrna` | `true` | `false` で mRNA を出さず CDS だけにする（原核生物、オルガネラ） |
+
+`[source]` と `[assembly_gap]` は使いません（書かれていると警告を出します）。common JSON の `SOURCE`、`ASSEMBLY_GAP` に書いてください。
 
 ---
 
@@ -738,6 +777,8 @@ A set of Python tools for generating DDBJ MSS (Mass Submission System) submissio
 
 - [Installation](#installation)
 - [GFF3 tools](#gff3-tools)
+- [gff2mss Usage](#gff2mss-usage)
+  - [Config File (--mss-config)](#config-file---mss-config)
 - [egapx2mss Usage](#egapx2mss-usage)
   - [Basic Usage](#basic-usage)
   - [Options](#options)
@@ -790,6 +831,43 @@ See `<command> --help` for the options of each tool.
 | `gff_repair` | Repairs CDS issues such as internal stop codons |
 | `gff_validate` | Checks GFF3 against INSDC / SO profiles |
 | `flatfile2gff` | Converts a DDBJ flat file to GFF3 |
+
+---
+
+## gff2mss Usage
+
+Creates DDBJ MSS `.ann` / `.fasta` files from a canonical GFF3 (gene → mRNA → CDS/exon) and its FASTA. See `gff2mss --help` for the options.
+
+- Metadata (COMMON, source, assembly_gap, TOPOLOGY) is handled **exactly as in mss_builder**: pass the common JSON ([Common JSON File](#common-json-file)) and, when there are chromosomes or organelles, a sequence role file ([Sequence Role File](#sequence-role-file---sequence_roles)). Without a sequence role file, or when all sequences are `unplaced`, the submission is treated as WGS and one source goes in COMMON
+- The `--mss-config` TOML holds only how annotation is converted
+- Convert gene predictor output to canonical GFF3 first with `gff_from_tool` → `gff_normalize` ([GFF3 tools](#gff3-tools))
+
+### Basic Usage
+
+```bash
+# Example (examples/gff2mss/)
+gff2mss --gff examples/gff2mss/citrus.gff3 --fasta examples/gff2mss/citrus.fasta \
+        --mss-config examples/gff2mss/mss.toml --common examples/gff2mss/common.json \
+        --out out/citrus
+# -> out/citrus.ann and out/citrus.fasta
+
+# With chromosomes / organelles
+gff2mss ... --sequence_roles sequence_roles.tsv --out out/genome
+```
+
+### Config File (--mss-config)
+
+| Section | Key | Default | Meaning |
+|---|---|---|---|
+| `[locus_tag]` | `prefix` | (required) | locus_tag prefix (registered with the BioProject). A `locus_tag` in the GFF is used as is |
+| | `width` / `start` / `step` | `6` / `10` / `10` | number of digits, first number, increment (`CIT_000010`, `CIT_000020`, ...) |
+| `[cds]` | `transl_table` | `1` | genetic code |
+| `[product]` | `default` | `hypothetical protein` | value when the GFF has no product |
+| | `map` | none | 2-column TSV (mRNA or gene ID, product); takes precedence over the GFF |
+| `[transcript]` | `mode` | `nonredundant` | `minimal`: first transcript per gene only / `nonredundant`: every mRNA, identical CDSs once / `full`: a CDS for every mRNA |
+| | `emit_mrna` | `true` | `false` writes CDS only, no mRNA (prokaryotes, organelles) |
+
+`[source]` and `[assembly_gap]` are not used (a warning is printed if present); put them in the common JSON `SOURCE` and `ASSEMBLY_GAP`.
 
 ---
 
