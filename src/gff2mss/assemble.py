@@ -20,6 +20,18 @@ from mss_builder.ann_writer import build_ann_rows
 
 def build_ann_text(gff_path, fasta_path, mss_config_path, common_path,
                    sequence_roles_path, submission_category, locus_tag_start=None):
+    # metadata first, with mss_builder's error messages (fail before parsing a large GFF)
+    try:
+        common = load_common_json(common_path)
+    except Exception as exc:
+        sys.exit(f"Error: failed to load --common file '{common_path}':\n{exc}")
+    roles = None
+    if sequence_roles_path:
+        try:
+            roles = load_sequence_roles(sequence_roles_path)
+        except Exception as exc:
+            sys.exit(f"Error: failed to load sequence role file '{sequence_roles_path}':\n{exc}")
+
     cfg, config_diags = load_config(mss_config_path)
     for d in config_diags:
         sys.stderr.write(f"[gff2mss] {d.severity.value} {d.code}: {d.message}\n")
@@ -42,9 +54,7 @@ def build_ann_text(gff_path, fasta_path, mss_config_path, common_path,
 
     entry_rows = {eid: [row for feat in feats for row in feature_rows(feat)]
                   for eid, feats in per_entry.items()}
-    rows = build_ann_rows(seq_text, load_common_json(common_path),
-                          load_sequence_roles(sequence_roles_path) if sequence_roles_path else None,
-                          submission_category or None, entry_rows)
+    rows = build_ann_rows(seq_text, common, roles, submission_category or None, entry_rows)
     ann_text = "\n".join("\t".join(r) for r in rows) + "\n"
     # output every input sequence (annotation or not), in FASTA order
     return ann_text, seq_text

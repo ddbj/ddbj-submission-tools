@@ -82,3 +82,39 @@ def test_mss_style_fasta_reads_like_mss_builder(tmp_path, monkeypatch):
     assert (tmp_path / "g2m.ann").read_text() == (tmp_path / "mb" / "gnm.ann").read_text()
     assert "/" not in "".join(l for l in (tmp_path / "g2m.fasta").read_text().splitlines()
                               if not l.startswith(">") and l != "//")
+
+
+def _gff2mss_exit(tmp_path, extra=(), common=None):
+    argv = ["--gff", _write(tmp_path, "in.gff3", EMPTY_GFF), "--fasta", str(EX / "example.gnm.fasta"),
+            "--mss-config", _write(tmp_path, "mss.toml", MIN_TOML),
+            "--common", common or str(EX / "example.gnm.common.json"), "--out", str(tmp_path / "g2m"), *extra]
+    try:
+        gff2mss_main(argv)
+    except SystemExit as exc:
+        return exc.code
+    raise AssertionError("gff2mss did not exit")
+
+
+def test_malformed_common_json_is_a_clean_error(tmp_path):
+    msg = _gff2mss_exit(tmp_path, common=_write(tmp_path, "bad.json", '{"DBLINK": '))
+    assert isinstance(msg, str) and "failed to load --common file" in msg and "bad.json" in msg
+
+
+def test_invalid_common_field_is_a_clean_error(tmp_path):
+    msg = _gff2mss_exit(tmp_path, common=_write(tmp_path, "bad.json", '{"SUBMITTER": "not an object"}'))
+    assert isinstance(msg, str) and "failed to load --common file" in msg
+
+
+def test_malformed_sequence_roles_is_a_clean_error(tmp_path):
+    roles = _write(tmp_path, "roles.tsv", "only_one_column\n")
+    msg = _gff2mss_exit(tmp_path, extra=["--sequence_roles", roles])
+    assert isinstance(msg, str) and "failed to load sequence role file" in msg and "roles.tsv" in msg
+
+
+def test_unannotated_wgs_sequences_are_in_output_fasta(tmp_path):
+    from common.fasta import parse_fasta_sequences
+    assert _gff2mss(tmp_path, "wgs") == 0
+    out = parse_fasta_sequences(str(tmp_path / "g2m.fasta"))
+    inp = parse_fasta_sequences(str(EX / "example.wgs.fasta"))
+    assert list(out) == list(inp)
+    assert {k: v.upper() for k, v in out.items()} == {k: v.upper() for k, v in inp.items()}

@@ -118,6 +118,24 @@ gff2mss ... --sequence_roles sequence_roles.tsv --out out/genome
 
 `[source]` と `[assembly_gap]` は使いません（書かれていると警告を出します）。common JSON の `SOURCE`、`ASSEMBLY_GAP` に書いてください。
 
+### 警告（`[gff2mss] WARNING ...` / `ERROR ...`）
+
+上の例を実行すると、次の警告が出ます。
+
+```
+[gff2mss] WARNING root-ignored: BDQV01000200.1: ignored 1 root feature(s) of type(s) ['region']; only gene/RNA roots are converted
+```
+
+| コード | 意味 | 対応 |
+|---|---|---|
+| `root-ignored`（型が `region`） | 配列全体を表す `region` は変換しない。source は common JSON から作る | 不要 |
+| `root-ignored`（それ以外の型） | 遺伝子・RNA 以外を親とする feature は変換されず、`.ann` に入らない | GFF を `gff_normalize` で直すか、その feature が要らないことを確かめる |
+| `missing-sequence`（ERROR） | GFF の seqid が FASTA にない。その配列の feature は入らない | GFF と FASTA の配列名をそろえる |
+| `moved-to-common` | TOML に `[source]` か `[assembly_gap]` がある | common JSON の `SOURCE`、`ASSEMBLY_GAP` に移す |
+| `unknown-config-key` | TOML に知らないセクションがある | 綴りを確かめる |
+
+common JSON や sequence role ファイルが読めないときは、`Error: failed to load ...` と出して終了します（mss_builder と同じ）。
+
 ---
 
 ## egapx2mss の使い方
@@ -878,6 +896,24 @@ gff2mss ... --sequence_roles sequence_roles.tsv --out out/genome
 | | `emit_mrna` | `true` | `false` writes CDS only, no mRNA (prokaryotes, organelles) |
 
 `[source]` and `[assembly_gap]` are not used (a warning is printed if present); put them in the common JSON `SOURCE` and `ASSEMBLY_GAP`.
+
+### Warnings (`[gff2mss] WARNING ...` / `ERROR ...`)
+
+The example above prints this warning:
+
+```
+[gff2mss] WARNING root-ignored: BDQV01000200.1: ignored 1 root feature(s) of type(s) ['region']; only gene/RNA roots are converted
+```
+
+| Code | Meaning | Action |
+|---|---|---|
+| `root-ignored` (type `region`) | The whole-sequence `region` is not converted; the source comes from the common JSON | None |
+| `root-ignored` (other types) | Features whose root is not a gene or RNA are not converted and are missing from the `.ann` | Fix the GFF with `gff_normalize`, or confirm the features are not needed |
+| `missing-sequence` (ERROR) | A GFF seqid is not in the FASTA; its features are missing | Make the sequence names in the GFF and FASTA match |
+| `moved-to-common` | The TOML has `[source]` or `[assembly_gap]` | Move it to the common JSON `SOURCE` / `ASSEMBLY_GAP` |
+| `unknown-config-key` | The TOML has an unknown section | Check the spelling |
+
+If the common JSON or sequence role file cannot be read, gff2mss exits with `Error: failed to load ...` (as mss_builder does).
 
 ---
 
