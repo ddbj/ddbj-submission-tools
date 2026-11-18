@@ -115,6 +115,7 @@ gff2mss ... --sequence_roles sequence_roles.tsv --out out/genome
 | | `map` | なし | 2 列の TSV（mRNA または gene の ID、product）。GFF の値より優先 |
 | `[transcript]` | `mode` | `nonredundant` | `minimal`：遺伝子ごとに最初の転写産物だけ／`nonredundant`：mRNA はすべて、同じ CDS は 1 つにまとめる／`full`：mRNA ごとに CDS も出す |
 | | `emit_mrna` | `true` | `false` で mRNA を出さず CDS だけにする（原核生物、オルガネラ） |
+| | `emit_intron` | `false` | `true` で GFF の intron を書く（遺伝子の locus_tag を付ける）。intron は mRNA と CDS の join で表されるので、特別な理由がなければ不要。exon は書かない |
 
 `[source]` と `[assembly_gap]` は使いません（書かれていると警告を出します）。common JSON の `SOURCE`、`ASSEMBLY_GAP` に書いてください。
 
@@ -894,6 +895,7 @@ gff2mss ... --sequence_roles sequence_roles.tsv --out out/genome
 | | `map` | none | 2-column TSV (mRNA or gene ID, product); takes precedence over the GFF |
 | `[transcript]` | `mode` | `nonredundant` | `minimal`: first transcript per gene only / `nonredundant`: every mRNA, identical CDSs once / `full`: a CDS for every mRNA |
 | | `emit_mrna` | `true` | `false` writes CDS only, no mRNA (prokaryotes, organelles) |
+| | `emit_intron` | `false` | `true` writes the GFF introns (with the gene's locus_tag). Introns are implied by the mRNA/CDS join, so they are not needed without a specific reason. Exons are never written |
 
 `[source]` and `[assembly_gap]` are not used (a warning is printed if present); put them in the common JSON `SOURCE` and `ASSEMBLY_GAP`.
 

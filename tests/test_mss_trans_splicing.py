@@ -15,7 +15,7 @@ def _load():
     with open(os.path.join(FIX, "trans_splicing_rps12.gff3")) as fh:
         doc, _ = normalize(parse(fh.read()))
     seqs = {r.id: r.seq for r in SeqIO.parse(os.path.join(FIX, "trans_splicing_rps12.fasta"), "fasta")}
-    cfg = MssConfig(transl_table=11, product_default="hypothetical protein")
+    cfg = MssConfig(transl_table=11, product_default="hypothetical protein", emit_intron=True)
     cfg.emit_mrna = False
     return doc, seqs, cfg
 

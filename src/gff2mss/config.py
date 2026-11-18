@@ -23,6 +23,7 @@ class MssConfig:
     product_map: dict = field(default_factory=dict)
     transcript_mode: str = "nonredundant"
     emit_mrna: bool = True   # organelle/prokaryotic profiles set False (CDS only, no mRNA feature)
+    emit_intron: bool = False  # introns are implied by the mRNA/CDS join; write them only on request
 
 
 def load_config(path: str) -> tuple[MssConfig, list[Diagnostic]]:
@@ -60,5 +61,6 @@ def load_config(path: str) -> tuple[MssConfig, list[Diagnostic]]:
         product_map_path=product.get("map"),
         transcript_mode=mode,
         emit_mrna=transcript.get("emit_mrna", True),
+        emit_intron=transcript.get("emit_intron", False),
     )
     return cfg, diags

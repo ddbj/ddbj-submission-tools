@@ -16,7 +16,7 @@ def test_trans_splicing_flatfile_roundtrip(tmp_path):
     rec = SeqIO.read(FIX, "genbank")
     # forward: flatfile -> canonical GFF -> gff2mss (.ann), organelle emit_mrna=false
     doc = parse(write(flatfile_to_gff(rec)))
-    cfg = MssConfig(transl_table=11, product_default="hypothetical protein")
+    cfg = MssConfig(transl_table=11, product_default="hypothetical protein", emit_intron=True)
     cfg.emit_mrna = False
     ann = ann_text(doc, {rec.id: rec.seq}, cfg)
 

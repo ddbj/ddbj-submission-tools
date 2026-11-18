@@ -394,12 +394,12 @@ def build_rna_feature(rna, locus_tag: str, seqlen: int, gene_id: str, tx_id: str
     return MssFeature(feat_key, location, quals)
 
 
-def build_intron_feature(intron, seqlen) -> MssFeature:
+def build_intron_feature(intron, seqlen, gene_locus_tag=None) -> MssFeature:
     location = _location_attr(intron) or build_insdc_location(intron.spans, seqlen)
     quals = []
     if intron.gene:
         quals.append(MssQualifier("gene", intron.gene))
-    lt = intron._first("locus_tag")
+    lt = intron._first("locus_tag") or gene_locus_tag
     if lt:
         quals.append(MssQualifier("locus_tag", lt))
     for n in intron.note:
@@ -537,7 +537,7 @@ def build_entry_features(doc, seqs, cfg, diagnostics: list) -> dict:
             diagnostics.append(Diagnostic(Severity.WARNING, None, "pseudogene-skipped",
                                           f"{seqid}: skipped {skipped} pseudogene feature(s)"))
         introns = [f for f in doc.features if f.type == "intron"
-                   and any(s.seqid == seqid for s in f.spans)]
+                   and any(s.seqid == seqid for s in f.spans)] if cfg.emit_intron else []
         ignored = [f for f in doc.roots
                    if any(s.seqid == seqid for s in f.spans)
                    and f.type not in ("gene", "intron") and f.type not in _PARENTLESS_RNA_TYPES
@@ -558,7 +558,10 @@ def build_entry_features(doc, seqs, cfg, diagnostics: list) -> dict:
                 feats.extend(build_gene_features(feat, cfg.transcript_mode, assigner,
                                                  genome_seq, cfg, diagnostics))
             elif feat.type == "intron":
-                feats.append(build_intron_feature(feat, len(genome_seq)))
+                root = feat
+                while root.parents:
+                    root = root.parents[0]
+                feats.append(build_intron_feature(feat, len(genome_seq), assigner.tag_of(root)))
             else:
                 feats.append(build_rna_feature(feat, assigner.assign(feat),
                                                 len(genome_seq), feat.id, feat.id, feat.gene))
