@@ -148,14 +148,12 @@ def build_ann_rows(
             rows.extend(_common_placeholder_nonwgs())
     else:
         common_dict = common.model_dump(exclude_none=True)
-        if is_wgs:
-            category = effective_category or "WGS"
+        category = effective_category or ("WGS" if is_wgs else "")
+        if category:  # category defaults (tagset_id, DATATYPE, ...) for GNM etc. too, not only WGS
             common_dict["_submission_category"] = category
             inject_defaults(common_dict, category)
             validate_and_fill(common_dict, category)
-            rows.extend(create_common(common_dict, include_source=True))
-        else:
-            rows.extend(create_common(common_dict))
+        rows.extend(create_common(common_dict, include_source=is_wgs))
 
     # ── Per-entry body ────────────────────────────────────────────────────────
     for entry_id in all_ids:

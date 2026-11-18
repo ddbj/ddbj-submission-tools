@@ -2,7 +2,9 @@
 from pathlib import Path
 
 from common.fasta import parse_fasta_sequences
-from common.models import load_common_json
+import json
+
+from common.models import CommonModel, load_common_json
 from common.source_builder import load_sequence_roles
 from mss_builder.ann_writer import build_ann_rows, write_mss_ann
 
@@ -65,3 +67,14 @@ def test_circular_entry_with_features():
     assert rows[i + 1][:2] == ["", "source"]
     src_end = next(j for j in range(i + 1, len(rows)) if rows[j][1] not in ("", "source"))
     assert rows[src_end] == feat
+
+
+def test_gnm_gets_category_tagset_id_first():
+    # GNM (complete genome) needs ST_COMMENT tagset_id 'Genome-Assembly-Data' first, as WGS gets it
+    _, seqs, _ = _inputs("gnm")
+    data = json.loads((EX / "example.gnm.common.json").read_text())
+    data["ST_COMMENT"].pop("tagset_id", None)
+    common = CommonModel.model_validate(data)
+    rows = build_ann_rows(seqs, common, ROLES, "GNM")
+    i = next(i for i, r in enumerate(rows) if r[1] == "ST_COMMENT")
+    assert rows[i][3:5] == ["tagset_id", "Genome-Assembly-Data"]
