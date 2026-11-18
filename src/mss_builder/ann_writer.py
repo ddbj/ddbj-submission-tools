@@ -6,6 +6,7 @@ Used by mss_builder. For assemblies that only need source + assembly_gap feature
 
 from __future__ import annotations
 
+import re
 import sys
 from typing import TYPE_CHECKING, Optional
 
@@ -68,6 +69,9 @@ def _common_placeholder_nonwgs() -> list[Row]:
     ]
 
 
+_LONG_N_RUN = re.compile(r"[Nn]{100,}")
+
+
 # ── Main writer ───────────────────────────────────────────────────────────────
 
 def build_ann_rows(
@@ -102,6 +106,12 @@ def build_ann_rows(
             if cfg.enabled
         ]
     gap_sequences = sequences if gap_annotators else {}
+    if not gap_annotators:
+        # without ASSEMBLY_GAP nothing marks the N runs; ddbj-validator flags runs >= 100 N (AXS5290)
+        n_seqs = sum(1 for s in sequences.values() if _LONG_N_RUN.search(s))
+        if n_seqs:
+            print(f"[WARNING] {n_seqs} sequence(s) contain runs of >= 100 N, but the common JSON has no "
+                  "ASSEMBLY_GAP; no assembly_gap features are written", file=sys.stderr)
 
     # Determine WGS mode: no sequence_roles file, or every entry is unplaced
     def _is_unplaced(eid: str) -> bool:

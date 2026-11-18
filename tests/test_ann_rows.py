@@ -78,3 +78,23 @@ def test_gnm_gets_category_tagset_id_first():
     rows = build_ann_rows(seqs, common, ROLES, "GNM")
     i = next(i for i, r in enumerate(rows) if r[1] == "ST_COMMENT")
     assert rows[i][3:5] == ["tagset_id", "Genome-Assembly-Data"]
+
+
+def _wgs_common(with_gap):
+    data = json.loads((EX / "example.wgs.common.json").read_text())
+    if not with_gap:
+        data.pop("ASSEMBLY_GAP", None)
+    return CommonModel.model_validate(data)
+
+
+def test_warns_when_n_runs_but_no_assembly_gap(capsys):
+    seqs = {"c1": "ACGT" + "N" * 100 + "ACGT", "c2": "ACGT" * 30}
+    build_ann_rows(seqs, _wgs_common(False), None, None)
+    err = capsys.readouterr().err
+    assert "ASSEMBLY_GAP" in err and "1 sequence" in err
+
+
+def test_no_warning_for_short_n_runs_or_with_assembly_gap(capsys):
+    build_ann_rows({"c1": "ACGT" + "N" * 99 + "ACGT"}, _wgs_common(False), None, None)
+    build_ann_rows({"c1": "ACGT" + "N" * 100 + "ACGT"}, _wgs_common(True), None, None)
+    assert "ASSEMBLY_GAP" not in capsys.readouterr().err
