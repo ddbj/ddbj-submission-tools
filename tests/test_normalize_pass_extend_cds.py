@@ -54,3 +54,30 @@ def test_stop_inside_cds_is_noop():
 def test_default_off():
     spans, ch = _run([("CDS", 1, 9, 0, "g1.t1.cds"), ("stop_codon", 10, 12, 0, "g1.t1.stop")], on=False)
     assert spans == [(1, 9, 0)] and ch == []
+
+
+# A last exon made of the stop codon alone: the CDS must still include it (INSDC CDS ends with the stop codon).
+
+def test_stop_only_last_exon_after_intron_is_appended():
+    spans, ch = _run([("CDS", 1, 9, 0, "g1.t1.cds"), ("intron", 10, 19, ".", "g1.t1.i1"),
+                      ("stop_codon", 20, 22, 0, "g1.t1.stop")])
+    assert spans == [(1, 9, 0), (20, 22, 0)] and len(ch) == 1
+
+
+def test_stop_only_last_exon_given_as_exon_is_appended():
+    spans, ch = _run([("exon", 1, 9, ".", "g1.t1.e1"), ("exon", 20, 22, ".", "g1.t1.e2"),
+                      ("CDS", 1, 9, 0, "g1.t1.cds"), ("stop_codon", 20, 22, 0, "g1.t1.stop")])
+    assert spans == [(1, 9, 0), (20, 22, 0)] and len(ch) == 1
+
+
+def test_stop_only_last_exon_on_minus():
+    spans, ch = _run([("CDS", 20, 28, 0, "g1.t1.cds"), ("intron", 10, 19, ".", "g1.t1.i1"),
+                      ("stop_codon", 7, 9, 0, "g1.t1.stop")], strand="-")
+    assert spans == [(7, 9, 0), (20, 28, 0)] and len(ch) == 1
+
+
+def test_detached_stop_upstream_of_cds_is_not_appended():
+    spans, ch, rep = _run_full([("intron", 4, 9, ".", "g1.t1.i1"), ("CDS", 10, 18, 0, "g1.t1.cds"),
+                                ("stop_codon", 1, 3, 0, "g1.t1.stop")])
+    assert spans == [(10, 18, 0)] and ch == []
+    assert any(c.action == "needs-manual" for c in rep.unresolved)

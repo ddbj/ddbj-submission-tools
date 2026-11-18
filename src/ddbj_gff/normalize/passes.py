@@ -206,12 +206,32 @@ def _remove_features(doc, feats: list) -> None:
         f.children = [c for c in f.children if id(c) not in doomed]
 
 
+def _stop_only_last_exon(mrna, cds, st) -> bool:
+    """True when the detached stop codon `st` is a last exon of its own: it lies 3' of the CDS and the
+    gap to the CDS is an intron child, or `st` sits in an exon child that holds no CDS."""
+    if st.strand == "-":
+        lo = min(sp.start for sp in cds.spans)
+        downstream, gap = st.end < lo, (st.end + 1, lo - 1)
+    else:
+        hi = max(sp.end for sp in cds.spans)
+        downstream, gap = st.start > hi, (hi + 1, st.start - 1)
+    if not downstream:
+        return False
+    kids = [(c.type, s) for c in mrna.children for s in c.spans]
+    if any(t == "intron" and (s.start, s.end) == gap for t, s in kids):
+        return True
+    return any(t == "exon" and s.start <= st.start and st.end <= s.end
+               and not any(sp.start <= s.end and s.start <= sp.end for sp in cds.spans) for t, s in kids)
+
+
 def pass_extend_cds_by_stop_codon(doc, ctx) -> list:
     """Fold stop_codon child spans lying outside the CDS into the CDS (AUGUSTUS
     stopCodonExcludedFromCDS style). A piece abutting a CDS span extends it; when the
     stop codon is split by an intron the detached piece becomes a new span with the
-    phase implied by the preceding coding length. Anything else (overlap, a single
-    detached piece) is reported as needs-manual and left alone. Opt-in."""
+    phase implied by the preceding coding length; so does a whole stop codon forming the
+    last exon (3' of the CDS, after an intron child or inside an exon child). Anything
+    else (overlap, a detached piece without intron/exon evidence) is reported as
+    needs-manual and left alone. Opt-in."""
     changes: list = []
     if not getattr(ctx.config, "extend_cds_by_stop_codon", False):
         return changes
@@ -231,7 +251,8 @@ def pass_extend_cds_by_stop_codon(doc, ctx) -> list:
         ok = True
         for st in outside:
             adj = next((sp for sp in cds.spans if st.start == sp.end + 1 or st.end == sp.start - 1), None)
-            if adj is None and (len(stops) < 2 or any(sp.start <= st.end and st.start <= sp.end for sp in cds.spans)):
+            overlaps = any(sp.start <= st.end and st.start <= sp.end for sp in cds.spans)
+            if adj is None and (overlaps or (len(stops) < 2 and not _stop_only_last_exon(mrna, cds, st))):
                 ok = False
             plan.append((st, adj))
         if not ok:
