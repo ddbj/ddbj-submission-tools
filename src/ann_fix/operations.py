@@ -180,7 +180,9 @@ def _resolve(ann: AnnFile, f: Finding) -> AnnRow | None:
         return None
     if f.entry not in ("", "ALL") and _entry_at(ann, f.line - 1) != f.entry:
         return None
-    if "Found:" in f.message and row.cols[2] and row.cols[2] not in f.message:
+    if f.location is not None and row.cols[2] != f.location:
+        return None
+    if f.location is None and "Found:" in f.message and row.cols[2] and row.cols[2] not in f.message:
         return None
     return row
 

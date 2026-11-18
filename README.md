@@ -654,19 +654,19 @@ DBLINK や source フィーチャーの情報は TSV で指定するため **DBL
 
 ## ann_fix の使い方
 
-gff2mss が出力した `.ann` に対して ddbj-validator が出した指摘（`validation_report_details.txt`）を、
+gff2mss が出力した `.ann` に対して ddbj-validator が出した指摘（`validation_report.json` または `validation_report_details.txt`）を、
 `.ann` 上で直接解消します。標準 GFF ができた後の修正は GFF に戻らず `.ann` を書き換える方針です。
 操作は detect → apply の 2 段階で、apply は選んだコードにだけ適用されます。無変更の行は byte 単位でそのまま残ります。
 
 ```bash
-# 1. validator を実行（非対話では -f 必須）
-ddbj-validator ddbj sub -o sub_out -f -j 1
+# 1. validator を実行（非対話では -f 必須。--json でレポートを JSON にする）
+ddbj-validator ddbj sub -o sub_out -f -j 1 --json
 
 # 2. 指摘をコード別に一覧（既定操作つき）
-ann_fix --ann sub/NAME.ann --report sub_out/reports/validation_report_details.txt --detect [--json]
+ann_fix --ann sub/NAME.ann --report sub_out/reports/validation_report.json --detect [--json]
 
 # 3. 既定操作をまとめて適用、または CODE=OP[:ARG] で個別指定
-ann_fix --ann sub/NAME.ann --report sub_out/reports/validation_report_details.txt --apply defaults --out sub/NAME.ann
+ann_fix --ann sub/NAME.ann --report sub_out/reports/validation_report.json --apply defaults --out sub/NAME.ann
 ann_fix --ann sub/NAME.ann --report ... --apply 'ANN4300=misc,ANN5320=overlap-drop:other,AXS6810=artificial-location:low-quality sequence region' --out fixed.ann
 
 # 4. 再検証（ann_fix は validator を呼びません）
@@ -684,7 +684,7 @@ ann_fix --ann sub/NAME.ann --report ... --apply 'ANN4300=misc,ANN5320=overlap-dr
 登録者の判断を `.ann` に記録するためのもので、再検証しても AXS6810 の件数は減りません。
 `ANN2520`（アイソフォームの locus_tag 共有）と `ANN2542`（`/gene` 無しの locus_tag 共有）は無視可として表示するだけです。
 レポートはそれを出した `.ann` にしか適用できません。修正後のファイルに同じレポートを再適用すると「report does not match」で何も書かずに終了します（exit 1）。再検証してから新しいレポートで apply してください。同一実行内で先の操作が消した feature を指す指摘は skip として表示されます。
-複数のファイルをまとめて検証したレポートは、ファイルごとの節（`1. NAME`）に分かれています。ann_fix は `--ann` のファイル名（`.ann` を除いたもの）と同じ節の指摘だけを使い、その節がなければ何も書かずに終了します（exit 1）。検証したときと同じファイル名で渡してください。指摘を feature に当てるときは、行番号・feature 名・location に加えてエントリ名も照合します。
+`--report` には validator の `--json` で出る `validation_report.json` を勧めます（テキストの `validation_report_details.txt` も読めます）。複数のファイルをまとめて検証したレポートでも、ann_fix は `--ann` のファイル名（`.ann` を除いたもの）の指摘だけを使います。検証したときと同じファイル名で渡してください。JSON にそのファイルの指摘が 1 つもなければ、レポートにあるファイル名を注意として表示します。テキストのレポートでそのファイルの節（`1. NAME`）がなければ、何も書かずに終了します（exit 1）。指摘を feature に当てるときは、行番号・feature 名・エントリ名と location（JSON ではその値、テキストではメッセージ中の `Found:`）を照合します。
 
 ## ann_meta の使い方
 
@@ -1469,16 +1469,17 @@ Entries are assigned serial numbers sequentially in the order they appear in the
 
 ## ann_fix Usage
 
-Resolves ddbj-validator findings (`validation_report_details.txt`) directly on a gff2mss `.ann`:
+Resolves ddbj-validator findings (`validation_report.json` or `validation_report_details.txt`) directly on a gff2mss `.ann`:
 `--detect` lists findings per code with the default operation, `--apply` applies the chosen operations
 (`defaults`, or `CODE=OP[:ARG],...` with OP in `misc`, `artificial-location`, `drop`, `overlap-drop`, `overlap-misc`)
-and writes `--out`. Untouched rows are preserved byte-for-byte. A report applies only to the `.ann` it was produced from: re-applying it to the fixed file exits 1 without writing (re-validate first). A report for several files has one section per file (`1. NAME`); ann_fix uses only the section named after the `--ann` file (base name without `.ann`) and exits 1 without writing when there is none. Findings are matched to features by line, feature key, location and entry name.
+and writes `--out`. Untouched rows are preserved byte-for-byte. A report applies only to the `.ann` it was produced from: re-applying it to the fixed file exits 1 without writing (re-validate first). Pass `validation_report.json` from `ddbj-validator --json` (the text `validation_report_details.txt` also works). With a report for several files, ann_fix uses only the findings of the `--ann` file (base name without `.ann`); a text report without that file's section (`1. NAME`) exits 1 without writing. Findings are matched to features by line, feature key, entry name and location.
 Defaults: `ANN5320` → `overlap-drop:cds`, `ANN4300` → `misc`, `AXS6810` → `artificial-location` (`low-quality sequence region`);
 `ANN2520` / `ANN2542` are shown as ignorable. ann_fix never runs the validator: re-validate afterwards.
 
 ```bash
-ann_fix --ann sub/NAME.ann --report sub_out/reports/validation_report_details.txt --detect --json
-ann_fix --ann sub/NAME.ann --report sub_out/reports/validation_report_details.txt --apply defaults --out sub/NAME.ann
+ddbj-validator ddbj sub -o sub_out -f -j 1 --json
+ann_fix --ann sub/NAME.ann --report sub_out/reports/validation_report.json --detect --json
+ann_fix --ann sub/NAME.ann --report sub_out/reports/validation_report.json --apply defaults --out sub/NAME.ann
 ```
 
 ## ann_meta Usage

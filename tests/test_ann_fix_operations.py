@@ -249,3 +249,10 @@ def test_finding_from_another_entry_does_not_match():
     with pytest.raises(ValueError, match="does not match"):
         apply(ann, [f], {"ANN5320": ("overlap-drop", {"keep": "cds"})})
     assert "tRNA" in _keys(ann)
+
+
+def test_finding_with_another_location_does_not_match():
+    ann = _ann()
+    f = Finding("ANN5320", "ERR", "NC_001133.9", "tRNA", _trna(ann).first + 1, "tRNA inside CDS", None, "601..671")
+    with pytest.raises(ValueError, match="does not match"):
+        apply(ann, [f], {"ANN5320": ("overlap-drop", {"keep": "cds"})})
