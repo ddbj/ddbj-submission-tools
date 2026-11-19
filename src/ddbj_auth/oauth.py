@@ -7,6 +7,7 @@ from __future__ import annotations
 
 import base64
 import hashlib
+import http.client
 import json
 import secrets
 import time
@@ -37,7 +38,7 @@ def post_form(url: str, data: dict[str, str]) -> dict:
         body = exc.read()
         if exc.code >= 500:
             raise AuthError(f"the IdP returned HTTP {exc.code}") from None
-    except (urllib.error.URLError, OSError) as exc:
+    except (urllib.error.URLError, OSError, http.client.HTTPException) as exc:
         reason = getattr(exc, "reason", exc)
         raise AuthError(f"cannot reach the IdP: {reason}") from None
     try:

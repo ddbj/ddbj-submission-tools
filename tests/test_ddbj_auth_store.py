@@ -54,3 +54,9 @@ def test_claims_decodes_payload_without_padding():
     assert claims("x." + _b64({"aud": ["kura"], "exp": 5}) + ".y") == {"aud": ["kura"], "exp": 5}
     assert claims("garbage") == {}
     assert claims("a.!!!.c") == {}
+
+
+def test_relative_xdg_config_home_ignored(tmp_path, monkeypatch):
+    monkeypatch.setenv("XDG_CONFIG_HOME", "relative/dir")
+    monkeypatch.setenv("HOME", str(tmp_path))
+    assert config_dir("staging") == tmp_path / ".config" / "ddbj" / "staging"

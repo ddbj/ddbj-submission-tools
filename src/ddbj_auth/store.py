@@ -1,8 +1,11 @@
 """Refresh tokens on disk, one file per environment and API.
 
 ${XDG_CONFIG_HOME:-~/.config}/ddbj/<env>/<api>.json, directory 0700, file 0600.
-Writes take a lock and replace the file atomically, so two processes refreshing at
-the same time (refresh-token rotation) never leave a half-written file.
+Writes take a lock and replace the file atomically, so the file is never half-written.
+`ddbj-auth token` holds the lock across load, refresh and save, so concurrent callers on the
+same machine queue and reuse the rotated refresh token. The lock is flock(2): on file systems
+that keep flock local to a node (e.g. Lustre with localflock), callers on different nodes are
+not serialised; the file stays valid, but one of them may need to log in again.
 Access tokens are never stored.
 """
 from __future__ import annotations
@@ -18,7 +21,9 @@ from pathlib import Path
 
 
 def config_dir(env: str) -> Path:
-    base = os.environ.get("XDG_CONFIG_HOME") or os.path.join(os.path.expanduser("~"), ".config")
+    base = os.environ.get("XDG_CONFIG_HOME", "")
+    if not os.path.isabs(base):  # the XDG spec says to ignore a relative value
+        base = os.path.join(os.path.expanduser("~"), ".config")
     return Path(base) / "ddbj" / env
 
 
@@ -27,7 +32,8 @@ def _path(env: str, api: str) -> Path:
 
 
 @contextlib.contextmanager
-def _locked(env: str, api: str):
+def locked(env: str, api: str):
+    """Hold the API's lock (callers then use write() instead of save())."""
     d = config_dir(env)
     d.mkdir(parents=True, exist_ok=True)
     os.chmod(d, 0o700)
@@ -47,21 +53,26 @@ def load(env: str, api: str) -> dict | None:
 
 
 def save(env: str, api: str, record: dict) -> None:
-    with _locked(env, api) as d:
-        fd, tmp = tempfile.mkstemp(dir=d, prefix=f".{api}.json.tmp")
-        try:
-            os.chmod(tmp, 0o600)
-            with os.fdopen(fd, "w", encoding="utf-8") as fh:
-                json.dump(record, fh)
-            os.replace(tmp, _path(env, api))
-        except BaseException:
-            with contextlib.suppress(FileNotFoundError):
-                os.unlink(tmp)
-            raise
+    with locked(env, api):
+        write(env, api, record)
+
+
+def write(env: str, api: str, record: dict) -> None:
+    """Replace the file atomically. Hold locked(env, api) while calling this."""
+    fd, tmp = tempfile.mkstemp(dir=config_dir(env), prefix=f".{api}.json.tmp")
+    try:
+        os.chmod(tmp, 0o600)
+        with os.fdopen(fd, "w", encoding="utf-8") as fh:
+            json.dump(record, fh)
+        os.replace(tmp, _path(env, api))
+    except BaseException:
+        with contextlib.suppress(FileNotFoundError):
+            os.unlink(tmp)
+        raise
 
 
 def delete(env: str, api: str) -> bool:
-    with _locked(env, api):
+    with locked(env, api):
         try:
             _path(env, api).unlink()
             return True

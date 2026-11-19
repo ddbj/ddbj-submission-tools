@@ -132,3 +132,62 @@ def test_saved_record_kept_when_save_unrelated(fake):
     save("staging", "other", {"refresh_token": "x"})
     _login(fake)
     assert list_apis("staging") == ["kura", "other"]
+
+
+@pytest.mark.parametrize(("display", "platform", "opened"), [(None, "linux", False), (":0", "linux", True), (None, "darwin", True)])
+def test_browser_opened_only_with_a_gui(fake, monkeypatch, display, platform, opened):
+    calls = []
+    monkeypatch.setattr(cli.webbrowser, "open", lambda *a, **k: calls.append(a) or True)
+    monkeypatch.delenv("WAYLAND_DISPLAY", raising=False)
+    if display:
+        monkeypatch.setenv("DISPLAY", display)
+    else:
+        monkeypatch.delenv("DISPLAY", raising=False)
+    monkeypatch.setattr(cli.sys, "platform", platform)
+    _login(fake)
+    assert bool(calls) is opened
+
+
+@pytest.mark.parametrize("api", ["../x", "a/b", ""])
+def test_bad_api_name_is_usage_error(fake, api, capsys):
+    assert main(["login", "--for", api, "--env", "staging", "--client-id", "c", "--audience", "a"]) == 2
+
+
+def test_parallel_token_calls_share_rotation(fake, monkeypatch, capsys):
+    import threading
+    import time
+
+    _login(fake)
+    current = {"rt": TOKENS["refresh_token"], "n": 10}
+    guard = threading.Lock()
+
+    def rotating(url, data):
+        time.sleep(0.05)                     # widen the race window
+        with guard:
+            if data.get("refresh_token") != current["rt"]:
+                return {"error": "invalid_grant"}     # reuse of a rotated refresh token
+            current["n"] += 1
+            current["rt"] = make_jwt(n=current["n"])
+            return {"access_token": make_jwt(aud="kura", n=current["n"]), "refresh_token": current["rt"]}
+    monkeypatch.setattr(oauth, "post_form", rotating)
+    codes = []
+    threads = [threading.Thread(target=lambda: codes.append(main(["token", "--for", "kura", "--env", "staging"]))) for _ in range(4)]
+    for t in threads:
+        t.start()
+    for t in threads:
+        t.join()
+    assert codes == [0, 0, 0, 0]
+
+
+def test_login_without_refresh_token_is_clear_error(fake, capsys):
+    fake.token_queue.append({"access_token": make_jwt(aud="kura")})
+    assert main(["login", "--for", "kura", "--env", "staging"]) == 1
+    err = capsys.readouterr().err
+    assert "refresh token" in err and "Traceback" not in err
+
+
+def test_ctrl_c_exits_130(fake, monkeypatch, capsys):
+    def interrupted(*a, **k):
+        raise KeyboardInterrupt
+    monkeypatch.setattr(oauth, "device_login", interrupted)
+    assert main(["login", "--for", "kura", "--env", "staging"]) == 130

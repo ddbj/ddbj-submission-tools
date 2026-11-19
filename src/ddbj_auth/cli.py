@@ -13,6 +13,7 @@ from __future__ import annotations
 import argparse
 import datetime
 import os
+import re
 import sys
 import webbrowser
 
@@ -30,7 +31,12 @@ class UsageError(Exception):
     pass
 
 
+_API_NAME = re.compile(r"[A-Za-z0-9_-]+")
+
+
 def _api(args) -> dict:
+    if not _API_NAME.fullmatch(args.api or ""):
+        raise UsageError(f"bad API name {args.api!r}: use letters, digits, '-' and '_'")
     known = APIS.get(args.api, {})
     client_id = getattr(args, "client_id", None) or known.get("client_id")
     audience = getattr(args, "audience", None) or known.get("audience")
@@ -43,7 +49,10 @@ def _api(args) -> dict:
 def _show(uri: str, code: str, complete: str | None) -> None:
     print(f"Open {complete or uri} and approve the login (code {code}).", file=sys.stderr)
     print("Approve only a code you started yourself.", file=sys.stderr)
-    if complete:
+    # Only where a graphical browser is likely: on a headless server Python would start a
+    # text browser (lynx, w3m) in the terminal, hiding the code and blocking the polling
+    gui = sys.platform in ("darwin", "win32") or os.environ.get("DISPLAY") or os.environ.get("WAYLAND_DISPLAY")
+    if complete and gui:
         try:
             webbrowser.open(complete)
         except Exception:  # noqa: BLE001 - no browser on a headless server: the URL is enough
@@ -55,6 +64,8 @@ def _login(args) -> int:
     issuer = ISSUERS[args.env]
     scope = "openid offline_access" if args.offline else "openid"
     tokens = oauth.device_login(issuer, api["client_id"], scope, show=_show)
+    if not tokens.get("refresh_token"):
+        raise AuthError("the IdP returned no refresh token; the client must allow refresh tokens")
     access = store.claims(tokens.get("access_token", ""))
     if not has_audience(access, api["audience"]):
         raise AuthError(f"the access token's aud does not include {api['audience']!r}; check the client's audience mapper")
@@ -82,18 +93,23 @@ def _token(args) -> int:
         _check_env_token(env_token, issuer, _api(args)["audience"])
         print(env_token)
         return 0
-    rec = store.load(args.env, args.api)
-    if rec is None:
-        raise AuthError(f"not logged in: run ddbj-auth login --for {args.api} --env {args.env}")
-    try:
-        tokens = oauth.refresh(rec["issuer"], rec["client_id"], rec["refresh_token"])
-    except AuthError as exc:
-        raise AuthError(f"{exc}: run ddbj-auth login --for {args.api} --env {args.env}") from None
-    if tokens.get("refresh_token"):
-        store.save(args.env, args.api, rec | {
-            "refresh_token": tokens["refresh_token"],
-            "refresh_expires_at": store.claims(tokens["refresh_token"]).get("exp"),
-        })
+    if not _API_NAME.fullmatch(args.api or ""):
+        raise UsageError(f"bad API name {args.api!r}")
+    # Hold the lock across load, refresh and save: with refresh-token rotation, a second caller
+    # must use the token the first one received (the IdP may reject a reused one)
+    with store.locked(args.env, args.api):
+        rec = store.load(args.env, args.api)
+        if rec is None:
+            raise AuthError(f"not logged in: run ddbj-auth login --for {args.api} --env {args.env}")
+        try:
+            tokens = oauth.refresh(rec["issuer"], rec["client_id"], rec["refresh_token"])
+        except AuthError as exc:
+            raise AuthError(f"{exc}: run ddbj-auth login --for {args.api} --env {args.env}") from None
+        if tokens.get("refresh_token"):
+            store.write(args.env, args.api, rec | {
+                "refresh_token": tokens["refresh_token"],
+                "refresh_expires_at": store.claims(tokens["refresh_token"]).get("exp"),
+            })
     if not has_audience(store.claims(tokens.get("access_token", "")), rec["audience"]):
         raise AuthError(f"the access token's aud does not include {rec['audience']!r}")
     print(tokens["access_token"])
@@ -159,6 +175,9 @@ def main(argv: list[str] | None = None) -> int:
     except AuthError as exc:
         print(f"error: {exc}", file=sys.stderr)
         return 1
+    except KeyboardInterrupt:
+        print("interrupted", file=sys.stderr)
+        return 130
 
 
 if __name__ == "__main__":

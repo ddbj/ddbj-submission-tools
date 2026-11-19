@@ -108,3 +108,13 @@ def test_revoke_posts_token_and_hint(fake):
     revoke(ISS, "kura", "r")
     assert fake.urls[-1] == f"{ISS}/protocol/openid-connect/revoke"
     assert fake.requests[-1] == {"client_id": "kura", "token": "r", "token_type_hint": "refresh_token"}
+
+
+def test_http_protocol_error_is_auth_error(monkeypatch):
+    import http.client
+
+    def broken(*a, **k):
+        raise http.client.IncompleteRead(b"")
+    monkeypatch.setattr(oauth.urllib.request, "urlopen", broken)
+    with pytest.raises(AuthError, match="cannot reach the IdP"):
+        oauth.post_form(f"{ISS}/protocol/openid-connect/token", {})
