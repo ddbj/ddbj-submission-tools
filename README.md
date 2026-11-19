@@ -694,7 +694,7 @@ ann_fix --ann NAME.ann --at 12=merge-previous --out NAME.ann   # 12 行目の fe
 ann_fix --ann NAME.ann --at 12=drop --out NAME.ann             # 12 行目の feature を消す
 ```
 
-WGS の 1,000 塩基未満の配列（ANN5045）は、除くかどうかを登録者が決めます。判断の材料（本数、長さ、割合、除くと失われる feature、全コピーが短い配列にしかない tRNA）を出し、決まったら `.ann` と FASTA の両方から除きます。
+短い配列を除くかどうかと、どの長さ未満を除くかは、登録者が決めます。長さは登録の種類で違い、ゲノム配列は 1,000 塩基（validator の ANN5045。WGS で真核生物・原核生物のときに出る）、それ以外の登録は 200 塩基などです。`--min-length` で指定します（既定 1000）。判断の材料（本数、長さ、割合、除くと失われる feature、全コピーが短い配列にしかない tRNA）を出し、決まったら `.ann` と FASTA の両方から除きます。
 
 ```bash
 ann_fix --ann NAME.ann --fasta NAME.fasta --short-seqs [--json] [--min-length 1000]
@@ -1496,7 +1496,7 @@ ddbj-validator ddbj sub -o sub_out -f -j 1 --json
 ann_fix --ann sub/NAME.ann --report sub_out/reports/validation_report.json --detect --json
 ann_fix --ann sub/NAME.ann --report sub_out/reports/validation_report.json --apply defaults --out sub/NAME.ann
 ann_fix --ann sub/NAME.ann --at 12=merge-previous --out sub/NAME.ann        # decisions left as review: (also =drop)
-ann_fix --ann sub/NAME.ann --fasta sub/NAME.fasta --short-seqs              # ANN5045: what removing short sequences loses
+ann_fix --ann sub/NAME.ann --fasta sub/NAME.fasta --short-seqs              # ANN5045 (genome, 1000 bp; --min-length 200 etc. for others)
 ann_fix --ann sub/NAME.ann --fasta sub/NAME.fasta --drop-short --out sub/NAME.ann --fasta-out sub/NAME.fasta
 ```
 

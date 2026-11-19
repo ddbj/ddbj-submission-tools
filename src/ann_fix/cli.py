@@ -8,7 +8,7 @@ import sys
 
 from .annfile import AnnFile
 from .layout import merge_previous
-from .short import WGS_MIN_LENGTH, drop_short, short_report
+from .short import GENOME_MIN_LENGTH, drop_short, short_report
 from .operations import ARTIFICIAL_LOCATION_VALUES, DEFAULTS, IGNORABLE, KEEP_VALUES, OPERATIONS, apply, op_drop
 from .report import Finding, group_by_code, parse_report
 
@@ -148,10 +148,10 @@ def main(argv: list[str] | None = None) -> int:
     ap.add_argument("--out", help="output .ann (required with --apply / --at / --drop-short; may equal --ann)")
     ap.add_argument("--fasta", help="FASTA of --ann (for --short-seqs / --drop-short)")
     ap.add_argument("--short-seqs", action="store_true",
-                    help="report sequences shorter than --min-length (ANN5045) and the annotation removing them loses")
+                    help="report sequences shorter than --min-length (e.g. ANN5045) and the annotation removing them loses")
     ap.add_argument("--drop-short", action="store_true",
                     help="remove those sequences from --ann and --fasta (the submitter's decision); needs --out and --fasta-out")
-    ap.add_argument("--min-length", type=int, default=WGS_MIN_LENGTH, help=f"default {WGS_MIN_LENGTH} (WGS)")
+    ap.add_argument("--min-length", type=int, default=GENOME_MIN_LENGTH, help=f"default {GENOME_MIN_LENGTH} (genome sequences, ANN5045); other submissions often use 200")
     ap.add_argument("--fasta-out", help="output FASTA for --drop-short")
     args = ap.parse_args(argv)
 
