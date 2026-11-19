@@ -101,3 +101,52 @@ def test_bad_operation_exits_2(tmp_path):
     ann, rep = _setup(tmp_path)
     assert main(["--ann", str(ann), "--report", str(rep), "--apply", "ANN4300=bogus", "--out", str(tmp_path / "o.ann")]) == 2
     assert main(["--ann", str(ann), "--report", str(rep), "--apply", "ANN4300=misc"]) == 2   # --out required
+
+
+def test_multi_file_report_uses_only_this_files_section(tmp_path, capsys):
+    ann, rep = _setup(tmp_path)                       # ann is x.ann
+    own = rep.read_text().split("\n", 1)[1]
+    cds1 = [f for f in AnnFile.read(ann).features() if f.key == "CDS"][0]
+    other = (f"ANN4300:WAR:NC_001133.9:CDS:Line[{cds1.first + 1}]:Complete CDS must be at least 90 bases (30 aa) "
+             "long unless supported by experiment or inference. (Length: 60 bases)\n")
+    rep.write_text("=== Validation Details (2 file sets) ===\n\n1. other\n[ WARNING ]\n" + other + "\n2. x\n" + own)
+    assert main(["--ann", str(ann), "--report", str(rep), "--detect", "--json"]) == 0
+    data = {d["code"]: d for d in json.loads(capsys.readouterr().out)}
+    assert data["ANN4300"]["count"] == 1                       # the other file's ANN4300 is not counted
+    out = tmp_path / "o.ann"
+    assert main(["--ann", str(ann), "--report", str(rep), "--apply", "defaults", "--out", str(out)]) == 0
+    keys = [f.key for f in AnnFile.read(out).features() if f.entry != "COMMON"]
+    assert keys == ["source", "mRNA", "CDS", "misc_feature"]   # 1st CDS untouched by the other file's finding
+
+
+def test_report_without_this_file_exits_1(tmp_path, capsys):
+    ann, rep = _setup(tmp_path)
+    rep.write_text("=== Validation Details (1 file set) ===\n\n1. other\n" + rep.read_text().split("\n", 1)[1])
+    assert main(["--ann", str(ann), "--report", str(rep), "--detect"]) == 1
+    assert "no section for x" in capsys.readouterr().err
+
+
+def test_json_report(tmp_path):
+    ann, _ = _setup(tmp_path)                         # ann is x.ann
+    feats = AnnFile.read(ann).features()
+    trna = next(f for f in feats if f.key == "tRNA")
+    cds1 = [f for f in feats if f.key == "CDS"][0]
+    msg = lambda file, key, feat: {"id": "ANN5320" if key == "tRNA" else "ANN4300", "level": "error", "message": "m",
+                                   "target": "feature", "file": file, "entry": "NC_001133.9", "feature_type": key,
+                                   "qualifier": "", "location": feat.location, "line_number": feat.first + 1}
+    rep = tmp_path / "validation_report.json"
+    rep.write_text(json.dumps({"version": "1.0.95", "messages": [msg("x.ann", "tRNA", trna),
+                                                                  msg("other.ann", "CDS", cds1)]}))
+    out = tmp_path / "o.ann"
+    assert main(["--ann", str(ann), "--report", str(rep), "--apply", "defaults", "--out", str(out)]) == 0
+    keys = [f.key for f in AnnFile.read(out).features() if f.entry != "COMMON"]
+    assert keys == ["source", "mRNA", "CDS", "mRNA", "CDS"]   # tRNA dropped; other.ann's ANN4300 not applied
+
+
+def test_json_report_without_this_file_warns(tmp_path, capsys):
+    ann, _ = _setup(tmp_path)
+    rep = tmp_path / "validation_report.json"
+    rep.write_text(json.dumps({"messages": [{"id": "ANN0470", "level": "warning", "message": "m", "file": "other.ann",
+                                             "entry": "ALL", "line_number": None}]}))
+    assert main(["--ann", str(ann), "--report", str(rep), "--detect"]) == 0
+    assert "no findings for x in this report (files: other)" in capsys.readouterr().err

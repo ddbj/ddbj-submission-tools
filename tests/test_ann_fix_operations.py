@@ -233,10 +233,26 @@ def test_location_in_message_must_match_the_row(tmp_path):
 def test_keep_other_with_missing_cds_is_skipped_not_raised(tmp_path):
     ann = _ann()
     t = _trna(ann).first + 1
-    log = apply(ann, [Finding("ANN5320", "ERR", "NC_1", "tRNA", t, "(Found: tRNA 600..671 in CDS 999..1000)")],
+    log = apply(ann, [Finding("ANN5320", "ERR", "NC_001133.9", "tRNA", t, "(Found: tRNA 600..671 in CDS 999..1000)")],
                 {"ANN5320": ("overlap-drop", {"keep": "other"})})
     assert any(l.startswith("skip") for l in log) and _keys(ann) == ["source", "mRNA", "CDS", "mRNA", "CDS", "tRNA"]
 
 
 def test_defaults_include_short_intron_code():
     assert DEFAULTS["ANN6840"] == ("artificial-location", {"value": "low-quality sequence region"})
+
+
+def test_finding_from_another_entry_does_not_match():
+    # same line, same feature key and location, but the report names another sequence (e.g. a multi-file report)
+    ann = _ann()
+    f = Finding("ANN5320", "ERR", "OTHER_SEQ", "tRNA", _trna(ann).first + 1, "... (Found: tRNA 600..671 in CDS 538..792)")
+    with pytest.raises(ValueError, match="does not match"):
+        apply(ann, [f], {"ANN5320": ("overlap-drop", {"keep": "cds"})})
+    assert "tRNA" in _keys(ann)
+
+
+def test_finding_with_another_location_does_not_match():
+    ann = _ann()
+    f = Finding("ANN5320", "ERR", "NC_001133.9", "tRNA", _trna(ann).first + 1, "tRNA inside CDS", None, "601..671")
+    with pytest.raises(ValueError, match="does not match"):
+        apply(ann, [f], {"ANN5320": ("overlap-drop", {"keep": "cds"})})

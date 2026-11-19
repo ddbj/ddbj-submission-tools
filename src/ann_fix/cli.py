@@ -3,11 +3,12 @@ from __future__ import annotations
 
 import argparse
 import json
+import os
 import sys
 
 from .annfile import AnnFile
 from .operations import ARTIFICIAL_LOCATION_VALUES, DEFAULTS, IGNORABLE, KEEP_VALUES, OPERATIONS, apply
-from .report import Finding, group_by_code, parse_details
+from .report import Finding, group_by_code, parse_report
 
 
 def _default_label(code: str) -> str:
@@ -63,7 +64,7 @@ def main(argv: list[str] | None = None) -> int:
     ap = argparse.ArgumentParser(prog="ann_fix",
                                  description="Resolve ddbj-validator findings directly on a gff2mss .ann")
     ap.add_argument("--ann", required=True)
-    ap.add_argument("--report", required=True, help="validation_report_details.txt from ddbj-validator")
+    ap.add_argument("--report", required=True, help="validation_report.json (ddbj-validator --json) or validation_report_details.txt")
     ap.add_argument("--detect", action="store_true", help="list findings per code (default when --apply is absent)")
     ap.add_argument("--json", action="store_true")
     ap.add_argument("--apply", metavar="SPEC",
@@ -72,8 +73,19 @@ def main(argv: list[str] | None = None) -> int:
     args = ap.parse_args(argv)
 
     ann = AnnFile.read(args.ann)
+    name = os.path.basename(args.ann)
+    name = name[:-4] if name.endswith(".ann") else name   # the validator names a file set after the .ann
     with open(args.report, encoding="utf-8") as fh:
-        groups = group_by_code(parse_details(fh.read()))
+        text = fh.read()
+    try:
+        groups = group_by_code(parse_report(text, file_set=name))
+    except ValueError as exc:
+        sys.stderr.write(f"error: {exc}; validate this .ann under the same name first\n")
+        return 1
+    if not groups:
+        others = sorted({f.file_set for f in parse_report(text) if f.file_set})
+        if others:
+            sys.stderr.write(f"note: no findings for {name} in this report (files: {', '.join(others)})\n")
 
     if args.apply is None:
         rows = [{"code": c, "level": fs[0].level, "count": len(fs), "default": _default_label(c),

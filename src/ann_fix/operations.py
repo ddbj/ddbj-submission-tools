@@ -163,6 +163,14 @@ _OPS = {"misc": op_misc, "artificial-location": op_artificial_location, "drop": 
         "overlap-drop": op_overlap_drop, "overlap-misc": op_overlap_misc}
 
 
+def _entry_at(ann: AnnFile, idx: int) -> str:
+    """Entry name of row idx: the last non-empty first column at or above it."""
+    for i in range(idx, -1, -1):
+        if ann.rows[i].cols[0]:
+            return ann.rows[i].cols[0]
+    return ""
+
+
 def _resolve(ann: AnnFile, f: Finding) -> AnnRow | None:
     """The first row of the feature a finding points at, or None when the report does not fit this file."""
     if f.line is None or not 1 <= f.line <= len(ann.rows):
@@ -170,7 +178,11 @@ def _resolve(ann: AnnFile, f: Finding) -> AnnRow | None:
     row = ann.rows[f.line - 1]
     if row.cols[1] != f.feature:
         return None
-    if "Found:" in f.message and row.cols[2] and row.cols[2] not in f.message:
+    if f.entry not in ("", "ALL") and _entry_at(ann, f.line - 1) != f.entry:
+        return None
+    if f.location is not None and row.cols[2] != f.location:
+        return None
+    if f.location is None and "Found:" in f.message and row.cols[2] and row.cols[2] not in f.message:
         return None
     return row
 
