@@ -55,7 +55,7 @@ def collapse_repeats(ann: AnnFile) -> tuple[list[str], list[str]]:
     review = [f"entry {name} appears again at line {line[id(r)]} after other entries: move its rows "
               f"to the first {name} by hand" for name, r in separated]
     review += [f"REFERENCE at lines {line[id(a)]} and {line[id(b)]}: {why}; decide with "
-               f"--at {line[id(b)]}=merge-previous, --at {line[id(b)]}=drop, or keep both" for a, b, why in pending]
+               f"--line {line[id(b)]}=merge-previous, --line {line[id(b)]}=drop, or keep both" for a, b, why in pending]
     return log, review
 
 

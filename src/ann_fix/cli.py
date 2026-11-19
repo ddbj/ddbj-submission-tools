@@ -62,7 +62,7 @@ def _parse_apply(spec: str, present: list[str]) -> dict[str, tuple[str, dict]]:
     return choice
 
 
-AT_OPS = {"merge-previous", "drop"}
+LINE_OPS = {"merge-previous", "drop"}
 
 
 def _run_short(ann: AnnFile, args) -> int:
@@ -94,22 +94,22 @@ def _run_short(ann: AnnFile, args) -> int:
     return 0
 
 
-def _run_at(ann: AnnFile, args) -> int:
+def _run_line(ann: AnnFile, args) -> int:
     if args.apply or args.detect or args.report:
-        sys.stderr.write("error: --at runs alone (line numbers refer to --ann as given)\n")
+        sys.stderr.write("error: --line runs alone (line numbers refer to --ann as given)\n")
         return 2
     if not args.out:
-        sys.stderr.write("error: --out is required with --at\n")
+        sys.stderr.write("error: --out is required with --line\n")
         return 2
     todo = []
-    for item in args.at:
+    for item in args.line:
         line, eq, op = item.partition("=")
-        if not eq or not line.strip().isdigit() or op not in AT_OPS:
-            sys.stderr.write(f"error: --at {item!r}: expected LINE=OP with OP in {sorted(AT_OPS)}\n")
+        if not eq or not line.strip().isdigit() or op not in LINE_OPS:
+            sys.stderr.write(f"error: --line {item!r}: expected LINE=OP with OP in {sorted(LINE_OPS)}\n")
             return 2
         n = int(line)
         if not 1 <= n <= len(ann.rows):
-            sys.stderr.write(f"error: --at {item!r}: line out of range; nothing written\n")
+            sys.stderr.write(f"error: --line {item!r}: line out of range; nothing written\n")
             return 1
         todo.append((ann.rows[n - 1], n, op))
     log = []
@@ -142,26 +142,26 @@ def main(argv: list[str] | None = None) -> int:
     ap.add_argument("--json", action="store_true")
     ap.add_argument("--apply", metavar="SPEC",
                     help="'defaults' or CODE=OP[:ARG],... (OP: misc | artificial-location | drop | overlap-drop | overlap-misc | collapse-repeats)")
-    ap.add_argument("--at", metavar="LINE=OP", action="append",
+    ap.add_argument("--line", metavar="LINE=OP", action="append",
                     help="apply OP to the feature starting at LINE, without a report (OP: merge-previous | drop); "
                          "for decisions ann_fix leaves to a person, e.g. the review lines of collapse-repeats")
-    ap.add_argument("--out", help="output .ann (required with --apply / --at / --drop-short; may equal --ann)")
+    ap.add_argument("--out", help="output .ann (required with --apply / --line / --drop-short; may equal --ann)")
     ap.add_argument("--fasta", help="FASTA of --ann (for --short-seqs / --drop-short)")
     ap.add_argument("--short-seqs", action="store_true",
                     help="report sequences shorter than --min-length (e.g. ANN5045) and the annotation removing them loses")
     ap.add_argument("--drop-short", action="store_true",
                     help="remove those sequences from --ann and --fasta (the submitter's decision); needs --out and --fasta-out")
-    ap.add_argument("--min-length", type=int, default=GENOME_MIN_LENGTH, help=f"default {GENOME_MIN_LENGTH} (genome sequences, ANN5045); other submissions often use 200")
+    ap.add_argument("--min-length", type=int, default=GENOME_MIN_LENGTH, help=f"default {GENOME_MIN_LENGTH} (genome sequences, ANN5045); 200 for other submissions")
     ap.add_argument("--fasta-out", help="output FASTA for --drop-short")
     args = ap.parse_args(argv)
 
     ann = AnnFile.read(args.ann)
-    if args.at:
-        return _run_at(ann, args)
+    if args.line:
+        return _run_line(ann, args)
     if args.short_seqs or args.drop_short:
         return _run_short(ann, args)
     if not args.report:
-        sys.stderr.write("error: --report is required (except with --at)\n")
+        sys.stderr.write("error: --report is required (except with --line)\n")
         return 2
     name = os.path.basename(args.ann)
     name = name[:-4] if name.endswith(".ann") else name   # the validator names a file set after the .ann

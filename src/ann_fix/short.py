@@ -1,7 +1,7 @@
 """Sequences shorter than a minimum length: what removing them would lose, and removing them.
 
 The length depends on the submission type: 1,000 bp for genome sequences (ddbj-validator ANN5045,
-checked for WGS of eukaryotes and prokaryotes), often 200 bp for other submissions.
+checked for WGS of eukaryotes and prokaryotes), 200 bp for other submissions. Shorter ones are accepted when there is a reason.
 
 Whether to remove them is the submitter's decision; the report gives what they need to decide.
 """
