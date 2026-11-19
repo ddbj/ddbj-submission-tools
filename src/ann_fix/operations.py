@@ -9,6 +9,7 @@ from __future__ import annotations
 import re
 
 from .annfile import AnnFeature, AnnFile, AnnRow
+from .layout import collapse_repeats
 from .report import Finding
 
 ARTIFICIAL_LOCATION_DEFAULT = "low-quality sequence region"
@@ -19,12 +20,15 @@ DEFAULTS: dict[str, tuple[str, dict]] = {
     "ANN4300": ("misc", {}),
     "AXS6810": ("artificial-location", {"value": ARTIFICIAL_LOCATION_DEFAULT}),
     "ANN6840": ("artificial-location", {"value": ARTIFICIAL_LOCATION_DEFAULT}),   # intron < 10 bp
+    "ANN0120": ("collapse-repeats", {}),   # entry name repeated (e.g. COMMON on every row)
+    "ANN0645": ("collapse-repeats", {}),   # single-use feature repeated (e.g. KEYWORD per keyword)
 }
 IGNORABLE: dict[str, str] = {
     "ANN2520": "同一遺伝子のアイソフォームが locus_tag を共有（想定どおり）",
     "ANN2542": "/gene 無しの locus_tag 共有（gff2mss の仕様。放置してよい）",
 }
-OPERATIONS = {"misc", "artificial-location", "drop", "overlap-drop", "overlap-misc"}
+OPERATIONS = {"misc", "artificial-location", "drop", "overlap-drop", "overlap-misc", "collapse-repeats"}
+FILE_OPS = {"collapse-repeats"}         # run once on the whole file, not per finding
 KEEP_VALUES = {"cds", "other"}
 
 _DROP_ON_MISC = {"transl_table", "codon_start", "product", "gene", "inference", "transl_except",
@@ -196,7 +200,7 @@ def apply(ann: AnnFile, findings: list[Finding], choice: dict[str, tuple[str, di
     todo = []
     unresolved = 0
     for f in findings:
-        if f.code not in choice:
+        if f.code not in choice or choice[f.code][0] in FILE_OPS:
             continue
         if f.line is None:
             continue                      # file-level findings carry no feature
@@ -205,7 +209,8 @@ def apply(ann: AnnFile, findings: list[Finding], choice: dict[str, tuple[str, di
             unresolved += 1
             continue
         todo.append((f, row))
-    skipped_file_level = {f.code for f in findings if f.code in choice and f.line is None}
+    skipped_file_level = {f.code for f in findings
+                          if f.code in choice and f.line is None and choice[f.code][0] not in FILE_OPS}
     for code in sorted(skipped_file_level):
         log.append(f"skip: {code} is file-level (no feature)")
     if unresolved:
@@ -230,4 +235,9 @@ def apply(ann: AnnFile, findings: list[Finding], choice: dict[str, tuple[str, di
             log.append(f"skip: line {f.line} {feat.key}: {exc} ({f.code})")
             continue
         log.append(f"{f.code} line {f.line}: {msg}")
+    file_codes = sorted({f.code for f in findings if f.code in choice and choice[f.code][0] in FILE_OPS})
+    if file_codes:
+        done, review = collapse_repeats(ann)
+        log += [f"{'/'.join(file_codes)}: {m}" for m in done] or [f"{'/'.join(file_codes)}: nothing to collapse"]
+        log += [f"review: {m}" for m in review]
     return log

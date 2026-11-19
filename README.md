@@ -678,13 +678,28 @@ ann_fix --ann sub/NAME.ann --report ... --apply 'ANN4300=misc,ANN5320=overlap-dr
 | `artificial-location[:VALUE]` | CDS とその mRNA に `/artificial_location` を付ける（既定 `low-quality sequence region`） |
 | `drop` | feature（と対になる mRNA/CDS）を削除 |
 | `overlap-drop[:cds\|other]` / `overlap-misc[:cds\|other]` | 重なり系の指摘で片側を削除 / misc 化。`cds` は指摘された側（tRNA など）を落とし CDS を残す（既定）、`other` はメッセージ中の CDS 側を落とす |
+| `collapse-repeats` | 行ごとにエントリ名や feature 名を書き直した形（表計算ソフトの出力など）を戻す。ファイル全体に 1 回だけ行う。見出しの行（`Entry Feature Location ...`）を消し、続く行の同じエントリ名を空け、1 回しか書けない feature（SUBMITTER、KEYWORD、DBLINK、DATE など）の続きの行の feature 名を空ける。続けて並んだ REFERENCE は、1 件が割れたもの（片方だけでは title・status・著者が揃わず、1 回しか書けない qualifier が重ならない）をまとめ、まったく同じものを 1 つにする。決められない組と、ほかのエントリをはさんで同じエントリ名がもう一度出るものは `review:` として表示し、変えない |
 
-既定の対応: `ANN5320` → `overlap-drop:cds`、`ANN4300` → `misc`、`AXS6810` / `ANN6840` → `artificial-location`（CDS/mRNA のみ。intron など他の feature は skip）。
+既定の対応: `ANN5320` → `overlap-drop:cds`、`ANN4300` → `misc`、`AXS6810` / `ANN6840` → `artificial-location`（CDS/mRNA のみ。intron など他の feature は skip）、`ANN0120` / `ANN0645` → `collapse-repeats`。
 注意: validator の AXS6810（非標準スプライス部位）は qualifier によらず必ず報告されます（抑止条件が無い）。`artificial-location` は
 登録者の判断を `.ann` に記録するためのもので、再検証しても AXS6810 の件数は減りません。
 `ANN2520`（アイソフォームの locus_tag 共有）と `ANN2542`（`/gene` 無しの locus_tag 共有）は無視可として表示するだけです。
 レポートはそれを出した `.ann` にしか適用できません。修正後のファイルに同じレポートを再適用すると「report does not match」で何も書かずに終了します（exit 1）。再検証してから新しいレポートで apply してください。同一実行内で先の操作が消した feature を指す指摘は skip として表示されます。
 `--report` には validator の `--json` で出る `validation_report.json` を勧めます（テキストの `validation_report_details.txt` も読めます）。複数のファイルをまとめて検証したレポートでも、ann_fix は `--ann` のファイル名（`.ann` を除いたもの）の指摘だけを使います。検証したときと同じファイル名で渡してください。JSON にそのファイルの指摘が 1 つもなければ、レポートにあるファイル名を注意として表示します。テキストのレポートでそのファイルの節（`1. NAME`）がなければ、何も書かずに終了します（exit 1）。指摘を feature に当てるときは、行番号・feature 名・エントリ名と location（JSON ではその値、テキストではメッセージ中の `Found:`）を照合します。
+
+`review:` に出た組など、人（またはエージェントが理由を添えて人に確かめたうえ）が決めることは、レポートなしで行を指定して実行します。行番号は `--ann` に渡したファイルの行で、`--apply` とは一緒に使えません。
+
+```bash
+ann_fix --ann NAME.ann --at 12=merge-previous --out NAME.ann   # 12 行目の feature を真上の同じ feature の続きにする
+ann_fix --ann NAME.ann --at 12=drop --out NAME.ann             # 12 行目の feature を消す
+```
+
+WGS の 1,000 塩基未満の配列（ANN5045）は、除くかどうかを登録者が決めます。判断の材料（本数、長さ、割合、除くと失われる feature、全コピーが短い配列にしかない tRNA）を出し、決まったら `.ann` と FASTA の両方から除きます。
+
+```bash
+ann_fix --ann NAME.ann --fasta NAME.fasta --short-seqs [--json] [--min-length 1000]
+ann_fix --ann NAME.ann --fasta NAME.fasta --drop-short --out NAME.ann --fasta-out NAME.fasta
+```
 
 ## ann_meta の使い方
 
@@ -1473,13 +1488,16 @@ Resolves ddbj-validator findings (`validation_report.json` or `validation_report
 `--detect` lists findings per code with the default operation, `--apply` applies the chosen operations
 (`defaults`, or `CODE=OP[:ARG],...` with OP in `misc`, `artificial-location`, `drop`, `overlap-drop`, `overlap-misc`)
 and writes `--out`. Untouched rows are preserved byte-for-byte. A report applies only to the `.ann` it was produced from: re-applying it to the fixed file exits 1 without writing (re-validate first). Pass `validation_report.json` from `ddbj-validator --json` (the text `validation_report_details.txt` also works). With a report for several files, ann_fix uses only the findings of the `--ann` file (base name without `.ann`); a text report without that file's section (`1. NAME`) exits 1 without writing. Findings are matched to features by line, feature key, entry name and location.
-Defaults: `ANN5320` → `overlap-drop:cds`, `ANN4300` → `misc`, `AXS6810` → `artificial-location` (`low-quality sequence region`);
+Defaults: `ANN5320` → `overlap-drop:cds`, `ANN4300` → `misc`, `AXS6810` → `artificial-location` (`low-quality sequence region`), `ANN0120` / `ANN0645` → `collapse-repeats` (undo entry and single-use feature names repeated on every row; join a REFERENCE split over rows, drop an identical one, and list undecidable pairs as `review:`);
 `ANN2520` / `ANN2542` are shown as ignorable. ann_fix never runs the validator: re-validate afterwards.
 
 ```bash
 ddbj-validator ddbj sub -o sub_out -f -j 1 --json
 ann_fix --ann sub/NAME.ann --report sub_out/reports/validation_report.json --detect --json
 ann_fix --ann sub/NAME.ann --report sub_out/reports/validation_report.json --apply defaults --out sub/NAME.ann
+ann_fix --ann sub/NAME.ann --at 12=merge-previous --out sub/NAME.ann        # decisions left as review: (also =drop)
+ann_fix --ann sub/NAME.ann --fasta sub/NAME.fasta --short-seqs              # ANN5045: what removing short sequences loses
+ann_fix --ann sub/NAME.ann --fasta sub/NAME.fasta --drop-short --out sub/NAME.ann --fasta-out sub/NAME.fasta
 ```
 
 ## ann_meta Usage

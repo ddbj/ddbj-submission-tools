@@ -150,3 +150,60 @@ def test_json_report_without_this_file_warns(tmp_path, capsys):
                                              "entry": "ALL", "line_number": None}]}))
     assert main(["--ann", str(ann), "--report", str(rep), "--detect"]) == 0
     assert "no findings for x in this report (files: other)" in capsys.readouterr().err
+
+
+def _rows(*rows):
+    return "".join("\t".join(r) + "\n" for r in rows)
+
+
+def _json(path, *msgs):
+    path.write_text(json.dumps({"messages": [dict({"level": "error", "message": "m", "file": "x.ann",
+                                                   "entry": "COMMON", "line_number": None}, **m) for m in msgs]}))
+
+
+def test_keyword_twice_fixed_by_default(tmp_path, capsys):
+    ann = tmp_path / "x.ann"
+    ann.write_text(_rows(("COMMON", "KEYWORD", "", "keyword", "WGS"), ("", "KEYWORD", "", "keyword", "STANDARD_DRAFT"),
+                         ("", "DATE", "", "hold_date", "20270101")))
+    rep = tmp_path / "r.json"
+    _json(rep, {"id": "ANN0645", "message": "More than one KEYWORD is not allowed.", "feature_type": "KEYWORD"})
+    out = tmp_path / "o.ann"
+    assert main(["--ann", str(ann), "--report", str(rep), "--apply", "defaults", "--out", str(out)]) == 0
+    assert out.read_text() == _rows(("COMMON", "KEYWORD", "", "keyword", "WGS"), ("", "", "", "keyword", "STANDARD_DRAFT"),
+                                    ("", "DATE", "", "hold_date", "20270101"))
+    assert "joined 1 repeated single-use feature" in capsys.readouterr().out
+
+
+def test_table_layout_fixed_and_undecidable_reference_reported(tmp_path, capsys):
+    ann = tmp_path / "x.ann"
+    ann.write_text(_rows(("Entry", "Feature", "Location", "Qualifier", "Value"),
+                         ("COMMON", "REFERENCE", "", "title", "A genome"), ("COMMON", "REFERENCE", "", "status", "Unpublished"),
+                         ("COMMON", "REFERENCE", "", "ab_name", "Mishima,T."), ("COMMON", "REFERENCE", "", "title", "A Genome."),
+                         ("COMMON", "DATE", "", "hold_date", "20270101")))
+    rep = tmp_path / "r.json"
+    _json(rep, {"id": "ANN0120", "message": "Duplicate entry name in annotation. ('COMMON')", "entry": "ALL"})
+    out = tmp_path / "o.ann"
+    assert main(["--ann", str(ann), "--report", str(rep), "--apply", "defaults", "--out", str(out)]) == 0
+    printed = capsys.readouterr().out
+    assert "removed the header row" in printed
+    assert "review: REFERENCE at lines 1 and 4" in printed and "--at 4=merge-previous" in printed
+    fixed = AnnFile.read(out)
+    assert [f.key for f in fixed.features()] == ["REFERENCE", "REFERENCE", "DATE"]
+    # the person (or the agent, showing its reason) then decides
+    out2 = tmp_path / "o2.ann"
+    assert main(["--ann", str(out), "--at", "4=drop", "--out", str(out2)]) == 0
+    assert [f.key for f in AnnFile.read(out2).features()] == ["REFERENCE", "DATE"]
+
+
+def test_at_merge_previous_and_errors(tmp_path, capsys):
+    ann = tmp_path / "x.ann"
+    ann.write_text(_rows(("COMMON", "REFERENCE", "", "title", "A genome"), ("", "", "", "status", "Unpublished"),
+                         ("", "REFERENCE", "", "ab_name", "Mishima,T.")))
+    out = tmp_path / "o.ann"
+    assert main(["--ann", str(ann), "--at", "3=merge-previous", "--out", str(out)]) == 0
+    assert [f.key for f in AnnFile.read(out).features()] == ["REFERENCE"]
+    assert main(["--ann", str(ann), "--at", "2=merge-previous", "--out", str(out)]) == 1      # not a feature start
+    assert main(["--ann", str(ann), "--at", "3=bogus", "--out", str(out)]) == 2
+    rep = tmp_path / "r.json"
+    _json(rep)
+    assert main(["--ann", str(ann), "--report", str(rep), "--apply", "defaults", "--at", "3=drop", "--out", str(out)]) == 2
