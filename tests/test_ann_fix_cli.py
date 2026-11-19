@@ -186,24 +186,24 @@ def test_table_layout_fixed_and_undecidable_reference_reported(tmp_path, capsys)
     assert main(["--ann", str(ann), "--report", str(rep), "--apply", "defaults", "--out", str(out)]) == 0
     printed = capsys.readouterr().out
     assert "removed the header row" in printed
-    assert "review: REFERENCE at lines 1 and 4" in printed and "--at 4=merge-previous" in printed
+    assert "review: REFERENCE at lines 1 and 4" in printed and "--line 4=merge-previous" in printed
     fixed = AnnFile.read(out)
     assert [f.key for f in fixed.features()] == ["REFERENCE", "REFERENCE", "DATE"]
     # the person (or the agent, showing its reason) then decides
     out2 = tmp_path / "o2.ann"
-    assert main(["--ann", str(out), "--at", "4=drop", "--out", str(out2)]) == 0
+    assert main(["--ann", str(out), "--line", "4=drop", "--out", str(out2)]) == 0
     assert [f.key for f in AnnFile.read(out2).features()] == ["REFERENCE", "DATE"]
 
 
-def test_at_merge_previous_and_errors(tmp_path, capsys):
+def test_line_merge_previous_and_errors(tmp_path, capsys):
     ann = tmp_path / "x.ann"
     ann.write_text(_rows(("COMMON", "REFERENCE", "", "title", "A genome"), ("", "", "", "status", "Unpublished"),
                          ("", "REFERENCE", "", "ab_name", "Mishima,T.")))
     out = tmp_path / "o.ann"
-    assert main(["--ann", str(ann), "--at", "3=merge-previous", "--out", str(out)]) == 0
+    assert main(["--ann", str(ann), "--line", "3=merge-previous", "--out", str(out)]) == 0
     assert [f.key for f in AnnFile.read(out).features()] == ["REFERENCE"]
-    assert main(["--ann", str(ann), "--at", "2=merge-previous", "--out", str(out)]) == 1      # not a feature start
-    assert main(["--ann", str(ann), "--at", "3=bogus", "--out", str(out)]) == 2
+    assert main(["--ann", str(ann), "--line", "2=merge-previous", "--out", str(out)]) == 1      # not a feature start
+    assert main(["--ann", str(ann), "--line", "3=bogus", "--out", str(out)]) == 2
     rep = tmp_path / "r.json"
     _json(rep)
-    assert main(["--ann", str(ann), "--report", str(rep), "--apply", "defaults", "--at", "3=drop", "--out", str(out)]) == 2
+    assert main(["--ann", str(ann), "--report", str(rep), "--apply", "defaults", "--line", "3=drop", "--out", str(out)]) == 2

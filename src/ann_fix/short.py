@@ -1,4 +1,7 @@
-"""Sequences shorter than the WGS minimum (ANN5045): what removing them would lose, and removing them.
+"""Sequences shorter than a minimum length: what removing them would lose, and removing them.
+
+The length depends on the submission type: 1,000 bp for genome sequences (ddbj-validator ANN5045,
+checked for WGS of eukaryotes and prokaryotes), 200 bp for other submissions. Shorter ones are accepted when there is a reason.
 
 Whether to remove them is the submitter's decision; the report gives what they need to decide.
 """
@@ -9,7 +12,7 @@ from pathlib import Path
 
 from .annfile import AnnFile
 
-WGS_MIN_LENGTH = 1000
+GENOME_MIN_LENGTH = 1000
 
 
 def _records(fasta: str | Path) -> list[tuple[str, list[str], int]]:
@@ -28,7 +31,7 @@ def _records(fasta: str | Path) -> list[tuple[str, list[str], int]]:
     return recs
 
 
-def short_report(ann: AnnFile, fasta: str | Path, min_length: int = WGS_MIN_LENGTH) -> dict:
+def short_report(ann: AnnFile, fasta: str | Path, min_length: int = GENOME_MIN_LENGTH) -> dict:
     recs = _records(fasta)
     short = [(name, n) for name, _, n in recs if n < min_length]
     names = {name for name, _ in short}
@@ -50,7 +53,7 @@ def short_report(ann: AnnFile, fasta: str | Path, min_length: int = WGS_MIN_LENG
     }
 
 
-def drop_short(ann: AnnFile, fasta: str | Path, min_length: int = WGS_MIN_LENGTH) -> str:
+def drop_short(ann: AnnFile, fasta: str | Path, min_length: int = GENOME_MIN_LENGTH) -> str:
     """Remove short sequences: their entries from `ann` (in place) and their records from the FASTA,
     which is returned as text."""
     recs = _records(fasta)
