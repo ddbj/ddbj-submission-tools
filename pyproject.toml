@@ -35,6 +35,8 @@ gff_normalize     = "ddbj_gff.normalize.cli:main"
 gff_repair        = "ddbj_gff.repair.cli:main"
 gff_validate      = "ddbj_gff.validate.cli:main"
 flatfile2gff      = "ddbj_gff.flatfile.cli:main"
+# DDBJ account login (device flow)
+ddbj-auth         = "ddbj_auth.cli:main"
 
 [tool.hatch.build.targets.wheel]
 packages = [
@@ -48,6 +50,7 @@ packages = [
     "src/tsa2mss",
     "src/ann_meta",
     "src/ddbj_gff",
+    "src/ddbj_auth",
 ]
 
 [tool.hatch.build.targets.sdist]

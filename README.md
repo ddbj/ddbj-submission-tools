@@ -15,6 +15,7 @@ DDBJ MSS (Mass Submission System) 登録ファイルを生成・修正するPyth
 | **gff2mss** | 正準 INSDC GFF3 + FASTA から MSS 形式ファイルを生成 |
 | **ann_fix** | ddbj-validator の指摘を .ann 上で解消 |
 | **gff_from_tool** / **gff_normalize** / **gff_repair** / **gff_validate** / **flatfile2gff** | GFF3 の変換・正準化・修復・検証（[GFF3 ツール](#gff3-ツール)） |
+| **ddbj-auth** | DDBJ アカウントにコマンドラインからログインし、API 用のトークンを出す（[ddbj-auth の使い方](#ddbj-auth-の使い方)） |
 
 \* **mss_builder** と **batch_wgs_builder** には生物学的注釈 (CDSなどの遺伝子アノテーション情報) を行う機能はありません。塩基配列のみを登録するためのファイルを生成します。
 
@@ -750,6 +751,25 @@ ann_meta apply --ann NAME.ann --common common.json --entries entries.tsv --out N
 `{"issues": [{"field": ..., "entry": ..., "message": ...}]}`、出力は書かない。`forbidden_char`、`unknown_qualifier`、`reserved_qualifier`、
 `bad_source_identifier`、`bad_shape: ...`、`bad_entries_tsv: ...`、`entry_missing_from_table: ...` など）。
 
+## ddbj-auth の使い方
+
+DDBJ アカウント（Keycloak）にコマンドラインからログインし、DDBJ の API（kura など）用のアクセストークンを出します。ログインはデバイスフローで、表示された URL をどの端末のブラウザで開いても承認できます。手元の端末でも、ブラウザのないリモートサーバーでも同じ手順です。
+
+```bash
+ddbj-auth login --for kura [--env staging|production] [--offline]   # URL とコードが出るので、ブラウザで承認する
+ddbj-auth token --for kura                                          # アクセストークンを標準出力に出す
+ddbj-auth status                                                    # ログインの状態（トークンは表示しない）
+ddbj-auth logout [--for kura]                                       # IdP 側でも失効させ、手元から消す
+```
+
+- 今は API ごとにログインします（組み込みは `kura`）。表にない API は `--client-id` と `--audience` で指定できます。`--env` の既定は `production` です。
+- `--offline` を付けると、IdP のセッションが切れても使える更新用トークン（offline token）を求めます（クライアントが許可している場合）。
+- 更新用トークンは `${XDG_CONFIG_HOME:-~/.config}/ddbj/<env>/<api>.json`（権限 600）に置きます。アクセストークンは保存せず、`token` のたびに取り直します。
+- 環境変数 `DDBJ_TOKEN` があれば `token` はそれを返します。ただし `iss` と `aud` が `--env` と `--for` に合わなければエラーにします。
+- トークンはコマンドの中で使い、表示しないでください：`curl -H "Authorization: Bearer $(ddbj-auth token --for kura)" ...`
+- 注意：共用のアカウントでは使わない。使い終わったら `ddbj-auth logout` する。自分で始めたログインのコードだけを承認する（他人が作ったコードを承認させる攻撃があり得るため）。
+- 終了コード：`0` 成功、`1` ログインが要る・IdP のエラー・検査の不一致、`2` 使い方の誤り。
+
 ## mss2ff の使い方
 
 MSS アノテーションファイル（`.ann` または `.annt.tsv`）と FASTA ファイルから DDBJ Flat File を生成します。
@@ -815,6 +835,7 @@ A set of Python tools for generating DDBJ MSS (Mass Submission System) submissio
 | **gff2mss** | Generates MSS files from canonical INSDC GFF3 + FASTA |
 | **ann_fix** | Resolves ddbj-validator findings in the .ann |
 | **gff_from_tool** / **gff_normalize** / **gff_repair** / **gff_validate** / **flatfile2gff** | GFF3 conversion, canonicalization, repair and validation ([GFF3 tools](#gff3-tools)) |
+| **ddbj-auth** | Logs in to your DDBJ account from the command line and prints tokens for DDBJ APIs ([ddbj-auth Usage](#ddbj-auth-usage)) |
 
 ---
 
@@ -1437,6 +1458,25 @@ For `MAG` / `MAG-WGS`, `isolate` is used by default; an explicit `SOURCE_IDENTIF
 `DBLINK` must also include a `sequence read archive` entry.
 
 ---
+
+## ddbj-auth Usage
+
+Logs in to your DDBJ account (Keycloak) from the command line and prints access tokens for DDBJ APIs (kura, ...). Login uses the device flow: approve the shown URL in a browser on any device. It works the same on a local terminal and on a remote server without a browser.
+
+```bash
+ddbj-auth login --for kura [--env staging|production] [--offline]   # approve the URL and code in a browser
+ddbj-auth token --for kura                                          # prints an access token on stdout
+ddbj-auth status                                                    # login state (never the tokens)
+ddbj-auth logout [--for kura]                                       # revokes at the IdP and removes it locally
+```
+
+- One login per API for now (built in: `kura`); other APIs with `--client-id` and `--audience`. `--env` defaults to `production`.
+- `--offline` asks for an offline token that survives the IdP session (if the client allows it).
+- The refresh token is kept in `${XDG_CONFIG_HOME:-~/.config}/ddbj/<env>/<api>.json` (mode 600). Access tokens are not stored; `token` gets a fresh one each time.
+- If `DDBJ_TOKEN` is set, `token` prints it, after checking that its `iss` and `aud` match `--env` and `--for`.
+- Use the token inside a command, never print it: `curl -H "Authorization: Bearer $(ddbj-auth token --for kura)" ...`
+- Do not use it on a shared account; run `ddbj-auth logout` when done; approve only codes you started yourself.
+- Exit codes: `0` success; `1` login needed, IdP error or check failed; `2` usage error.
 
 ## mss2ff Usage
 
