@@ -2,29 +2,41 @@
 
   ddbj-auth login  --for kura [--env staging|production] [--offline]
   ddbj-auth token  --for kura          # prints an access token for kura (stdout only)
+  ddbj-auth aws-credentials --for kura # temporary S3 credentials, for credential_process
   ddbj-auth status [--env ...]
   ddbj-auth logout [--for kura] [--env ...]
 
 Use the token inside a command, never print it into a conversation or a log:
   curl -H "Authorization: Bearer $(ddbj-auth token --for kura)" ...
+
+For aws cli, boto3 or rclone, put this in ~/.aws/config (bucket = the sub that status shows):
+  [profile kura]
+  region = us-east-1
+  endpoint_url = https://kura-s3.ddbj.nig.ac.jp
+  credential_process = ddbj-auth aws-credentials --for kura
 """
 from __future__ import annotations
 
 import argparse
 import datetime
+import json
 import os
 import re
 import sys
 import webbrowser
 
-from . import oauth, store
+from . import oauth, store, sts
 from .oauth import AuthError, has_audience
 
 ISSUERS = {
     "staging": "https://idp-staging.ddbj.nig.ac.jp/realms/master",
     "production": "https://idp.ddbj.nig.ac.jp/realms/master",
 }
-APIS = {"kura": {"client_id": "kura", "audience": "kura"}}
+APIS = {"kura": {"client_id": "kura", "audience": "kura",
+                 # S3 API and STS share one endpoint (kura docs/sp-integration.md)
+                 "sts": {"staging": "https://kura-s3-staging.ddbj.nig.ac.jp",
+                         "production": "https://kura-s3.ddbj.nig.ac.jp"},
+                 "role_arn": "arn:aws:iam::role/KuraUserRole"}}
 
 
 class UsageError(Exception):
@@ -71,7 +83,7 @@ def _login(args) -> int:
         raise AuthError(f"the access token's aud does not include {api['audience']!r}; check the client's audience mapper")
     store.save(args.env, args.api, {
         "refresh_token": tokens["refresh_token"], "client_id": api["client_id"], "issuer": issuer,
-        "audience": api["audience"], "username": access.get("preferred_username"),
+        "audience": api["audience"], "username": access.get("preferred_username"), "sub": access.get("sub"),
         "refresh_expires_at": store.claims(tokens["refresh_token"]).get("exp"),
     })
     print(f"logged in to {args.api} ({args.env}) as {access.get('preferred_username')}", file=sys.stderr)
@@ -86,13 +98,12 @@ def _check_env_token(token: str, issuer: str, audience: str) -> None:
         raise AuthError(f"DDBJ_TOKEN: aud does not include {audience!r}")
 
 
-def _token(args) -> int:
+def _access_token(args) -> str:
     issuer = ISSUERS[args.env]
     env_token = os.environ.get("DDBJ_TOKEN")
     if env_token:
         _check_env_token(env_token, issuer, _api(args)["audience"])
-        print(env_token)
-        return 0
+        return env_token
     if not _API_NAME.fullmatch(args.api or ""):
         raise UsageError(f"bad API name {args.api!r}")
     # Hold the lock across load, refresh and save: with refresh-token rotation, a second caller
@@ -112,7 +123,22 @@ def _token(args) -> int:
             })
     if not has_audience(store.claims(tokens.get("access_token", "")), rec["audience"]):
         raise AuthError(f"the access token's aud does not include {rec['audience']!r}")
-    print(tokens["access_token"])
+    return tokens["access_token"]
+
+
+def _token(args) -> int:
+    print(_access_token(args))
+    return 0
+
+
+def _aws_credentials(args) -> int:
+    known = APIS.get(args.api, {})
+    if "sts" not in known:
+        s3_apis = ", ".join(sorted(k for k, v in APIS.items() if "sts" in v))
+        raise UsageError(f"{args.api!r} has no S3 API: choose from {s3_apis}")
+    creds = sts.assume_role(known["sts"][args.env], known["role_arn"], _access_token(args))
+    # The format of credential_process; aws cli and boto3 call again before Expiration
+    print(json.dumps({"Version": 1} | creds))
     return 0
 
 
@@ -128,7 +154,7 @@ def _status(args) -> int:
         print(f"not logged in ({args.env})")
     for api in apis:
         rec = store.load(args.env, api) or {}
-        print(f"{api}\t{rec.get('username')}\trefresh until {_when(rec.get('refresh_expires_at'))}")
+        print(f"{api}\t{rec.get('username')}\tsub {rec.get('sub') or '-'}\trefresh until {_when(rec.get('refresh_expires_at'))}")
     return 0
 
 
@@ -164,11 +190,13 @@ def main(argv: list[str] | None = None) -> int:
     p = sub.add_parser("token", help="print an access token for the API")
     common(p, True)
     p.add_argument("--audience")
+    common(sub.add_parser("aws-credentials", help="print temporary S3 credentials (credential_process format)"), True)
     common(sub.add_parser("status", help="show logins (never the tokens)"), False)
     common(sub.add_parser("logout", help="revoke and remove the stored login"), False)
     args = ap.parse_args(argv)
     try:
-        return {"login": _login, "token": _token, "status": _status, "logout": _logout}[args.cmd](args)
+        return {"login": _login, "token": _token, "aws-credentials": _aws_credentials,
+                "status": _status, "logout": _logout}[args.cmd](args)
     except UsageError as exc:
         print(f"error: {exc}", file=sys.stderr)
         return 2
