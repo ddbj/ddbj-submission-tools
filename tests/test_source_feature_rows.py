@@ -5,9 +5,9 @@ values into rows. Regression for: a boolean flag qualifier (e.g.
 TypeError: sequence item ...: expected str instance, bool found.
 """
 
-from common.models import CommonModel
-from common.source_builder import source_feature_rows, SequenceRoleEntry
-from mss_builder.ann_writer import write_mss_ann
+from ddbj_submission_tools.nuc.common.models import CommonModel
+from ddbj_submission_tools.nuc.common.source_builder import source_feature_rows, SequenceRoleEntry
+from ddbj_submission_tools.nuc.mss_builder.ann_writer import write_mss_ann
 
 
 # ── unit: source_feature_rows helper ───────────────────────────────────────

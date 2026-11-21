@@ -1,7 +1,7 @@
 from Bio import SeqIO
 from Bio.SeqFeature import SeqFeature, FeatureLocation
 from collections import Counter
-from ddbj_gff.flatfile.convert import synthesize_features
+from ddbj_submission_tools.nuc.ddbj_gff.flatfile.convert import synthesize_features
 
 FIX = "tests/flatfile_fixtures/citrus_unshiu_excerpt.gbk"
 

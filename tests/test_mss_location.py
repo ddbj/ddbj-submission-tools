@@ -1,7 +1,7 @@
 from Bio.Seq import Seq
-from ddbj_gff.model import Feature, Span
-from gff2mss.config import MssConfig
-from gff2mss.convert import collect_spans, build_insdc_location, extract_seq, build_cds_feature
+from ddbj_submission_tools.nuc.ddbj_gff.model import Feature, Span
+from ddbj_submission_tools.nuc.gff2mss.config import MssConfig
+from ddbj_submission_tools.nuc.gff2mss.convert import collect_spans, build_insdc_location, extract_seq, build_cds_feature
 
 
 def test_collect_spans_unions_children_of_type():

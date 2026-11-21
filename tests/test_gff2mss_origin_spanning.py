@@ -1,10 +1,10 @@
 import os
 from Bio import SeqIO
-from ddbj_gff import parse
-from ddbj_gff.normalize.normalize import normalize
-from ddbj_gff.validate import validate
-from gff2mss.convert import build_entry_features
-from gff2mss.config import load_config
+from ddbj_submission_tools.nuc.ddbj_gff import parse
+from ddbj_submission_tools.nuc.ddbj_gff.normalize.normalize import normalize
+from ddbj_submission_tools.nuc.ddbj_gff.validate import validate
+from ddbj_submission_tools.nuc.gff2mss.convert import build_entry_features
+from ddbj_submission_tools.nuc.gff2mss.config import load_config
 
 FIX = os.path.join(os.path.dirname(__file__), "mss_fixtures")
 

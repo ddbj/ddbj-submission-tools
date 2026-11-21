@@ -1,6 +1,6 @@
-from ddbj_gff import parse
-from ddbj_gff.normalize.config import NormalizeConfig
-from ddbj_gff.normalize.normalize import normalize
+from ddbj_submission_tools.nuc.ddbj_gff import parse
+from ddbj_submission_tools.nuc.ddbj_gff.normalize.config import NormalizeConfig
+from ddbj_submission_tools.nuc.ddbj_gff.normalize.normalize import normalize
 
 HEAD = "##gff-version 3\nchr1\tL\tgene\t1\t999\t.\t{s}\t.\tID=g1\nchr1\tL\tmRNA\t1\t999\t.\t{s}\t.\tID=g1.t1;Parent=g1\n"
 

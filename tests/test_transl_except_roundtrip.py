@@ -1,11 +1,11 @@
 from tests.mss_helpers import ann_text
 import os
 from Bio import SeqIO
-from ddbj_gff import parse
-from ddbj_gff.flatfile import flatfile_to_gff
-from ddbj_gff.writer import write
-from gff2mss.convert import build_entry_features
-from gff2mss.config import MssConfig
+from ddbj_submission_tools.nuc.ddbj_gff import parse
+from ddbj_submission_tools.nuc.ddbj_gff.flatfile import flatfile_to_gff
+from ddbj_submission_tools.nuc.ddbj_gff.writer import write
+from ddbj_submission_tools.nuc.gff2mss.convert import build_entry_features
+from ddbj_submission_tools.nuc.gff2mss.config import MssConfig
 
 FIX = os.path.join(os.path.dirname(__file__), "flatfile_fixtures", "transl_except_p87.gbk")
 
@@ -29,7 +29,8 @@ def test_transl_except_qualifier_emitted_on_clean_cds():
 
 
 def test_transl_except_full_roundtrip(tmp_path):
-    import mss2ff.cli
+    import ddbj_submission_tools.nuc.mss2ff.cli
+    from ddbj_submission_tools.nuc import mss2ff
     rec = SeqIO.read(FIX, "genbank")
     doc = parse(write(flatfile_to_gff(rec)))
     cfg = MssConfig(transl_table=1, product_default="hypothetical protein")

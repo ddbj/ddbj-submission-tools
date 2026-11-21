@@ -1,5 +1,5 @@
-from ann_fix.annfile import AnnFile, _split
-from ann_fix.layout import collapse_repeats, merge_previous
+from ddbj_submission_tools.nuc.ann_fix.annfile import AnnFile, _split
+from ddbj_submission_tools.nuc.ann_fix.layout import collapse_repeats, merge_previous
 
 
 def _ann(text: str) -> AnnFile:

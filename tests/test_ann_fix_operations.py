@@ -2,10 +2,10 @@ from pathlib import Path
 
 import pytest
 
-from ann_fix.annfile import AnnFile
-from ann_fix.operations import (ARTIFICIAL_LOCATION_DEFAULT, DEFAULTS, IGNORABLE, apply, op_artificial_location,
+from ddbj_submission_tools.nuc.ann_fix.annfile import AnnFile
+from ddbj_submission_tools.nuc.ann_fix.operations import (ARTIFICIAL_LOCATION_DEFAULT, DEFAULTS, IGNORABLE, apply, op_artificial_location,
                                 op_drop, op_misc, op_overlap_drop, op_overlap_misc, paired_mrna)
-from ann_fix.report import Finding
+from ddbj_submission_tools.nuc.ann_fix.report import Finding
 
 FX = Path(__file__).parent / "ann_fix_fixtures" / "mini.ann"
 

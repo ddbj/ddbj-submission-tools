@@ -37,10 +37,10 @@ import re
 import unicodedata
 from dataclasses import dataclass
 
-from ann_meta.categories import PASS_THROUGH, ROLE_CATEGORIES
-from ann_meta.model import Entry
-from common.qualifiers import known_qualifier_names
-from common.submission_category import get_category_rules
+from ddbj_submission_tools.nuc.ann_meta.categories import PASS_THROUGH, ROLE_CATEGORIES
+from ddbj_submission_tools.nuc.ann_meta.model import Entry
+from ddbj_submission_tools.nuc.common.qualifiers import known_qualifier_names
+from ddbj_submission_tools.nuc.common.submission_category import get_category_rules
 
 ROLES = ("chromosome", "plasmid", "organelle", "segment")
 TYPES = ROLES + ("unplaced",)

@@ -1,6 +1,6 @@
 from pathlib import Path
 
-from ddbj_gff.tools.cli import TOOLS, main
+from ddbj_submission_tools.nuc.ddbj_gff.tools.cli import TOOLS, main
 
 FIX = Path(__file__).parent / "fixtures" / "tools"
 

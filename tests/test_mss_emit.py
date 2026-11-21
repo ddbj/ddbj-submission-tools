@@ -1,5 +1,5 @@
-from gff2mss.model import MssQualifier, MssFeature
-from gff2mss.emit import emit_fasta, feature_rows
+from ddbj_submission_tools.nuc.gff2mss.model import MssQualifier, MssFeature
+from ddbj_submission_tools.nuc.gff2mss.emit import emit_fasta, feature_rows
 
 
 def test_emit_fasta_wrap_and_terminator():

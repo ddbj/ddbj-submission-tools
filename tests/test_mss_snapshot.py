@@ -1,5 +1,5 @@
 from pathlib import Path
-from gff2mss.cli import main
+from ddbj_submission_tools.nuc.gff2mss.cli import main
 
 FIX = Path(__file__).parent / "mss_fixtures"
 

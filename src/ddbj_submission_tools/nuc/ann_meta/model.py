@@ -8,7 +8,7 @@ from __future__ import annotations
 import copy
 from dataclasses import asdict, dataclass, field
 
-from ann_meta.category import CategoryGuess
+from ddbj_submission_tools.nuc.ann_meta.category import CategoryGuess
 
 QualValue = str | bool  # flag qualifiers (no value) are True, as in mss_builder's JSON
 

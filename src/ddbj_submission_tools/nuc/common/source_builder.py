@@ -295,7 +295,7 @@ def create_source_feature(
             _submission_category, source_dict, source_modifier_key
         )
 
-    from common.submission_category import get_category_rules
+    from ddbj_submission_tools.nuc.common.submission_category import get_category_rules
     rules = get_category_rules(_submission_category)
     env_sample = "environmental_sample" in rules.auto_source_qualifiers
     modifier = "isolate" if env_sample else "strain"
@@ -358,7 +358,7 @@ def _create_source_with_meta(
     ``ff_definition`` references ``@@[organism]@@`` and, when *source_modifier_key*
     is provided, ``@@[<source_modifier_key>]@@``.
     """
-    from common.submission_category import get_category_rules
+    from ddbj_submission_tools.nuc.common.submission_category import get_category_rules
     rules = get_category_rules(category)
     environmental_sample = "environmental_sample" in rules.auto_source_qualifiers
     mol_type = source_dict.get("mol_type", "genomic DNA")

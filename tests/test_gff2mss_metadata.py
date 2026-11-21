@@ -2,8 +2,8 @@
 import sys
 from pathlib import Path
 
-from gff2mss.cli import main as gff2mss_main
-from mss_builder.cli import main as mss_builder_main
+from ddbj_submission_tools.nuc.gff2mss.cli import main as gff2mss_main
+from ddbj_submission_tools.nuc.mss_builder.cli import main as mss_builder_main
 
 EX = Path(__file__).resolve().parents[1] / "examples" / "mss_builder"
 ROLES = str(EX / "example.sequence_roles.tsv")
@@ -112,7 +112,7 @@ def test_malformed_sequence_roles_is_a_clean_error(tmp_path):
 
 
 def test_unannotated_wgs_sequences_are_in_output_fasta(tmp_path):
-    from common.fasta import parse_fasta_sequences
+    from ddbj_submission_tools.nuc.common.fasta import parse_fasta_sequences
     assert _gff2mss(tmp_path, "wgs") == 0
     out = parse_fasta_sequences(str(tmp_path / "g2m.fasta"))
     inp = parse_fasta_sequences(str(EX / "example.wgs.fasta"))

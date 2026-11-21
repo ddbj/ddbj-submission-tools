@@ -25,8 +25,8 @@ from __future__ import annotations
 
 from pathlib import Path
 
-from ann_meta.model import Entry, QualValue
-from common.qualifiers import known_qualifier_names, qualifier_def
+from ddbj_submission_tools.nuc.ann_meta.model import Entry, QualValue
+from ddbj_submission_tools.nuc.common.qualifiers import known_qualifier_names, qualifier_def
 
 FIXED_COLUMNS = ("#seq_id", "type", "seq_name", "status", "topology", "ff_definition")
 _ROLE_NAMES = ("chromosome", "plasmid", "organelle", "segment")

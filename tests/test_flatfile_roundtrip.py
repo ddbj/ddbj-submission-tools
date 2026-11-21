@@ -3,11 +3,12 @@ import os
 from Bio import SeqIO
 from Bio.Seq import Seq
 from Bio.SeqRecord import SeqRecord
-from ddbj_gff import parse
-from ddbj_gff.flatfile import flatfile_to_gff
-from ddbj_gff.writer import write
-from gff2mss.config import MssConfig
-import mss2ff.cli
+from ddbj_submission_tools.nuc.ddbj_gff import parse
+from ddbj_submission_tools.nuc.ddbj_gff.flatfile import flatfile_to_gff
+from ddbj_submission_tools.nuc.ddbj_gff.writer import write
+from ddbj_submission_tools.nuc.gff2mss.config import MssConfig
+import ddbj_submission_tools.nuc.mss2ff.cli
+from ddbj_submission_tools.nuc import mss2ff
 
 FIX = os.path.join(os.path.dirname(__file__), "flatfile_fixtures", "citrus_unshiu_excerpt.gbk")
 
@@ -37,7 +38,7 @@ def test_flatfile_to_gff_roundtrip_cds_translation():
 
     # CDS translations survive the loop: recompute from the round-tripped CDS locations
     # by re-parsing the GFF CDS spans and translating against the original sequence.
-    from ddbj_gff.model import Feature
+    from ddbj_submission_tools.nuc.ddbj_gff.model import Feature
     cds_feats = [f for f in doc.features if f.type == "CDS"]
     got = []
     for c in cds_feats:

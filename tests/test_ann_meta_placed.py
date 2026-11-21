@@ -4,9 +4,9 @@ from pathlib import Path
 
 import pytest
 
-from ann_fix.annfile import AnnFile
-from ann_meta.cli import main
-from ann_meta.extract import read_fasta_lengths
+from ddbj_submission_tools.nuc.ann_fix.annfile import AnnFile
+from ddbj_submission_tools.nuc.ann_meta.cli import main
+from ddbj_submission_tools.nuc.ann_meta.extract import read_fasta_lengths
 
 FIX = Path(__file__).parent / "ann_meta_fixtures"
 

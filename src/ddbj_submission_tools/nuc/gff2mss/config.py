@@ -3,7 +3,7 @@ from __future__ import annotations
 import tomllib
 from dataclasses import dataclass, field
 
-from ddbj_gff.errors import Diagnostic, GffParseError, Severity
+from ddbj_submission_tools.nuc.ddbj_gff.errors import Diagnostic, GffParseError, Severity
 
 _KNOWN_SECTIONS = {"locus_tag", "cds", "product", "transcript"}
 # Metadata now comes from the common JSON (and sequence roles), as in mss_builder.

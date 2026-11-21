@@ -1,4 +1,4 @@
-from ddbj_gff.attributes import (
+from ddbj_submission_tools.nuc.ddbj_gff.attributes import (
     decode_value,
     encode_value,
     parse_attributes,

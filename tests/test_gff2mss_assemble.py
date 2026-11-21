@@ -1,4 +1,4 @@
-from gff2mss.assemble import build_ann_text
+from ddbj_submission_tools.nuc.gff2mss.assemble import build_ann_text
 
 
 def _write(tmp_path, name, text):

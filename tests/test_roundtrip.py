@@ -2,7 +2,7 @@ from pathlib import Path
 
 import pytest
 
-from ddbj_gff import parse, write
+from ddbj_submission_tools.nuc.ddbj_gff import parse, write
 
 FIXTURES = Path(__file__).parent / "fixtures"
 FILES = [

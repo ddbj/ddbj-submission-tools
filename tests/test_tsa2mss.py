@@ -4,7 +4,7 @@ from pathlib import Path
 
 import pytest
 
-from tsa2mss.cli import main
+from ddbj_submission_tools.nuc.tsa2mss.cli import main
 
 EX = Path(__file__).parent.parent / "examples" / "tsa2mss"
 

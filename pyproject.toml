@@ -4,8 +4,8 @@ build-backend = "hatchling.build"
 
 [project]
 name = "ddbj-submission-tools"
-version = "0.1.8"
-description = "Tools to create and fix DDBJ MSS submission files (GFF3 canonicalization, MSS conversion, annotation fixes)"
+version = "0.2.0"
+description = "Tools to help DDBJ submissions. Nucleotide sequences (MSS): GFF3 canonicalization, MSS conversion, annotation fixes"
 readme = "README.md"
 license = "MIT"
 license-files = ["LICENSE"]
@@ -20,38 +20,26 @@ dependencies = [
 
 [project.scripts]
 # MSS conversion (the portal calls these; keep names, options and outputs stable)
-egapx2mss         = "egapx2mss.cli:main"
-mss_builder       = "mss_builder.cli:main"
-mss2ff            = "mss2ff.cli:main"
-batch_wgs_builder = "batch_wgs_builder.cli:main"
-tsa2mss           = "tsa2mss.cli:main"
-ann_meta          = "ann_meta.cli:main"
+egapx2mss         = "ddbj_submission_tools.nuc.egapx2mss.cli:main"
+mss_builder       = "ddbj_submission_tools.nuc.mss_builder.cli:main"
+mss2ff            = "ddbj_submission_tools.nuc.mss2ff.cli:main"
+batch_wgs_builder = "ddbj_submission_tools.nuc.batch_wgs_builder.cli:main"
+tsa2mss           = "ddbj_submission_tools.nuc.tsa2mss.cli:main"
+ann_meta          = "ddbj_submission_tools.nuc.ann_meta.cli:main"
 # GFF -> MSS and annotation fixes
-gff2mss           = "gff2mss.cli:main"
-ann_fix           = "ann_fix.cli:main"
+gff2mss           = "ddbj_submission_tools.nuc.gff2mss.cli:main"
+ann_fix           = "ddbj_submission_tools.nuc.ann_fix.cli:main"
 # GFF3 canonicalization (ddbj_gff). Not named "ddbj-gff": that name is the separate Rust converter.
-gff_from_tool     = "ddbj_gff.tools.cli:main"
-gff_normalize     = "ddbj_gff.normalize.cli:main"
-gff_repair        = "ddbj_gff.repair.cli:main"
-gff_validate      = "ddbj_gff.validate.cli:main"
-flatfile2gff      = "ddbj_gff.flatfile.cli:main"
+gff_from_tool     = "ddbj_submission_tools.nuc.ddbj_gff.tools.cli:main"
+gff_normalize     = "ddbj_submission_tools.nuc.ddbj_gff.normalize.cli:main"
+gff_repair        = "ddbj_submission_tools.nuc.ddbj_gff.repair.cli:main"
+gff_validate      = "ddbj_submission_tools.nuc.ddbj_gff.validate.cli:main"
+flatfile2gff      = "ddbj_submission_tools.nuc.ddbj_gff.flatfile.cli:main"
 # DDBJ account login (device flow)
-ddbj-auth         = "ddbj_auth.cli:main"
+ddbj-auth         = "ddbj_submission_tools.auth.cli:main"
 
 [tool.hatch.build.targets.wheel]
-packages = [
-    "src/common",
-    "src/egapx2mss",
-    "src/mss_builder",
-    "src/mss2ff",
-    "src/batch_wgs_builder",
-    "src/gff2mss",
-    "src/ann_fix",
-    "src/tsa2mss",
-    "src/ann_meta",
-    "src/ddbj_gff",
-    "src/ddbj_auth",
-]
+packages = ["src/ddbj_submission_tools"]
 
 [tool.hatch.build.targets.sdist]
 include = ["src", "tests", "README.md", "LICENSE"]

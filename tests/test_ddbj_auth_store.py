@@ -4,7 +4,7 @@ import os
 import stat
 import threading
 
-from ddbj_auth.store import claims, config_dir, delete, list_apis, load, save
+from ddbj_submission_tools.auth.store import claims, config_dir, delete, list_apis, load, save
 
 
 def _b64(obj) -> str:

@@ -1,5 +1,5 @@
 import gzip
-from ddbj_gff.io import open_text
+from ddbj_submission_tools.nuc.ddbj_gff.io import open_text
 
 
 def test_open_text_reads_gzip(tmp_path):

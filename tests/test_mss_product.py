@@ -1,8 +1,8 @@
 from Bio.Seq import Seq
-from ddbj_gff.model import Feature, Span
-from gff2mss.config import MssConfig
-from gff2mss.convert import _product
-from gff2mss.product_map import load_product_map
+from ddbj_submission_tools.nuc.ddbj_gff.model import Feature, Span
+from ddbj_submission_tools.nuc.gff2mss.config import MssConfig
+from ddbj_submission_tools.nuc.gff2mss.convert import _product
+from ddbj_submission_tools.nuc.gff2mss.product_map import load_product_map
 
 
 def _mrna(mid, gid, product=None):

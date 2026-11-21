@@ -1,5 +1,5 @@
-from ddbj_gff import parse
-from ddbj_gff.model import cds_exon_intron_conflict
+from ddbj_submission_tools.nuc.ddbj_gff import parse
+from ddbj_submission_tools.nuc.ddbj_gff.model import cds_exon_intron_conflict
 
 HDR = "##gff-version 3\n##sequence-region c 1 100000\n"
 
@@ -67,7 +67,7 @@ def test_single_cds_no_conflict():
     assert cds_exon_intron_conflict(_mrna(parse(gff), "g.m")) == []
 
 
-from ddbj_gff.validate import validate
+from ddbj_submission_tools.nuc.ddbj_gff.validate import validate
 
 
 def test_rule_flags_internal_utr():

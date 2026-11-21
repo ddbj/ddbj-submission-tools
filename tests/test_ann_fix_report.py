@@ -3,7 +3,7 @@ from pathlib import Path
 
 import pytest
 
-from ann_fix.report import Finding, group_by_code, parse_details, parse_report
+from ddbj_submission_tools.nuc.ann_fix.report import Finding, group_by_code, parse_details, parse_report
 
 FX = Path(__file__).parent / "ann_fix_fixtures" / "details.txt"
 

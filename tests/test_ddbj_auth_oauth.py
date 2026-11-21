@@ -5,8 +5,8 @@ import urllib.error
 import pytest
 from tests.fake_idp import ISS, FakeIdp, make_jwt
 
-from ddbj_auth import oauth
-from ddbj_auth.oauth import AuthError, device_login, has_audience, pkce_pair, refresh, revoke
+from ddbj_submission_tools.auth import oauth
+from ddbj_submission_tools.auth.oauth import AuthError, device_login, has_audience, pkce_pair, refresh, revoke
 
 TOKENS = {"access_token": make_jwt(aud="kura", preferred_username="u1"), "refresh_token": make_jwt(exp=2000000000),
           "expires_in": 300}

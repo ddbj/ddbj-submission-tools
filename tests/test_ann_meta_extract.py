@@ -1,10 +1,10 @@
 import csv
 from pathlib import Path
 
-from ann_fix.annfile import AnnFile
-from ann_meta.entries_tsv import write_entries
-from ann_meta.extract import extract, read_fasta_lengths
-from ann_meta.model import Entry, MetaDoc, Note
+from ddbj_submission_tools.nuc.ann_fix.annfile import AnnFile
+from ddbj_submission_tools.nuc.ann_meta.entries_tsv import write_entries
+from ddbj_submission_tools.nuc.ann_meta.extract import extract, read_fasta_lengths
+from ddbj_submission_tools.nuc.ann_meta.model import Entry, MetaDoc, Note
 
 FIX = Path(__file__).parent / "ann_meta_fixtures"
 

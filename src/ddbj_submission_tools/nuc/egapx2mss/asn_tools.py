@@ -30,7 +30,7 @@ _PLATFORM_SUFFIX: dict[str, dict[str, str]] = {
     "Linux":  {"asn2gb": "asn2gb.linux64.gz", "asn2fsa": "asn2fsa.linux64.gz"},
 }
 
-DEFAULT_BIN_DIR = Path(__file__).parent.parent.parent / "bin"
+DEFAULT_BIN_DIR = Path(__file__).resolve().parents[4] / "bin"
 
 
 # ── Download ──────────────────────────────────────────────────────────────────

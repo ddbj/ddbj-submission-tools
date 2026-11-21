@@ -21,7 +21,7 @@ from typing import Optional
 
 from pydantic import BaseModel, ConfigDict, StrictBool, StrictStr, ValidationError
 
-from ann_meta.validate import Issue
+from ddbj_submission_tools.nuc.ann_meta.validate import Issue
 
 # alias -> name used by create_common (which writes sample / sequence_read_archive
 # as "biosample" / "sequence read archive")

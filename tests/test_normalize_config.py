@@ -1,4 +1,4 @@
-from ddbj_gff.normalize.config import NormalizeConfig, load_normalize_config
+from ddbj_submission_tools.nuc.ddbj_gff.normalize.config import NormalizeConfig, load_normalize_config
 
 
 def test_defaults():

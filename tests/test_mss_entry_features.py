@@ -1,7 +1,7 @@
 from Bio.Seq import Seq
-from ddbj_gff import parse
-from gff2mss.config import MssConfig
-from gff2mss.convert import build_entry_features
+from ddbj_submission_tools.nuc.ddbj_gff import parse
+from ddbj_submission_tools.nuc.gff2mss.config import MssConfig
+from ddbj_submission_tools.nuc.gff2mss.convert import build_entry_features
 
 GFF = """##gff-version 3
 c1\tS\tgene\t1\t9\t.\t+\t.\tID=g1

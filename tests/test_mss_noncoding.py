@@ -1,6 +1,6 @@
-from ddbj_gff.model import Feature, Span
-from gff2mss.config import MssConfig
-from gff2mss.convert import build_noncoding_features
+from ddbj_submission_tools.nuc.ddbj_gff.model import Feature, Span
+from ddbj_submission_tools.nuc.gff2mss.config import MssConfig
+from ddbj_submission_tools.nuc.gff2mss.convert import build_noncoding_features
 
 
 def cfg():

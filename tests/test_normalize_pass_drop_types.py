@@ -1,6 +1,6 @@
-from ddbj_gff import parse
-from ddbj_gff.normalize.config import NormalizeConfig, load_normalize_config
-from ddbj_gff.normalize.normalize import normalize
+from ddbj_submission_tools.nuc.ddbj_gff import parse
+from ddbj_submission_tools.nuc.ddbj_gff.normalize.config import NormalizeConfig, load_normalize_config
+from ddbj_submission_tools.nuc.ddbj_gff.normalize.normalize import normalize
 
 GFF = """##gff-version 3
 chr1\tA\tgene\t1\t20\t.\t+\t.\tID=g1

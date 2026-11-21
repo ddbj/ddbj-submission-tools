@@ -22,11 +22,11 @@ import sys
 
 import pandas as pd
 
-from common.common_builder import create_common
-from common.fasta import read_fasta
-from common.gap_annotator import GapAnnotator, annotate_gaps
-from common.models import AssemblyGapModel
-from common.submission_category import inject_defaults, validate_and_fill
+from ddbj_submission_tools.nuc.common.common_builder import create_common
+from ddbj_submission_tools.nuc.common.fasta import read_fasta
+from ddbj_submission_tools.nuc.common.gap_annotator import GapAnnotator, annotate_gaps
+from ddbj_submission_tools.nuc.common.models import AssemblyGapModel
+from ddbj_submission_tools.nuc.common.submission_category import inject_defaults, validate_and_fill
 
 Row = list[str]
 
@@ -220,7 +220,7 @@ def _load_common_base(path: str) -> tuple[dict, AssemblyGapModel | list[Assembly
     """Load common JSON without requiring DBLINK (which is per-sample in the TSV)."""
     import json
     from pathlib import Path
-    from common.models import _strip_trailing_commas, AssemblyGapModel
+    from ddbj_submission_tools.nuc.common.models import _strip_trailing_commas, AssemblyGapModel
 
     raw = Path(path).read_text(encoding="utf-8")
     data: dict = json.loads(_strip_trailing_commas(raw))

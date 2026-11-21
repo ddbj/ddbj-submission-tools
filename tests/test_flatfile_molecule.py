@@ -1,5 +1,5 @@
 from Bio import SeqIO
-from ddbj_gff.flatfile.molecule import detect_molecule
+from ddbj_submission_tools.nuc.ddbj_gff.flatfile.molecule import detect_molecule
 
 FIX = "tests/flatfile_fixtures/citrus_unshiu_excerpt.gbk"
 

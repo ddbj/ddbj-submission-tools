@@ -7,8 +7,8 @@ these tests pin the helper's contract directly, including two branches no operat
 reached: a feature with no gene parent, and remove_childless_gene=False.
 """
 
-from ddbj_gff import parse
-from ddbj_gff.repair.operations import _drop_subtree
+from ddbj_submission_tools.nuc.ddbj_gff import parse
+from ddbj_submission_tools.nuc.ddbj_gff.repair.operations import _drop_subtree
 
 HDR = "##gff-version 3\n##sequence-region c 1 100000\n"
 

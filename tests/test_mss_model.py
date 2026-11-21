@@ -1,4 +1,4 @@
-from gff2mss.model import MssQualifier, MssFeature
+from ddbj_submission_tools.nuc.gff2mss.model import MssQualifier, MssFeature
 
 
 def test_model_construction():

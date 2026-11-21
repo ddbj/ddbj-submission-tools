@@ -1,4 +1,4 @@
-from ddbj_gff.validate.vocab import Vocab, load_vocab
+from ddbj_submission_tools.nuc.ddbj_gff.validate.vocab import Vocab, load_vocab
 
 
 def test_load_vocab_feature_types():

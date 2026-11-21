@@ -1,4 +1,4 @@
-from ddbj_gff.parser import parse_directive
+from ddbj_submission_tools.nuc.ddbj_gff.parser import parse_directive
 
 
 def test_gff_version():

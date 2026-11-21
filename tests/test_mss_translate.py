@@ -1,6 +1,6 @@
 from Bio.Seq import Seq
 from Bio.SeqFeature import SeqFeature, SimpleLocation
-from gff2mss.translate import translate_cds_with_transl_except
+from ddbj_submission_tools.nuc.gff2mss.translate import translate_cds_with_transl_except
 
 
 def test_translate_applies_selenocysteine_exception():

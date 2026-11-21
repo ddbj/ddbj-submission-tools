@@ -1,6 +1,6 @@
-from ddbj_gff import parse
-from ddbj_gff.repair import REGISTRY, RepairContext, run_detect, run_apply, apply_all_names
-from ddbj_gff.repair.operations import _duplicate_mrna_losers, _is_five_prime_truncation
+from ddbj_submission_tools.nuc.ddbj_gff import parse
+from ddbj_submission_tools.nuc.ddbj_gff.repair import REGISTRY, RepairContext, run_detect, run_apply, apply_all_names
+from ddbj_submission_tools.nuc.ddbj_gff.repair.operations import _duplicate_mrna_losers, _is_five_prime_truncation
 
 HDR = "##gff-version 3\n##sequence-region c 1 100000\n"
 

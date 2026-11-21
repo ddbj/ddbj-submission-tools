@@ -27,11 +27,11 @@ from __future__ import annotations
 import re
 from pathlib import Path
 
-from ann_fix.annfile import AnnFeature, AnnFile
-from ann_meta.category import EntrySketch, detect_category
-from ann_meta.model import Entry, MetaDoc, Note
-from common.models import ReferenceModel, SubmitterModel
-from common.qualifiers import known_qualifier_names, qualifier_def
+from ddbj_submission_tools.nuc.ann_fix.annfile import AnnFeature, AnnFile
+from ddbj_submission_tools.nuc.ann_meta.category import EntrySketch, detect_category
+from ddbj_submission_tools.nuc.ann_meta.model import Entry, MetaDoc, Note
+from ddbj_submission_tools.nuc.common.models import ReferenceModel, SubmitterModel
+from ddbj_submission_tools.nuc.common.qualifiers import known_qualifier_names, qualifier_def
 
 COMMON_TARGETS = ("DBLINK", "SUBMITTER", "REFERENCE", "COMMENT", "DATE", "ST_COMMENT")
 ROLE_QUALIFIERS = ("chromosome", "plasmid", "organelle", "segment")

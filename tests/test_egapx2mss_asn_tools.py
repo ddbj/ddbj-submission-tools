@@ -1,6 +1,6 @@
 import pytest
 
-from egapx2mss import asn_tools
+from ddbj_submission_tools.nuc.egapx2mss import asn_tools
 
 ASN = "Seq-entry ::= set {\n}\n"
 

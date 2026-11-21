@@ -10,11 +10,11 @@ import re
 import sys
 from typing import TYPE_CHECKING, Optional
 
-from common.common_builder import create_common
-from common.fasta import parse_fasta_sequences
-from common.gap_annotator import GapAnnotator, annotate_gaps
-from common.submission_category import inject_defaults, validate_and_fill
-from common.source_builder import (
+from ddbj_submission_tools.nuc.common.common_builder import create_common
+from ddbj_submission_tools.nuc.common.fasta import parse_fasta_sequences
+from ddbj_submission_tools.nuc.common.gap_annotator import GapAnnotator, annotate_gaps
+from ddbj_submission_tools.nuc.common.submission_category import inject_defaults, validate_and_fill
+from ddbj_submission_tools.nuc.common.source_builder import (
     SequenceRoleEntry,
     ff_definition,
     source_qualifier,
@@ -22,7 +22,7 @@ from common.source_builder import (
 )
 
 if TYPE_CHECKING:
-    from common.models import CommonModel
+    from ddbj_submission_tools.nuc.common.models import CommonModel
 
 Row = list[str]
 
@@ -145,7 +145,7 @@ def build_ann_rows(
 
     source_id_key = common.SOURCE_IDENTIFIER if common is not None else None
     if not source_id_key and effective_category:
-        from common.submission_category import get_category_rules
+        from ddbj_submission_tools.nuc.common.submission_category import get_category_rules
         source_id_key = get_category_rules(effective_category).source_identifier or None
 
     rows: list[Row] = []

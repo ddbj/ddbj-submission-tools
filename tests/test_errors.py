@@ -1,6 +1,6 @@
 import pytest
 
-from ddbj_gff.errors import Diagnostic, GffParseError, Severity
+from ddbj_submission_tools.nuc.ddbj_gff.errors import Diagnostic, GffParseError, Severity
 
 
 def test_severity_members():

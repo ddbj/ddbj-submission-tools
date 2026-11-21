@@ -4,10 +4,10 @@ from pathlib import Path
 
 import pytest
 
-from ann_fix.annfile import AnnFile
-from ann_meta.cli import main
-from ann_meta.entries_tsv import read_entries
-from ann_meta.extract import COMMON_TARGETS, read_fasta_lengths
+from ddbj_submission_tools.nuc.ann_fix.annfile import AnnFile
+from ddbj_submission_tools.nuc.ann_meta.cli import main
+from ddbj_submission_tools.nuc.ann_meta.entries_tsv import read_entries
+from ddbj_submission_tools.nuc.ann_meta.extract import COMMON_TARGETS, read_fasta_lengths
 
 FIX = Path(__file__).parent / "ann_meta_fixtures"
 
@@ -236,7 +236,7 @@ def test_usage_error_exit_1_empty_stdout(tmp_path, capsys):
 
 
 def test_internal_error_exit_1_no_traceback(tmp_path, capsys, monkeypatch):
-    import ann_meta.cli as cli
+    import ddbj_submission_tools.nuc.ann_meta.cli as cli
     _, common, tsv = _extract(tmp_path, capsys)
 
     def boom(*a, **k):

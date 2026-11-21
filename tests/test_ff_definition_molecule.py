@@ -2,7 +2,7 @@
 
 import pytest
 
-from common.source_builder import _molecule_token, ff_definition, SequenceRoleEntry
+from ddbj_submission_tools.nuc.common.source_builder import _molecule_token, ff_definition, SequenceRoleEntry
 
 
 @pytest.mark.parametrize("mol_type,expected", [
@@ -23,7 +23,7 @@ def test_molecule_token(mol_type, expected):
     assert _molecule_token(mol_type) == expected
 
 
-from common.source_builder import create_source_feature, source_qualifier, _organelle_code
+from ddbj_submission_tools.nuc.common.source_builder import create_source_feature, source_qualifier, _organelle_code
 
 
 def _ff_def_value(rows):

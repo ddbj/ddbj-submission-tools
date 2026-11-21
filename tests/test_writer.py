@@ -1,6 +1,6 @@
-from ddbj_gff import parse
-from ddbj_gff.model import Directive, Feature, GffDocument, Span
-from ddbj_gff.writer import write
+from ddbj_submission_tools.nuc.ddbj_gff import parse
+from ddbj_submission_tools.nuc.ddbj_gff.model import Directive, Feature, GffDocument, Span
+from ddbj_submission_tools.nuc.ddbj_gff.writer import write
 
 
 def test_write_one_line_per_span_and_part_injected():

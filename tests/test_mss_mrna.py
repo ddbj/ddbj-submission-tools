@@ -1,5 +1,5 @@
-from ddbj_gff.model import Feature, Span
-from gff2mss.convert import build_mrna_feature, mrna_partial_flags
+from ddbj_submission_tools.nuc.ddbj_gff.model import Feature, Span
+from ddbj_submission_tools.nuc.gff2mss.convert import build_mrna_feature, mrna_partial_flags
 
 
 def build_gene_mrna(exon_spans, cds_spans, strand="+", gene_attr=None):

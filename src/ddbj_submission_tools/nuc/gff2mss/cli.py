@@ -21,8 +21,8 @@ def main(argv=None) -> int:
     ap.add_argument("--out", required=True, help="output prefix; writes <out>.ann and <out>.fasta")
     args = ap.parse_args(argv)
 
-    from gff2mss.assemble import build_ann_text  # after parse_args: keeps --help fast
-    from gff2mss.emit import emit_fasta
+    from ddbj_submission_tools.nuc.gff2mss.assemble import build_ann_text  # after parse_args: keeps --help fast
+    from ddbj_submission_tools.nuc.gff2mss.emit import emit_fasta
 
     ann_text, seqs = build_ann_text(args.gff, args.fasta, args.mss_config, args.common,
                                     args.sequence_roles, args.submission_category,

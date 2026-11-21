@@ -1,6 +1,6 @@
-from ddbj_gff import parse
-from ddbj_gff.normalize.config import NormalizeConfig
-from ddbj_gff.normalize.passes import NormalizeContext, pass_directives
+from ddbj_submission_tools.nuc.ddbj_gff import parse
+from ddbj_submission_tools.nuc.ddbj_gff.normalize.config import NormalizeConfig
+from ddbj_submission_tools.nuc.ddbj_gff.normalize.passes import NormalizeContext, pass_directives
 
 GFF = (
     "##gff-version 3\n"
@@ -65,9 +65,9 @@ def test_idempotent():
 
 
 def test_non_numeric_species_directive_is_replaced():
-    from ddbj_gff import parse
-    from ddbj_gff.normalize.config import NormalizeConfig
-    from ddbj_gff.normalize.normalize import normalize
+    from ddbj_submission_tools.nuc.ddbj_gff import parse
+    from ddbj_submission_tools.nuc.ddbj_gff.normalize.config import NormalizeConfig
+    from ddbj_submission_tools.nuc.ddbj_gff.normalize.normalize import normalize
     gff = "##gff-version 3\n##species Saccharomyces cerevisiae\nchr1\tA\tgene\t1\t9\t.\t+\t.\tID=g1\n"
     norm, rep = normalize(parse(gff), config=NormalizeConfig(taxid=559292))
     species = [d for d in norm.directives if d.kind == "species"]

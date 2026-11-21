@@ -1,6 +1,6 @@
-from ddbj_gff.repair.context import RepairContext
-from ddbj_gff.repair.report import Candidate, candidates_to_json, render_candidates
-from ddbj_gff.repair.registry import Operation, register, get_operation, list_operations, REGISTRY
+from ddbj_submission_tools.nuc.ddbj_gff.repair.context import RepairContext
+from ddbj_submission_tools.nuc.ddbj_gff.repair.report import Candidate, candidates_to_json, render_candidates
+from ddbj_submission_tools.nuc.ddbj_gff.repair.registry import Operation, register, get_operation, list_operations, REGISTRY
 
 
 def test_context_defaults():

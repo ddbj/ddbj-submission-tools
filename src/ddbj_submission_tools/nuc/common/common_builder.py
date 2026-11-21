@@ -6,7 +6,7 @@ Used by both egapx2mss and wgs_maker.
 
 import json
 
-from common.source_builder import create_source_feature
+from ddbj_submission_tools.nuc.common.source_builder import create_source_feature
 
 # Keys in the common JSON that are tool-specific configuration, not DDBJ MSS features
 _NON_COMMON_KEYS = frozenset({"SOURCE", "SOURCE_IDENTIFIER", "INFRASPECIFIC_NAME_MODIFIER", "ASSEMBLY_GAP"})
@@ -66,7 +66,7 @@ def _build_common_source(common_json: dict) -> list[list[str]]:
         common_json.get("SOURCE_IDENTIFIER") or common_json.get("INFRASPECIFIC_NAME_MODIFIER", "")
     )
     if not infraspecific_name_modifier_key and category:
-        from common.submission_category import get_category_rules
+        from ddbj_submission_tools.nuc.common.submission_category import get_category_rules
         infraspecific_name_modifier_key = get_category_rules(category).source_identifier or ""
     return create_source_feature(
         category,

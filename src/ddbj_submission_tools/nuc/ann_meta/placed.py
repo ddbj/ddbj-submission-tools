@@ -49,10 +49,10 @@ import re
 from collections import Counter
 from dataclasses import dataclass, field
 
-from ann_fix.annfile import AnnFeature, AnnFile, AnnRow
-from ann_meta.apply import common_blocks
-from ann_meta.shape import normalize_common, shape_issues
-from ann_meta.validate import Issue, char_issues
+from ddbj_submission_tools.nuc.ann_fix.annfile import AnnFeature, AnnFile, AnnRow
+from ddbj_submission_tools.nuc.ann_meta.apply import common_blocks
+from ddbj_submission_tools.nuc.ann_meta.shape import normalize_common, shape_issues
+from ddbj_submission_tools.nuc.ann_meta.validate import Issue, char_issues
 
 SOURCE_LAYOUTS = ("common", "entry")
 DBLINK_LAYOUTS = ("common", "entry", "none")

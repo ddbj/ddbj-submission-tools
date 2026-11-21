@@ -1,8 +1,8 @@
-from ddbj_gff import parse
-from ddbj_gff.model import Feature, Span, Directive, GffDocument
-from ddbj_gff.normalize.passes import pass_trans_splicing_location, NormalizeContext
-from ddbj_gff.normalize.normalize import normalize
-from ddbj_gff.validate import validate
+from ddbj_submission_tools.nuc.ddbj_gff import parse
+from ddbj_submission_tools.nuc.ddbj_gff.model import Feature, Span, Directive, GffDocument
+from ddbj_submission_tools.nuc.ddbj_gff.normalize.passes import pass_trans_splicing_location, NormalizeContext
+from ddbj_submission_tools.nuc.ddbj_gff.normalize.normalize import normalize
+from ddbj_submission_tools.nuc.ddbj_gff.validate import validate
 
 
 def _ctx():

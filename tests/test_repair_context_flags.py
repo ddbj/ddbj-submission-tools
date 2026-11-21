@@ -1,6 +1,6 @@
 import os
-from ddbj_gff.repair.context import RepairContext
-from ddbj_gff.repair.cli import main
+from ddbj_submission_tools.nuc.ddbj_gff.repair.context import RepairContext
+from ddbj_submission_tools.nuc.ddbj_gff.repair.cli import main
 
 FIX = os.path.join(os.path.dirname(__file__), "fixtures")
 GFF = os.path.join(FIX, "repair_internal_stop.gff3")
@@ -35,7 +35,7 @@ def test_cli_accepts_the_four_new_flags(tmp_path, capsys):
 
 def test_cli_passes_the_flags_into_the_context(tmp_path, monkeypatch):
     seen = {}
-    import ddbj_gff.repair.cli as cli_mod
+    import ddbj_submission_tools.nuc.ddbj_gff.repair.cli as cli_mod
 
     real = cli_mod.RepairContext
 
@@ -56,7 +56,7 @@ def test_cli_passes_the_flags_into_the_context(tmp_path, monkeypatch):
 
 def test_cli_defaults_match_the_context_defaults(tmp_path, monkeypatch):
     seen = {}
-    import ddbj_gff.repair.cli as cli_mod
+    import ddbj_submission_tools.nuc.ddbj_gff.repair.cli as cli_mod
     real = cli_mod.RepairContext
 
     def spy(**kw):

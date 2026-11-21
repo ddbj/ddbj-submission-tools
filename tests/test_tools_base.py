@@ -1,7 +1,7 @@
 from pathlib import Path
 
-from ddbj_gff import parse
-from ddbj_gff.tools._base import ToolSpec, run_tool
+from ddbj_submission_tools.nuc.ddbj_gff import parse
+from ddbj_submission_tools.nuc.ddbj_gff.tools._base import ToolSpec, run_tool
 
 FX = Path(__file__).parent / "fixtures" / "tools"
 GFF = """##gff-version 3

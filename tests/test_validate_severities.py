@@ -1,6 +1,6 @@
 import pytest
-from ddbj_gff.errors import Severity
-from ddbj_gff.validate.severities import DEFAULT_SEVERITIES, make_diagnostic, resolve_level
+from ddbj_submission_tools.nuc.ddbj_gff.errors import Severity
+from ddbj_submission_tools.nuc.ddbj_gff.validate.severities import DEFAULT_SEVERITIES, make_diagnostic, resolve_level
 
 
 def test_default_severities_cover_known_codes():

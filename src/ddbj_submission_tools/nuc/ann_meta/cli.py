@@ -36,13 +36,13 @@ import sys
 import tempfile
 from pathlib import Path
 
-from ann_fix.annfile import AnnFile
-from ann_meta.apply import COMMON_ONLY_TARGETS, apply, apply_common
-from ann_meta.entries_tsv import read_entries, write_entries
-from ann_meta.extract import extract, read_fasta_lengths
-from ann_meta.placed import PlacedDoc, apply_placed, placed_issues
-from ann_meta.shape import shape_issues as _shape_issues
-from ann_meta.validate import Issue, char_issues, validate
+from ddbj_submission_tools.nuc.ann_fix.annfile import AnnFile
+from ddbj_submission_tools.nuc.ann_meta.apply import COMMON_ONLY_TARGETS, apply, apply_common
+from ddbj_submission_tools.nuc.ann_meta.entries_tsv import read_entries, write_entries
+from ddbj_submission_tools.nuc.ann_meta.extract import extract, read_fasta_lengths
+from ddbj_submission_tools.nuc.ann_meta.placed import PlacedDoc, apply_placed, placed_issues
+from ddbj_submission_tools.nuc.ann_meta.shape import shape_issues as _shape_issues
+from ddbj_submission_tools.nuc.ann_meta.validate import Issue, char_issues, validate
 
 _RANGE = re.compile(r"^1\.\.(\d+)$")
 

@@ -6,11 +6,11 @@ from __future__ import annotations
 
 from typing import TYPE_CHECKING, Optional
 
-from common.common_builder import create_common
-from common.gap_annotator import GapAnnotator, annotate_gaps
-from common.fasta import parse_fasta_sequences
-from common.submission_category import get_category_rules, inject_defaults, validate_and_fill
-from common.source_builder import (
+from ddbj_submission_tools.nuc.common.common_builder import create_common
+from ddbj_submission_tools.nuc.common.gap_annotator import GapAnnotator, annotate_gaps
+from ddbj_submission_tools.nuc.common.fasta import parse_fasta_sequences
+from ddbj_submission_tools.nuc.common.submission_category import get_category_rules, inject_defaults, validate_and_fill
+from ddbj_submission_tools.nuc.common.source_builder import (
     SequenceRoleEntry,
     load_sequence_roles,
     source_qualifier,
@@ -20,7 +20,7 @@ from common.source_builder import (
 from .tbl_parser import collect_qualifiers, format_location, parse_tbl
 
 if TYPE_CHECKING:
-    from common.models import CommonModel
+    from ddbj_submission_tools.nuc.common.models import CommonModel
 
 Row = list[str]
 

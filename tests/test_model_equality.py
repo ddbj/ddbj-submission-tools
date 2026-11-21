@@ -1,4 +1,4 @@
-from ddbj_gff.model import Directive, Feature, GffDocument, Span
+from ddbj_submission_tools.nuc.ddbj_gff.model import Directive, Feature, GffDocument, Span
 
 
 def doc_with(features, directives=None):

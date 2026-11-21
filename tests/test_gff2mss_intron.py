@@ -1,8 +1,8 @@
 """gff2mss writes intron features only on request ([transcript] emit_intron), with the gene's locus_tag."""
 from Bio.Seq import Seq
 
-from ddbj_gff import parse
-from gff2mss.config import MssConfig, load_config
+from ddbj_submission_tools.nuc.ddbj_gff import parse
+from ddbj_submission_tools.nuc.gff2mss.config import MssConfig, load_config
 from tests.mss_helpers import ann_text
 
 GFF = """##gff-version 3

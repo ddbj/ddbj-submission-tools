@@ -1,6 +1,6 @@
 import pytest
-from ddbj_gff.errors import Severity, GffParseError
-from gff2mss.config import load_config
+from ddbj_submission_tools.nuc.ddbj_gff.errors import Severity, GffParseError
+from ddbj_submission_tools.nuc.gff2mss.config import load_config
 
 
 def _cfg(tmp_path, text):

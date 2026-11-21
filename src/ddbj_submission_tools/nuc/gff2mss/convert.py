@@ -10,9 +10,9 @@ from Bio.SeqIO.InsdcIO import _insdc_location_string
 
 from Bio.SeqFeature import SeqFeature
 
-from ddbj_gff.errors import Diagnostic, GffParseError, Severity
-from ddbj_gff import aa_names
-from ddbj_gff.model import Span
+from ddbj_submission_tools.nuc.ddbj_gff.errors import Diagnostic, GffParseError, Severity
+from ddbj_submission_tools.nuc.ddbj_gff import aa_names
+from ddbj_submission_tools.nuc.ddbj_gff.model import Span
 from .config import MssConfig
 from .locus_tag import LocusTagAssigner
 from .model import MssFeature, MssQualifier

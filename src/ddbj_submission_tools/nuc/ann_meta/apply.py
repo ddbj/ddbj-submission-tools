@@ -41,14 +41,14 @@ from __future__ import annotations
 
 import dataclasses
 
-from ann_fix.annfile import AnnFeature, AnnFile
-from ann_meta.categories import PASS_THROUGH, REGENERATE_FF, WGS_LIKE
-from ann_meta.extract import COMMON_TARGETS
-from ann_meta.model import Entry
-from ann_meta.shape import normalize_common
-from common.common_builder import create_common
-from common.qualifiers import qualifier_def
-from common.source_builder import (
+from ddbj_submission_tools.nuc.ann_fix.annfile import AnnFeature, AnnFile
+from ddbj_submission_tools.nuc.ann_meta.categories import PASS_THROUGH, REGENERATE_FF, WGS_LIKE
+from ddbj_submission_tools.nuc.ann_meta.extract import COMMON_TARGETS
+from ddbj_submission_tools.nuc.ann_meta.model import Entry
+from ddbj_submission_tools.nuc.ann_meta.shape import normalize_common
+from ddbj_submission_tools.nuc.common.common_builder import create_common
+from ddbj_submission_tools.nuc.common.qualifiers import qualifier_def
+from ddbj_submission_tools.nuc.common.source_builder import (
     _FLAG_QUALIFIERS,
     SequenceRoleEntry,
     _flag_is_set,
@@ -56,7 +56,7 @@ from common.source_builder import (
     ff_definition,
     source_qualifier,
 )
-from common.submission_category import SubmissionCategoryRules, get_category_rules
+from ddbj_submission_tools.nuc.common.submission_category import SubmissionCategoryRules, get_category_rules
 
 
 Quals = list[tuple[str, str]]

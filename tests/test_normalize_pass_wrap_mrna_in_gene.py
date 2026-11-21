@@ -1,6 +1,6 @@
-from ddbj_gff import parse
-from ddbj_gff.normalize.config import NormalizeConfig
-from ddbj_gff.normalize.normalize import normalize
+from ddbj_submission_tools.nuc.ddbj_gff import parse
+from ddbj_submission_tools.nuc.ddbj_gff.normalize.config import NormalizeConfig
+from ddbj_submission_tools.nuc.ddbj_gff.normalize.normalize import normalize
 
 GFF = """##gff-version 3
 chr1\tGlimmerHMM\tmRNA\t2929\t3249\t.\t-\t.\tID=chr1.path1.gene1;Name=chr1.path1.gene1

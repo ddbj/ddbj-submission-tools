@@ -1,6 +1,6 @@
 """SUBMITTER: phone / fax / phext are not in the DDBJ annotation file spec
 (https://www.ddbj.nig.ac.jp/ddbj/file-format.html#submitter), so create_common drops them."""
-from common.common_builder import create_common
+from ddbj_submission_tools.nuc.common.common_builder import create_common
 
 
 def test_create_common_drops_phone_fax_phext_from_submitter():

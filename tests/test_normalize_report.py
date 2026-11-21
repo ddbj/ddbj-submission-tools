@@ -1,4 +1,4 @@
-from ddbj_gff.normalize.report import Change, NormalizationReport
+from ddbj_submission_tools.nuc.ddbj_gff.normalize.report import Change, NormalizationReport
 
 
 def test_report_render_and_counts():

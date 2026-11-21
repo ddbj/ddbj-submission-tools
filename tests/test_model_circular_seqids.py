@@ -1,4 +1,4 @@
-from ddbj_gff.model import Feature, Span, GffDocument
+from ddbj_submission_tools.nuc.ddbj_gff.model import Feature, Span, GffDocument
 
 
 def test_circular_seqids_from_region_landmark():

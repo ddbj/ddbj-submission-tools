@@ -3,8 +3,8 @@ from pathlib import Path
 
 import pytest
 
-from ddbj_gff import parse
-from ddbj_gff.tools._base import run_tool
+from ddbj_submission_tools.nuc.ddbj_gff import parse
+from ddbj_submission_tools.nuc.ddbj_gff.tools._base import run_tool
 
 FX = Path(__file__).parent / "fixtures" / "tools"
 CASES = [("augustus", "augustus_stopExcluded.gff3"), ("braker", "braker3.gtf"),
@@ -13,7 +13,7 @@ CASES = [("augustus", "augustus_stopExcluded.gff3"), ("braker", "braker3.gtf"),
 
 @pytest.mark.parametrize("tool,fixture", CASES)
 def test_codon_predictor_outputs_gene_mrna_cds(tool, fixture, tmp_path):
-    mod = importlib.import_module(f"ddbj_gff.tools.{tool}")
+    mod = importlib.import_module(f"ddbj_submission_tools.nuc.ddbj_gff.tools.{tool}")
     out, rep = tmp_path / "o.gff3", tmp_path / "r.txt"
     assert run_tool(mod.SPEC, [str(FX / fixture), "--out", str(out), "--report", str(rep)]) == 0
     doc = parse(out.read_text())
@@ -25,7 +25,7 @@ def test_codon_predictor_outputs_gene_mrna_cds(tool, fixture, tmp_path):
 
 
 def test_augustus_stop_excluded_cds_is_extended(tmp_path):
-    from ddbj_gff.tools import augustus
+    from ddbj_submission_tools.nuc.ddbj_gff.tools import augustus
     out, rep = tmp_path / "o.gff3", tmp_path / "r.txt"
     run_tool(augustus.SPEC, [str(FX / "augustus_stopExcluded.gff3"), "--out", str(out), "--report", str(rep)])
     cds = parse(out.read_text()).feature_index["g1.t1.cds"]

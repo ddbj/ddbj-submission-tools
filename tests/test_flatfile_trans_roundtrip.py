@@ -1,11 +1,12 @@
 from tests.mss_helpers import ann_text
 import os, tempfile
 from Bio import SeqIO
-from ddbj_gff import parse
-from ddbj_gff.flatfile import flatfile_to_gff
-from ddbj_gff.writer import write
-from gff2mss.config import MssConfig
-import mss2ff.cli
+from ddbj_submission_tools.nuc.ddbj_gff import parse
+from ddbj_submission_tools.nuc.ddbj_gff.flatfile import flatfile_to_gff
+from ddbj_submission_tools.nuc.ddbj_gff.writer import write
+from ddbj_submission_tools.nuc.gff2mss.config import MssConfig
+import ddbj_submission_tools.nuc.mss2ff.cli
+from ddbj_submission_tools.nuc import mss2ff
 
 FIX = os.path.join(os.path.dirname(__file__), "flatfile_fixtures", "trans_splicing_rps12.gbk")
 PROT = ("MPTIQQLIRNKRQPIENRTKSPALKGCPQRRGVCTRVYTTTPKKPNSALRKIARVRLTSGF"

@@ -1,7 +1,7 @@
-from ddbj_gff import parse
-from ddbj_gff.errors import Severity
-from ddbj_gff.validate import validate
-from ddbj_gff.normalize import normalize, NormalizeConfig
+from ddbj_submission_tools.nuc.ddbj_gff import parse
+from ddbj_submission_tools.nuc.ddbj_gff.errors import Severity
+from ddbj_submission_tools.nuc.ddbj_gff.validate import validate
+from ddbj_submission_tools.nuc.ddbj_gff.normalize import normalize, NormalizeConfig
 
 GFF_MESSY = (
     "##gff-version 3\n"

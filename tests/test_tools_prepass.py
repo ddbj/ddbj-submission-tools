@@ -1,4 +1,4 @@
-from ddbj_gff.tools.prepass import dedupe_ids_per_seqid
+from ddbj_submission_tools.nuc.ddbj_gff.tools.prepass import dedupe_ids_per_seqid
 
 GFF = """##gff-version 3
 chr1\tA\tgene\t1\t9\t.\t+\t.\tID=g1

@@ -1,5 +1,5 @@
-from ddbj_gff.repair.partial import is_partial, partial_attrs
-from ddbj_gff.model import Feature
+from ddbj_submission_tools.nuc.ddbj_gff.repair.partial import is_partial, partial_attrs
+from ddbj_submission_tools.nuc.ddbj_gff.model import Feature
 
 
 def test_is_partial():

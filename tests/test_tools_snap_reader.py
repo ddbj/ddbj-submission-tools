@@ -1,6 +1,6 @@
 from pathlib import Path
 
-from ddbj_gff.tools.snap_reader import parse_snap
+from ddbj_submission_tools.nuc.ddbj_gff.tools.snap_reader import parse_snap
 
 FX = Path(__file__).parent / "fixtures" / "tools"
 

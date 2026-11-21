@@ -21,10 +21,10 @@ import tempfile
 from pathlib import Path
 from typing import Optional
 
-from common.cli_args import add_output_args, validate_prefix, resolve_output
-from common.fasta import write_clean_fasta
-from common.models import CommonModel, load_common_json
-from common.source_builder import load_sequence_roles
+from ddbj_submission_tools.nuc.common.cli_args import add_output_args, validate_prefix, resolve_output
+from ddbj_submission_tools.nuc.common.fasta import write_clean_fasta
+from ddbj_submission_tools.nuc.common.models import CommonModel, load_common_json
+from ddbj_submission_tools.nuc.common.source_builder import load_sequence_roles
 
 from .ann_writer import write_mss_ann
 

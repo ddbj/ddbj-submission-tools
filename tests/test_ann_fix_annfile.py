@@ -1,6 +1,6 @@
 from pathlib import Path
 
-from ann_fix.annfile import AnnFile
+from ddbj_submission_tools.nuc.ann_fix.annfile import AnnFile
 
 FX = Path(__file__).parent / "ann_fix_fixtures" / "mini.ann"
 

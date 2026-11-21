@@ -27,11 +27,11 @@ from pathlib import Path
 from typing import Optional
 
 from .ann_writer import write_ddbj_ann
-from common.cli_args import validate_prefix, resolve_output
-from common.source_builder import load_sequence_roles
+from ddbj_submission_tools.nuc.common.cli_args import validate_prefix, resolve_output
+from ddbj_submission_tools.nuc.common.source_builder import load_sequence_roles
 from .asn_tools import DEFAULT_BIN_DIR, ensure_tools, run_asn2fsa, run_asn2gb_tbl
-from common.fasta import write_clean_fasta
-from common.models import CommonModel, load_common_json
+from ddbj_submission_tools.nuc.common.fasta import write_clean_fasta
+from ddbj_submission_tools.nuc.common.models import CommonModel, load_common_json
 
 
 def main() -> None:

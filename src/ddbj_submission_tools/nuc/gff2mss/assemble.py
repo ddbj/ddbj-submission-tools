@@ -5,17 +5,17 @@ import sys
 
 from Bio.Seq import Seq
 
-from ddbj_gff import parse
-from ddbj_gff.io import open_text
-from gff2mss.config import load_config
-from gff2mss.convert import build_entry_features
-from gff2mss.emit import feature_rows
-from gff2mss.product_map import load_product_map
+from ddbj_submission_tools.nuc.ddbj_gff import parse
+from ddbj_submission_tools.nuc.ddbj_gff.io import open_text
+from ddbj_submission_tools.nuc.gff2mss.config import load_config
+from ddbj_submission_tools.nuc.gff2mss.convert import build_entry_features
+from ddbj_submission_tools.nuc.gff2mss.emit import feature_rows
+from ddbj_submission_tools.nuc.gff2mss.product_map import load_product_map
 
-from common.fasta import parse_fasta_sequences
-from common.models import load_common_json
-from common.source_builder import load_sequence_roles
-from mss_builder.ann_writer import build_ann_rows
+from ddbj_submission_tools.nuc.common.fasta import parse_fasta_sequences
+from ddbj_submission_tools.nuc.common.models import load_common_json
+from ddbj_submission_tools.nuc.common.source_builder import load_sequence_roles
+from ddbj_submission_tools.nuc.mss_builder.ann_writer import build_ann_rows
 
 
 def build_ann_text(gff_path, fasta_path, mss_config_path, common_path,

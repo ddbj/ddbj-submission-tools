@@ -21,11 +21,11 @@ import argparse
 import sys
 from pathlib import Path
 
-from common.cli_args import add_output_args, validate_prefix, resolve_output
-from common.fasta import write_clean_fasta
-from common.gap_annotator import GapAnnotator
-from common.models import load_common_json
-from mss_builder.ann_writer import write_mss_ann
+from ddbj_submission_tools.nuc.common.cli_args import add_output_args, validate_prefix, resolve_output
+from ddbj_submission_tools.nuc.common.fasta import write_clean_fasta
+from ddbj_submission_tools.nuc.common.gap_annotator import GapAnnotator
+from ddbj_submission_tools.nuc.common.models import load_common_json
+from ddbj_submission_tools.nuc.mss_builder.ann_writer import write_mss_ann
 
 
 def main() -> None:
