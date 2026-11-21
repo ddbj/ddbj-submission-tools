@@ -1,0 +1,25 @@
+COMMON	SUBMITTER		ab_name	Mishima,T.
+			contact	Taro Mishima
+			email	example@example.org
+			institute	Example University
+			country	Japan
+	REFERENCE		title	Example genome
+			ab_name	Mishima,T.
+			status	Unpublished
+			year	2026
+	DBLINK		project	PRJDB00001
+			biosample	SAMD00000001
+	ST_COMMENT		tagset_id	Genome-Assembly-Data
+			Assembly Method	Flye v2.9
+seq1	source	1..600	organism	Examplea testa
+			strain	JCM1234
+			mol_type	genomic DNA
+			ff_definition	@@[organism]@@ @@[strain]@@ DNA
+	CDS	1..63	product	hypothetical protein
+			transl_table	11
+			codon_start	1
+	mat_peptide	4..30	product	example peptide
+	CDS	complement(join(100..150,200..250))	product	example protein
+			transl_table	11
+	tRNA	300..372	product	tRNA-Leu
+	rRNA	400..500	product	16S ribosomal RNA
