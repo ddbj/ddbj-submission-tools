@@ -5,7 +5,8 @@ from pathlib import Path
 ROOT = Path(__file__).resolve().parents[1]
 
 # Internal curation-spec rule IDs and versions, internal paths. Sequence data (examples/, fixtures) is not scanned.
-PATTERN = re.compile(r"\b[BCDFM][0-9]{2}\b|v1\.[0-9]{2}\b|査定|work-submit|/lustre|/home/w3const")
+# S-rules need context: "ribosomal protein S12" is a real product name.
+PATTERN = re.compile(r"\b[BCDFM][0-9]{2}\b|(?<!protein )\bS[0-9]{2}\b|v1\.[0-9]+\b|査定|nsub-validation|work-submit|/lustre|/home/w3const")
 SUFFIXES = {".py", ".md", ".json", ".tsv", ".toml"}
 
 

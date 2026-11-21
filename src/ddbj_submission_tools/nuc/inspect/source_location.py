@@ -127,10 +127,10 @@ def main(argv=None):
     from_common = entry is None or entry.get_feature("source") is None
     print_details(args.entry, source, loc, seq_length, from_common, circular)
 
-    # Rule S03: source must cover the whole sequence
+    # source must cover the whole sequence
     if seq_length is not None and (loc.start != 1 or loc.end != seq_length):
         print(f"Warning: source {loc.start}..{loc.end} does not match "
-              f"sequence length {seq_length} (rule S03)", file=sys.stderr)
+              f"sequence length {seq_length} (source must cover the whole sequence)", file=sys.stderr)
     return 0
 
 
