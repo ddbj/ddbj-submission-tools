@@ -1,6 +1,6 @@
 """Tests for source flag-qualifier truthiness handling."""
 
-from common.source_builder import _flag_is_set
+from ddbj_submission_tools.nuc.common.source_builder import _flag_is_set
 
 
 def test_flag_is_set_false_strings():
@@ -30,7 +30,7 @@ def test_flag_is_set_whitespace_false():
     assert _flag_is_set("  no  ") is False
 
 
-from common.source_builder import _source_qualifier_rows
+from ddbj_submission_tools.nuc.common.source_builder import _source_qualifier_rows
 
 
 def test_rows_flag_on_emits_valueless_row():
@@ -64,7 +64,7 @@ def test_rows_nonflag_list_multiple():
     ]
 
 
-from common.models import CommonModel
+from ddbj_submission_tools.nuc.common.models import CommonModel
 
 
 def test_source_accepts_bool_value():
@@ -85,7 +85,7 @@ def test_source_accepts_list_value_still():
     assert m.SOURCE["culture_collection"] == ["ATCC:1", "NBRC:2"]
 
 
-from common.source_builder import create_source_feature
+from ddbj_submission_tools.nuc.common.source_builder import create_source_feature
 
 
 def _quals(rows):

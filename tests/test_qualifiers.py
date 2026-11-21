@@ -1,4 +1,4 @@
-from common.qualifiers import known_qualifier_names, qualifier_def
+from ddbj_submission_tools.nuc.common.qualifiers import known_qualifier_names, qualifier_def
 
 
 def test_known_names_has_organism_and_44_entries():

@@ -1,6 +1,6 @@
 from Bio import SeqIO
-from ddbj_gff.model import Span
-from ddbj_gff.flatfile.convert import _is_trans, _mark_trans_spliced, qualifiers_to_attrs
+from ddbj_submission_tools.nuc.ddbj_gff.model import Span
+from ddbj_submission_tools.nuc.ddbj_gff.flatfile.convert import _is_trans, _mark_trans_spliced, qualifiers_to_attrs
 
 FIX = "tests/flatfile_fixtures/trans_splicing_rps12.gbk"
 
@@ -33,7 +33,7 @@ def test_qualifiers_to_attrs_drops_raw_trans_splicing():
 
 
 from collections import Counter
-from ddbj_gff.flatfile.convert import synthesize_features
+from ddbj_submission_tools.nuc.ddbj_gff.flatfile.convert import synthesize_features
 
 
 def test_synthesis_marks_trans_and_emits_introns():
@@ -68,9 +68,9 @@ def test_trans_gene_spans_have_no_phase():
     assert all(s.phase is None for s in gene.spans)   # gene rows must not carry CDS phase
 
 
-from ddbj_gff.flatfile.convert import flatfile_to_gff
-from ddbj_gff.writer import write
-from ddbj_gff.validate import validate
+from ddbj_submission_tools.nuc.ddbj_gff.flatfile.convert import flatfile_to_gff
+from ddbj_submission_tools.nuc.ddbj_gff.writer import write
+from ddbj_submission_tools.nuc.ddbj_gff.validate import validate
 
 
 def test_flatfile_to_gff_builds_location_and_validates():

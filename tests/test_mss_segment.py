@@ -1,8 +1,8 @@
 """End-to-end: type=segment in sequence roles -> mss_builder .ann output."""
 
-from common.models import CommonModel
-from common.source_builder import SequenceRoleEntry
-from mss_builder.ann_writer import write_mss_ann
+from ddbj_submission_tools.nuc.common.models import CommonModel
+from ddbj_submission_tools.nuc.common.source_builder import SequenceRoleEntry
+from ddbj_submission_tools.nuc.mss_builder.ann_writer import write_mss_ann
 
 
 def _common():

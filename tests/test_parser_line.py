@@ -1,5 +1,5 @@
-from ddbj_gff.errors import Severity
-from ddbj_gff.parser import parse_feature_line
+from ddbj_submission_tools.nuc.ddbj_gff.errors import Severity
+from ddbj_submission_tools.nuc.ddbj_gff.parser import parse_feature_line
 
 
 def test_parse_basic_cds_line():

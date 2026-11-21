@@ -1,5 +1,5 @@
 import pytest
-from ddbj_gff.normalize.cli import main
+from ddbj_submission_tools.nuc.ddbj_gff.normalize.cli import main
 
 GFF = "##gff-version 3\nchr1\tS\tgene\t1\t9\t.\t+\t.\tID=g;locus_tag=X_1\n"
 

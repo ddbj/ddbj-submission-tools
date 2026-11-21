@@ -1,9 +1,9 @@
 from Bio.Seq import Seq
-from ddbj_gff import parse
-from ddbj_gff.model import Feature, Span
-from gff2mss.config import MssConfig
-from gff2mss.convert import build_cds_feature, build_gene_features
-from gff2mss.locus_tag import LocusTagAssigner
+from ddbj_submission_tools.nuc.ddbj_gff import parse
+from ddbj_submission_tools.nuc.ddbj_gff.model import Feature, Span
+from ddbj_submission_tools.nuc.gff2mss.config import MssConfig
+from ddbj_submission_tools.nuc.gff2mss.convert import build_cds_feature, build_gene_features
+from ddbj_submission_tools.nuc.gff2mss.locus_tag import LocusTagAssigner
 
 
 def cfg():

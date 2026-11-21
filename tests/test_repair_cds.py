@@ -1,9 +1,9 @@
 import warnings
 
 from Bio.Seq import Seq
-from ddbj_gff.model import Feature, Span
-from ddbj_gff.repair.context import RepairContext
-from ddbj_gff.repair.cds import (collect_transl_excepts, protein_of,
+from ddbj_submission_tools.nuc.ddbj_gff.model import Feature, Span
+from ddbj_submission_tools.nuc.ddbj_gff.repair.context import RepairContext
+from ddbj_submission_tools.nuc.ddbj_gff.repair.cds import (collect_transl_excepts, protein_of,
                                   has_internal_stop, coding_sequence)
 
 

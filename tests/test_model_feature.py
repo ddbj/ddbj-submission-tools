@@ -1,4 +1,4 @@
-from ddbj_gff.model import Feature, Span
+from ddbj_submission_tools.nuc.ddbj_gff.model import Feature, Span
 
 
 def make_cds(spans):

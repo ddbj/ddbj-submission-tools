@@ -1,4 +1,4 @@
-from egapx2mss.ann_writer import write_ddbj_ann
+from ddbj_submission_tools.nuc.egapx2mss.ann_writer import write_ddbj_ann
 
 TBL = (
     ">Feature lcl|chr1\n"

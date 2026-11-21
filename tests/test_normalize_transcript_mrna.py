@@ -1,7 +1,7 @@
-from ddbj_gff import parse
-from ddbj_gff.normalize.passes import pass_coerce_transcript_to_mrna, NormalizeContext
-from ddbj_gff.normalize.config import NormalizeConfig
-from ddbj_gff.validate.vocab import load_vocab
+from ddbj_submission_tools.nuc.ddbj_gff import parse
+from ddbj_submission_tools.nuc.ddbj_gff.normalize.passes import pass_coerce_transcript_to_mrna, NormalizeContext
+from ddbj_submission_tools.nuc.ddbj_gff.normalize.config import NormalizeConfig
+from ddbj_submission_tools.nuc.ddbj_gff.validate.vocab import load_vocab
 
 GFF = """##gff-version 3
 c1\tS\tgene\t1\t9\t.\t+\t.\tID=g1

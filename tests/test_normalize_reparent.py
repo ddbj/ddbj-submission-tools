@@ -1,4 +1,4 @@
-from ddbj_gff.normalize.config import NormalizeConfig, load_normalize_config
+from ddbj_submission_tools.nuc.ddbj_gff.normalize.config import NormalizeConfig, load_normalize_config
 
 
 def test_reparent_config_default_on():
@@ -17,8 +17,8 @@ def test_reparent_config_loader_defaults_on(tmp_path):
     assert load_normalize_config(str(p)).reparent_gene_children is True
 
 
-from ddbj_gff import parse
-from ddbj_gff.normalize.normalize import normalize
+from ddbj_submission_tools.nuc.ddbj_gff import parse
+from ddbj_submission_tools.nuc.ddbj_gff.normalize.normalize import normalize
 
 HDR = "##gff-version 3\n##sequence-region c 1 100000\n"
 
@@ -34,7 +34,7 @@ def _feat(doc, fid):
 
 
 def _validate(doc):
-    from ddbj_gff.validate import validate
+    from ddbj_submission_tools.nuc.ddbj_gff.validate import validate
     return validate(doc)
 
 

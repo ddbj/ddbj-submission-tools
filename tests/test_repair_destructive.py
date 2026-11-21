@@ -1,4 +1,4 @@
-from ddbj_gff.repair import REGISTRY, Operation, driver
+from ddbj_submission_tools.nuc.ddbj_gff.repair import REGISTRY, Operation, driver
 
 
 def _dummy(name="dummy-destructive"):
@@ -27,7 +27,7 @@ def test_apply_all_names_skips_unregistered(monkeypatch):
 
 
 def test_list_marks_destructive(monkeypatch, capsys):
-    from ddbj_gff.repair import cli
+    from ddbj_submission_tools.nuc.ddbj_gff.repair import cli
     monkeypatch.setitem(REGISTRY, "dummy-destructive", _dummy())
     assert cli.main(["--list"]) == 0
     out = capsys.readouterr().out

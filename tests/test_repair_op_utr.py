@@ -1,6 +1,6 @@
-from ddbj_gff import parse
-from ddbj_gff.repair.context import RepairContext
-from ddbj_gff.repair.registry import get_operation
+from ddbj_submission_tools.nuc.ddbj_gff import parse
+from ddbj_submission_tools.nuc.ddbj_gff.repair.context import RepairContext
+from ddbj_submission_tools.nuc.ddbj_gff.repair.registry import get_operation
 
 HDR = "##gff-version 3\n##sequence-region s 1 100000\n"
 

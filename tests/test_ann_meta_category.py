@@ -1,4 +1,4 @@
-from ann_meta.category import CategoryGuess, EntrySketch, detect_category
+from ddbj_submission_tools.nuc.ann_meta.category import CategoryGuess, EntrySketch, detect_category
 
 
 def _entry(seq_id="seq1", has_topology=False, ff_definition=None, dblink=None, **qualifiers):

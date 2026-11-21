@@ -2,10 +2,10 @@ import json
 
 import pytest
 
-from ddbj_auth import cli, oauth, sts
-from ddbj_auth.cli import ISSUERS, main
-from ddbj_auth.oauth import AuthError
-from ddbj_auth.store import list_apis, load, save
+from ddbj_submission_tools.auth import cli, oauth, sts
+from ddbj_submission_tools.auth.cli import ISSUERS, main
+from ddbj_submission_tools.auth.oauth import AuthError
+from ddbj_submission_tools.auth.store import list_apis, load, save
 from tests.fake_idp import FakeIdp, make_jwt
 
 STG = ISSUERS["staging"]

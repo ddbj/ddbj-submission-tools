@@ -6,7 +6,7 @@ import os
 import pandas as pd
 import pytest
 
-from batch_wgs_builder.core import _output_prefix, build_sample_json, run
+from ddbj_submission_tools.nuc.batch_wgs_builder.core import _output_prefix, build_sample_json, run
 
 SEQ = "ACGT" * 50
 

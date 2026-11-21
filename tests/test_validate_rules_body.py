@@ -1,6 +1,6 @@
-from ddbj_gff.model import Feature, Span, GffDocument
-from ddbj_gff.validate.vocab import Vocab
-from ddbj_gff.validate import rules
+from ddbj_submission_tools.nuc.ddbj_gff.model import Feature, Span, GffDocument
+from ddbj_submission_tools.nuc.ddbj_gff.validate.vocab import Vocab
+from ddbj_submission_tools.nuc.ddbj_gff.validate import rules
 
 V = Vocab(frozenset({"gene", "mRNA", "CDS", "exon"}), {"CDS": "CDS"}, frozenset({"GenBank", "GeneID"}))
 
@@ -34,7 +34,7 @@ def test_cds_missing_transl_table():
 
 
 def test_cds_transl_table_satisfied_by_file_pragma():
-    from ddbj_gff.model import Directive
+    from ddbj_submission_tools.nuc.ddbj_gff.model import Directive
     cds = Feature("c1", "S", "CDS", [Span("c", 1, 9, "+", 0)], {}, [])
     doc = GffDocument(directives=[Directive("#!transl_table primary:1", "transl_table", {"primary": 1})],
                       features=[cds])

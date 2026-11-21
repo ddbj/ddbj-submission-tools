@@ -1,4 +1,4 @@
-from ddbj_gff.model import Directive, Span
+from ddbj_submission_tools.nuc.ddbj_gff.model import Directive, Span
 
 
 def test_span_defaults_and_equality():

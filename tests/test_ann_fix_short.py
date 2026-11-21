@@ -1,6 +1,6 @@
-from ann_fix.annfile import AnnFile
-from ann_fix.cli import main
-from ann_fix.short import drop_short, short_report
+from ddbj_submission_tools.nuc.ann_fix.annfile import AnnFile
+from ddbj_submission_tools.nuc.ann_fix.cli import main
+from ddbj_submission_tools.nuc.ann_fix.short import drop_short, short_report
 
 
 def _rows(*rows):

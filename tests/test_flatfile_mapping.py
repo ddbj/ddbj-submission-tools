@@ -1,5 +1,5 @@
 from Bio import SeqIO
-from ddbj_gff.flatfile.convert import bio_location_to_spans, qualifiers_to_attrs
+from ddbj_submission_tools.nuc.ddbj_gff.flatfile.convert import bio_location_to_spans, qualifiers_to_attrs
 
 FIX = "tests/flatfile_fixtures/citrus_unshiu_excerpt.gbk"
 

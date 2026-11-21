@@ -1,7 +1,7 @@
 from Bio import SeqIO
-from ddbj_gff.flatfile.convert import flatfile_to_gff
-from ddbj_gff.writer import write
-from ddbj_gff.validate import validate
+from ddbj_submission_tools.nuc.ddbj_gff.flatfile.convert import flatfile_to_gff
+from ddbj_submission_tools.nuc.ddbj_gff.writer import write
+from ddbj_submission_tools.nuc.ddbj_gff.validate import validate
 
 FIX = "tests/flatfile_fixtures/citrus_unshiu_excerpt.gbk"
 

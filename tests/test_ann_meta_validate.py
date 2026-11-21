@@ -1,7 +1,7 @@
 import pytest
 
-from ann_meta.model import Entry
-from ann_meta.validate import Issue, validate
+from ddbj_submission_tools.nuc.ann_meta.model import Entry
+from ddbj_submission_tools.nuc.ann_meta.validate import Issue, validate
 
 COMMON = {
     "DBLINK": {"project": "PRJDB1", "sample": "SAMD1"},
@@ -63,7 +63,7 @@ def test_rejects_unknown_qualifier_unless_allowed():
 
 
 def test_tsv_typo_column_is_rejected(tmp_path):
-    from ann_meta.entries_tsv import read_entries
+    from ddbj_submission_tools.nuc.ann_meta.entries_tsv import read_entries
     p = tmp_path / "e.tsv"
     p.write_text("#seq_id\ttype\tseq_name\tstatus\ttopology\tff_definition\tstrian\n"
                  "s1\tunplaced\t\tpartial\t\t\tK-12\n", encoding="utf-8")

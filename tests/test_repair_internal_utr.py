@@ -1,6 +1,6 @@
-from ddbj_gff import parse
-from ddbj_gff.model import cds_exon_intron_conflict
-from ddbj_gff.repair import RepairContext, run_detect, run_apply, apply_all_names, DEFAULT_ORDER
+from ddbj_submission_tools.nuc.ddbj_gff import parse
+from ddbj_submission_tools.nuc.ddbj_gff.model import cds_exon_intron_conflict
+from ddbj_submission_tools.nuc.ddbj_gff.repair import RepairContext, run_detect, run_apply, apply_all_names, DEFAULT_ORDER
 
 HDR = "##gff-version 3\n##sequence-region c 1 100000\n"
 
@@ -175,13 +175,13 @@ def test_drop_is_idempotent():
 
 
 def test_drop_is_destructive_and_excluded_from_apply_all():
-    from ddbj_gff.repair import REGISTRY
+    from ddbj_submission_tools.nuc.ddbj_gff.repair import REGISTRY
     assert REGISTRY[DROP].destructive is True
     assert DROP not in apply_all_names()
 
 
 def test_apply_all_reconciles_rather_than_deleting():
-    from ddbj_gff.repair import REGISTRY
+    from ddbj_submission_tools.nuc.ddbj_gff.repair import REGISTRY
     doc = _doc(ANOM)
     # run the non-sequence ops from the `all` list (the sequence ops would need a FASTA)
     names = [n for n in apply_all_names() if not REGISTRY[n].requires_sequence]
@@ -224,8 +224,8 @@ def test_internal_utr_fix_lives_in_repair_not_normalize():
     # -- the package's __init__.py does `from .normalize import normalize`, which rebinds
     # the package attribute to the *function*, shadowing the submodule of the same name.
     import importlib
-    from ddbj_gff.normalize.config import NormalizeConfig
-    norm_mod = importlib.import_module("ddbj_gff.normalize.normalize")
+    from ddbj_submission_tools.nuc.ddbj_gff.normalize.config import NormalizeConfig
+    norm_mod = importlib.import_module("ddbj_submission_tools.nuc.ddbj_gff.normalize.normalize")
     assert not hasattr(NormalizeConfig(), "internal_utr_fix")
     assert "pass_fix_internal_utr" not in [p.__name__ for p in norm_mod.ALL_PASSES]
     assert not hasattr(norm_mod, "pass_fix_internal_utr")

@@ -1,9 +1,9 @@
 from Bio.Seq import Seq
-from ddbj_gff import parse
-from ddbj_gff.model import Feature, Span
-from gff2mss.config import MssConfig
-from gff2mss.convert import build_entry_features, build_gene_features
-from gff2mss.locus_tag import LocusTagAssigner
+from ddbj_submission_tools.nuc.ddbj_gff import parse
+from ddbj_submission_tools.nuc.ddbj_gff.model import Feature, Span
+from ddbj_submission_tools.nuc.gff2mss.config import MssConfig
+from ddbj_submission_tools.nuc.gff2mss.convert import build_entry_features, build_gene_features
+from ddbj_submission_tools.nuc.gff2mss.locus_tag import LocusTagAssigner
 
 
 def cfg():
@@ -42,7 +42,7 @@ def test_ignored_non_gene_roots_are_reported():
 
 def test_cli_prints_root_ignored_warning(tmp_path, capsys):
     import json
-    from gff2mss.cli import main
+    from ddbj_submission_tools.nuc.gff2mss.cli import main
     gff = tmp_path / "in.gff3"
     gff.write_text("##gff-version 3\nc1\tS\tmRNA\t1\t9\t.\t+\t.\tID=m1\nc1\tS\tCDS\t1\t9\t.\t+\t0\tID=m1.c;Parent=m1\n")
     fa = tmp_path / "g.fa"; fa.write_text(">c1\nATGAAATAA\n")

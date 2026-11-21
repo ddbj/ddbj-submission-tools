@@ -1,7 +1,7 @@
-from ddbj_gff import parse
-from ddbj_gff.model import Feature, Span, Directive, GffDocument
-from ddbj_gff.validate.vocab import Vocab
-from ddbj_gff.validate import rules
+from ddbj_submission_tools.nuc.ddbj_gff import parse
+from ddbj_submission_tools.nuc.ddbj_gff.model import Feature, Span, Directive, GffDocument
+from ddbj_submission_tools.nuc.ddbj_gff.validate.vocab import Vocab
+from ddbj_submission_tools.nuc.ddbj_gff.validate import rules
 
 V = Vocab(frozenset({"gene", "mRNA", "CDS", "exon"}), {}, frozenset({"GenBank"}))
 

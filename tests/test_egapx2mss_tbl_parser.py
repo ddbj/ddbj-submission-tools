@@ -1,4 +1,4 @@
-from egapx2mss.tbl_parser import collect_qualifiers, format_location
+from ddbj_submission_tools.nuc.egapx2mss.tbl_parser import collect_qualifiers, format_location
 
 
 def test_minus_strand_partials():

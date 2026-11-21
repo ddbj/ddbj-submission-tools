@@ -1,7 +1,7 @@
-from ddbj_gff.model import Feature, Span, GffDocument
-from ddbj_gff.normalize.config import NormalizeConfig
-from ddbj_gff.normalize.passes import NormalizeContext, pass_so_terms
-from ddbj_gff.validate.vocab import load_vocab
+from ddbj_submission_tools.nuc.ddbj_gff.model import Feature, Span, GffDocument
+from ddbj_submission_tools.nuc.ddbj_gff.normalize.config import NormalizeConfig
+from ddbj_submission_tools.nuc.ddbj_gff.normalize.passes import NormalizeContext, pass_so_terms
+from ddbj_submission_tools.nuc.ddbj_gff.validate.vocab import load_vocab
 
 
 def _ctx():

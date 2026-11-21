@@ -2,7 +2,9 @@
 
 > **本ツールは beta 版です。不明点があれば dfast[@]ddbj.nig.ac.jp までお問い合わせください。**
 
-DDBJ MSS (Mass Submission System) 登録ファイルを生成・修正するPythonツール群。
+DDBJ への登録を支援する Python ツール群。現在は塩基配列（nuc、MSS: Mass Submission System）の登録ファイルを生成・修正するツールと、DDBJ アカウントのログインツールがあります。BioProject・BioSample などの登録を支援するツールも今後加える予定です。
+
+### 塩基配列（nuc）
 
 | ツール | 概要 |
 |---|---|
@@ -15,9 +17,14 @@ DDBJ MSS (Mass Submission System) 登録ファイルを生成・修正するPyth
 | **gff2mss** | 正準 INSDC GFF3 + FASTA から MSS 形式ファイルを生成 |
 | **ann_fix** | ddbj-validator の指摘を .ann 上で解消 |
 | **gff_from_tool** / **gff_normalize** / **gff_repair** / **gff_validate** / **flatfile2gff** | GFF3 の変換・正準化・修復・検証（[GFF3 ツール](#gff3-ツール)） |
-| **ddbj-auth** | DDBJ アカウントにコマンドラインからログインし、API 用のトークンを出す（[ddbj-auth の使い方](#ddbj-auth-の使い方)） |
 
 \* **mss_builder** と **batch_wgs_builder** には生物学的注釈 (CDSなどの遺伝子アノテーション情報) を行う機能はありません。塩基配列のみを登録するためのファイルを生成します。
+
+### 共通
+
+| ツール | 概要 |
+|---|---|
+| **ddbj-auth** | DDBJ アカウントにコマンドラインからログインし、API 用のトークンを出す（[ddbj-auth の使い方](#ddbj-auth-の使い方)） |
 
 > English documentation is available in the [second half of this page](#english).
 
@@ -844,7 +851,9 @@ mss2ff annotation.ann genome.fa \
 
 # ddbj-submission-tools (English)
 
-A set of Python tools for generating DDBJ MSS (Mass Submission System) submission files.
+Python tools that help DDBJ submissions. They currently cover nucleotide sequence (nuc, MSS: Mass Submission System) submission files, plus a login tool for DDBJ accounts. Tools for BioProject, BioSample and other submissions will be added.
+
+### Nucleotide sequences (nuc)
 
 | Tool | Description |
 |---|---|
@@ -857,6 +866,11 @@ A set of Python tools for generating DDBJ MSS (Mass Submission System) submissio
 | **gff2mss** | Generates MSS files from canonical INSDC GFF3 + FASTA |
 | **ann_fix** | Resolves ddbj-validator findings in the .ann |
 | **gff_from_tool** / **gff_normalize** / **gff_repair** / **gff_validate** / **flatfile2gff** | GFF3 conversion, canonicalization, repair and validation ([GFF3 tools](#gff3-tools)) |
+
+### Common
+
+| Tool | Description |
+|---|---|
 | **ddbj-auth** | Logs in to your DDBJ account from the command line and prints tokens for DDBJ APIs ([ddbj-auth Usage](#ddbj-auth-usage)) |
 
 ---

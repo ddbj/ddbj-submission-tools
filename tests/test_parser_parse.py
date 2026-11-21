@@ -1,7 +1,7 @@
 import pytest
 
-from ddbj_gff.errors import GffParseError, Severity
-from ddbj_gff.parser import parse
+from ddbj_submission_tools.nuc.ddbj_gff.errors import GffParseError, Severity
+from ddbj_submission_tools.nuc.ddbj_gff.parser import parse
 
 CANONICAL = """\
 ##gff-version 3

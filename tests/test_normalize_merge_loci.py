@@ -1,4 +1,4 @@
-from ddbj_gff.normalize.config import NormalizeConfig
+from ddbj_submission_tools.nuc.ddbj_gff.normalize.config import NormalizeConfig
 
 
 def test_merge_config_defaults_off():
@@ -7,9 +7,9 @@ def test_merge_config_defaults_off():
     assert c.merge_overlap_min_fraction == 0.0
 
 
-from ddbj_gff import parse
-from ddbj_gff.normalize.normalize import normalize
-from ddbj_gff.normalize.config import NormalizeConfig
+from ddbj_submission_tools.nuc.ddbj_gff import parse
+from ddbj_submission_tools.nuc.ddbj_gff.normalize.normalize import normalize
+from ddbj_submission_tools.nuc.ddbj_gff.normalize.config import NormalizeConfig
 
 HDR = "##gff-version 3\n##sequence-region c 1 100000\n"
 
@@ -53,7 +53,7 @@ def test_merge_two_overlapping_same_strand():
 
 
 def validate_ok(doc):
-    from ddbj_gff.validate import validate
+    from ddbj_submission_tools.nuc.ddbj_gff.validate import validate
     return validate(doc)
 
 

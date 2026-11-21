@@ -3,7 +3,7 @@ Strings (including ones that already contain '; ') pass through unchanged.
 Other features keep list == one-row-per-element behavior.
 """
 
-from common.common_builder import create_feature
+from ddbj_submission_tools.nuc.common.common_builder import create_feature
 
 
 def _val(rows, key):

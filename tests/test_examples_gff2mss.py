@@ -1,7 +1,7 @@
 """The gff2mss example in examples/gff2mss runs as the README shows."""
 from pathlib import Path
 
-from gff2mss.cli import main
+from ddbj_submission_tools.nuc.gff2mss.cli import main
 
 EX = Path(__file__).resolve().parents[1] / "examples" / "gff2mss"
 

@@ -1,6 +1,6 @@
-from ddbj_gff.model import Feature, Span, GffDocument
-from ddbj_gff.normalize.config import NormalizeConfig
-from ddbj_gff.normalize.passes import NormalizeContext, pass_transl_except
+from ddbj_submission_tools.nuc.ddbj_gff.model import Feature, Span, GffDocument
+from ddbj_submission_tools.nuc.ddbj_gff.normalize.config import NormalizeConfig
+from ddbj_submission_tools.nuc.ddbj_gff.normalize.passes import NormalizeContext, pass_transl_except
 
 
 def _ctx():

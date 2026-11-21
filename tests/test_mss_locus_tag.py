@@ -1,5 +1,5 @@
-from ddbj_gff.model import Feature, Span
-from gff2mss.locus_tag import LocusTagAssigner
+from ddbj_submission_tools.nuc.ddbj_gff.model import Feature, Span
+from ddbj_submission_tools.nuc.gff2mss.locus_tag import LocusTagAssigner
 
 
 def gene(attrs):

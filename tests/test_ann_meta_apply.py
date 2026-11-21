@@ -3,12 +3,12 @@ from pathlib import Path
 
 import pytest
 
-from ann_fix.annfile import AnnFile
-from ann_meta.apply import COMMON_ONLY_TARGETS, apply, apply_common
-from ann_meta.entries_tsv import read_entries, write_entries
-from ann_meta.extract import COMMON_TARGETS, extract, read_fasta_lengths
-from ann_meta.model import Entry, MetaDoc
-from ann_meta.validate import Issue, validate
+from ddbj_submission_tools.nuc.ann_fix.annfile import AnnFile
+from ddbj_submission_tools.nuc.ann_meta.apply import COMMON_ONLY_TARGETS, apply, apply_common
+from ddbj_submission_tools.nuc.ann_meta.entries_tsv import read_entries, write_entries
+from ddbj_submission_tools.nuc.ann_meta.extract import COMMON_TARGETS, extract, read_fasta_lengths
+from ddbj_submission_tools.nuc.ann_meta.model import Entry, MetaDoc
+from ddbj_submission_tools.nuc.ann_meta.validate import Issue, validate
 
 FIX = Path(__file__).parent / "ann_meta_fixtures"
 FIXTURES = ("dfast_draft", "dfast_complete", "marker_set", "handmade", "plasmid_only", "single_chromosome",

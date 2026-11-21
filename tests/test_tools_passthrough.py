@@ -3,8 +3,8 @@ from pathlib import Path
 
 import pytest
 
-from ddbj_gff import parse, write
-from ddbj_gff.tools._base import run_tool
+from ddbj_submission_tools.nuc.ddbj_gff import parse, write
+from ddbj_submission_tools.nuc.ddbj_gff.tools._base import run_tool
 
 FX = Path(__file__).parent / "fixtures" / "tools"
 CASES = [("annevo", "annevo.gff3"), ("helixer", "helixer.gff3"), ("evm", "evm.gff3"),
@@ -14,7 +14,7 @@ CASES = [("annevo", "annevo.gff3"), ("helixer", "helixer.gff3"), ("evm", "evm.gf
 
 @pytest.mark.parametrize("tool,fixture", CASES)
 def test_passthrough_is_already_canonical(tool, fixture, tmp_path):
-    mod = importlib.import_module(f"ddbj_gff.tools.{tool}")
+    mod = importlib.import_module(f"ddbj_submission_tools.nuc.ddbj_gff.tools.{tool}")
     out = tmp_path / "o.gff3"
     assert run_tool(mod.SPEC, [str(FX / fixture), "--out", str(out)]) == 0
     doc = parse(out.read_text())

@@ -1,6 +1,6 @@
 import pytest
 
-from ddbj_gff.validate.cli import main
+from ddbj_submission_tools.nuc.ddbj_gff.validate.cli import main
 
 VALID = (
     "##gff-version 3\n"

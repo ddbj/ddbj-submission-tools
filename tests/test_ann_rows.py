@@ -1,12 +1,12 @@
 """build_ann_rows: the metadata rows mss_builder writes, with optional per-entry feature rows."""
 from pathlib import Path
 
-from common.fasta import parse_fasta_sequences
+from ddbj_submission_tools.nuc.common.fasta import parse_fasta_sequences
 import json
 
-from common.models import CommonModel, load_common_json
-from common.source_builder import load_sequence_roles
-from mss_builder.ann_writer import build_ann_rows, write_mss_ann
+from ddbj_submission_tools.nuc.common.models import CommonModel, load_common_json
+from ddbj_submission_tools.nuc.common.source_builder import load_sequence_roles
+from ddbj_submission_tools.nuc.mss_builder.ann_writer import build_ann_rows, write_mss_ann
 
 EX = Path(__file__).resolve().parents[1] / "examples" / "mss_builder"
 ROLES = load_sequence_roles(str(EX / "example.sequence_roles.tsv"))

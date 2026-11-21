@@ -1,8 +1,8 @@
 import os
 import pytest
-from ddbj_gff.repair.cli import main
-from ddbj_gff import parse
-from ddbj_gff.validate import validate
+from ddbj_submission_tools.nuc.ddbj_gff.repair.cli import main
+from ddbj_submission_tools.nuc.ddbj_gff import parse
+from ddbj_submission_tools.nuc.ddbj_gff.validate import validate
 
 FIX = os.path.join(os.path.dirname(__file__), "fixtures")
 GFF = os.path.join(FIX, "repair_internal_stop.gff3")
