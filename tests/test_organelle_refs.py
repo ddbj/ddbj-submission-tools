@@ -68,11 +68,6 @@ def test_search_sends_genus_only_by_default(fake_get):
     assert {r.species for r in got} == {"Apis cerana", "Apis mellifera"}
 
 
-def test_search_with_species_also_queries_species(fake_get):
-    refs.NcbiClient(get=fake_get, pause=0).search("Apis", "mitochondrion", species="Apis cerana")
-    assert any("Apis+cerana%5BOrganism%5D" in u or "Apis%20cerana%5BOrganism%5D" in u for u in fake_get.urls)
-
-
 def test_http_error_raises_reference_error():
     def boom(url):
         raise urllib.error.URLError("down")
@@ -107,3 +102,21 @@ def test_load_refs_reads_species_and_taxid(tmp_path):
     summary, record = got["NC_000001"]
     assert (summary.species, summary.taxid, summary.refseq) == ("Apis cerana", 7461, True)
     assert len(record.seq) == 200
+
+
+def test_species_of_more_unresolved_forms():
+    for name in ["Apis cf cerana", "Apis nr. cerana", "Apis near cerana", "Apis gr. cerana", "Apis spp.", "Apis aff cerana"]:
+        assert refs.species_of(name) is None, name
+
+
+def test_fetch_error_body_is_not_cached(tmp_path):
+    client = refs.NcbiClient(get=lambda url: b'{"error":"API rate limit exceeded"}', pause=0)
+    with pytest.raises(refs.ReferenceError):
+        client.fetch(["NC_999999"], tmp_path)
+    assert not (tmp_path / "NC_999999.gb").exists()
+
+
+def test_search_species(fake_get):
+    got = refs.NcbiClient(get=fake_get, pause=0).search_species("Apis cerana", "mitochondrion")
+    assert any("Apis+cerana%5BOrganism%5D" in u or "Apis%20cerana%5BOrganism%5D" in u for u in fake_get.urls)
+    assert {r.taxid for r in got} == {7461, 7460}

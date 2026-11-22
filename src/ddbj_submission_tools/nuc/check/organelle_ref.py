@@ -27,13 +27,14 @@ Exit code: 0 no finding (information only), 1 findings, 2 usage, file, network o
 from __future__ import annotations
 
 import argparse
+import dataclasses
 import json
 import sys
 import tempfile
 from pathlib import Path
 
 from ddbj_submission_tools.nuc.mssann.annotation import AnnParseError, effective_source, read
-from ddbj_submission_tools.nuc.mssann.fasta import iter_sequences
+from ddbj_submission_tools.nuc.mssann.fasta import FastaParseError, iter_sequences
 from ddbj_submission_tools.nuc.organelle_ref import align, refs
 from ddbj_submission_tools.nuc.organelle_ref.judge import FINDING_RESULTS, Finding, Thresholds, boundary, hit_table, identify
 
@@ -78,21 +79,34 @@ def _references(args, groups, client):
     info: list[Finding] = []
     if args.refs:
         loaded = refs.load_refs(args.refs)
+        if not loaded:
+            raise RuntimeError("no GenBank record in the --refs files")
         return {g: loaded for g in groups}, info
     out = {}
     for (genus, filt), claimed in groups.items():
         if genus is None:
             out[(genus, filt)] = {}
             continue
-        species = sorted(claimed)[0] if args.send_species and claimed else None
-        found = client.search(genus, filt, species)
+        found = client.search(genus, filt)
+        synonyms = {}                                      # taxid -> claimed name (only with --send-species)
+        if args.send_species:
+            seen = {f.accession for f in found}
+            for name in sorted(claimed):
+                for f in client.search_species(name, filt):
+                    synonyms[f.taxid] = name
+                    if f.accession not in seen:
+                        seen.add(f.accession)
+                        found.append(f)
+            found = [dataclasses.replace(f, species=synonyms.get(f.taxid, f.species)) for f in found]
         picked, dropped = refs.pick_one_per_species(found, claimed, args.max_species)
         if dropped:
             info.append(Finding("*", "identify", "CAP_REACHED",
                                 f"{genus} {filt}: {dropped} species left out by --max-species {args.max_species}; "
                                 "raise it if the closest species may be among them"))
         paths = client.fetch([p.accession for p in picked], args.cache)
-        out[(genus, filt)] = refs.load_refs(paths)
+        loaded = refs.load_refs(paths)
+        out[(genus, filt)] = {acc: (dataclasses.replace(sm, species=synonyms.get(sm.taxid, sm.species)), rec)
+                              for acc, (sm, rec) in loaded.items()}
     return out, info
 
 
@@ -120,7 +134,10 @@ def run(args) -> tuple[list[Finding], list[dict]]:
                 findings.append(Finding(name, "identify", "NO_REFERENCE",
                                         f"no complete {key[1]} genome of the genus {key[0] or '(unknown)'}"))
                 continue
-            hits = align.best_hits({name: seq}, {acc: str(rec.seq) for acc, (_, rec) in references.items()},
+            # a circular genome gets its first part again at the end, so a sequence across the origin aligns whole
+            extend = lambda rec: str(rec.seq) + (str(rec.seq)[:len(seq)]
+                                                 if rec.annotations.get("topology") == "circular" else "")
+            hits = align.best_hits({name: seq}, {acc: extend(rec) for acc, (_, rec) in references.items()},
                                    Path(tmp) / str(i)).get(name, {})
             ranked = sorted(((references[acc][0], h) for acc, h in hits.items()),
                             key=lambda rh: (-rh[1].identity, -rh[1].bitscore))
@@ -130,7 +147,7 @@ def run(args) -> tuple[list[Finding], list[dict]]:
             full = [rh for rh in ranked if rh[1].coverage >= th.min_coverage] or ranked
             mine = [rh for rh in full if rh[0].species == claimed]
             summary, h = (mine or full)[0]
-            found, new_rules = boundary(name, features, len(seq), h, references[summary.accession])
+            found, new_rules = boundary(name, features, seq, h, references[summary.accession])
             findings += found
             rules += new_rules
             findings.append(Finding(name, "identify", "TOP", hit_table(ranked)))
@@ -153,7 +170,7 @@ def main(argv=None) -> int:
     args = parse_args(argv)
     try:
         findings, rules = run(args)
-    except (OSError, AnnParseError, ValueError, refs.ReferenceError, RuntimeError) as e:
+    except (OSError, AnnParseError, FastaParseError, ValueError, refs.ReferenceError, RuntimeError) as e:
         print(f"Error: {e}", file=sys.stderr)
         return 2
     out = sys.stderr if args.tsv else sys.stdout

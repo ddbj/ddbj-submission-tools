@@ -19,6 +19,8 @@ from typing import Callable
 EUTILS = "https://eutils.ncbi.nlm.nih.gov/entrez/eutils"
 TOOL = "ddbj-submission-tools"
 _UNRESOLVED_FIRST = {"uncultured", "unidentified", "unclassified"}
+# a second word like these, or any second word ending in ".", leaves the species open
+_OPEN_EPITHET = {"sp", "spp", "cf", "aff", "nr", "near", "gr", "grp", "x", "×"}
 _PAGE = 500
 
 
@@ -50,7 +52,8 @@ def species_of(organism: str) -> str | None:
     words = organism.split()
     if len(words) < 2 or genus_of(organism) is None:
         return None
-    if words[1] in ("sp.", "sp") or "cf." in words or "aff." in words or "x" in words or "×" in words:
+    if words[1].endswith(".") or words[1].lower() in _OPEN_EPITHET or any(
+            w.rstrip(".").lower() in {"cf", "aff", "x", "×"} for w in words[1:]):
         return None
     return f"{words[0]} {words[1]}"
 
@@ -129,13 +132,12 @@ class NcbiClient:
         except (KeyError, TypeError, ValueError) as e:
             raise ReferenceError(f"NCBI search: unexpected answer ({e})") from e
 
-    def search(self, genus: str, organelle: str, species: str | None = None) -> list[RefSummary]:
-        tail = f" AND {organelle}[filter] AND complete genome[title]"
-        found = self._search_term(f"{genus}[Organism]{tail}")
-        if species:
-            seen = {s.accession for s in found}
-            found += [s for s in self._search_term(f"{species}[Organism]{tail}") if s.accession not in seen]
-        return found
+    def search(self, genus: str, organelle: str) -> list[RefSummary]:
+        return self._search_term(f"{genus}[Organism] AND {organelle}[filter] AND complete genome[title]")
+
+    def search_species(self, species: str, organelle: str) -> list[RefSummary]:
+        """Sends the species name: only with --send-species. NCBI resolves synonyms to the taxid."""
+        return self._search_term(f"{species}[Organism] AND {organelle}[filter] AND complete genome[title]")
 
     def fetch(self, accessions: list[str], cache_dir: Path) -> list[Path]:
         cache_dir = Path(cache_dir)
@@ -145,6 +147,8 @@ class NcbiClient:
             p = cache_dir / f"{acc}.gb"
             if not p.exists():
                 text = self._call("efetch", db="nuccore", id=acc, rettype="gbwithparts", retmode="text")
+                if not text.lstrip().startswith(b"LOCUS"):
+                    raise ReferenceError(f"NCBI efetch {acc}: no GenBank record in the answer")
                 fd, tmp = tempfile.mkstemp(dir=cache_dir, suffix=".tmp")
                 with os.fdopen(fd, "wb") as fh:
                     fh.write(text)

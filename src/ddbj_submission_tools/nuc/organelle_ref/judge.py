@@ -56,7 +56,7 @@ def identify(entry: str, claimed: str | None, hits: list[tuple[RefSummary, Hsp]]
     if claimed is None:
         add("BEST_MATCH", f"species not resolved; closest: {hit_table(full)}", best_ref.accession)
         return out
-    mine = [(r, h) for r, h in full if r.species == claimed]
+    mine = [(r, h) for r, h in hits if r.species == claimed]     # even below the coverage: it is loaded
     if not mine:
         add("CLAIMED_ABSENT", f"no complete genome of {claimed}; closest: {hit_table(full)}")
         if best.identity >= th.other_identity:
@@ -74,15 +74,16 @@ def identify(entry: str, claimed: str | None, hits: list[tuple[RefSummary, Hsp]]
 
 
 def _ref_features(record, key):
-    """(low, high, strand, crosses_origin) per reference feature of *key*, 1-based."""
+    """(parts, strand, crosses_origin, mixed_strands) per reference feature of *key*; parts are 1-based."""
     for f in record.features:
         if f.type != key:
             continue
         parts = f.location.parts
+        strands = {p.strand or 1 for p in parts}
+        strand = strands.pop() if len(strands) == 1 else 0
         starts = [int(p.start) for p in parts]
-        strand = f.location.strand or 1
-        crosses = len(parts) > 1 and starts != sorted(starts, reverse=(strand == -1))
-        yield [(int(p.start) + 1, int(p.end)) for p in parts], strand, crosses
+        crosses = bool(strand) and len(parts) > 1 and starts != sorted(starts, reverse=(strand == -1))
+        yield [(int(p.start) + 1, int(p.end)) for p in parts], strand, crosses, strand == 0
 
 
 def _overlap(parts, a, b):
@@ -93,8 +94,41 @@ def _escape_loc(loc: str) -> str:
     return "^" + re.escape(loc) + "$"
 
 
-def boundary(entry: str, features: list[Feature], qlen: int, h: Hsp, ref: tuple) -> tuple[list[Finding], list[dict]]:
+def _int(value, default=1):
+    try:
+        return int(value)
+    except (TypeError, ValueError):
+        return default
+
+
+def _revcomp(s: str) -> str:
+    return s[::-1].translate(str.maketrans("ACGTacgt", "TGCAtgca"))
+
+
+def _incomplete_stop(seq: str, loc, codon_start: int) -> bool:
+    """True if a one-span CDS ends with a partial codon T or TA (completed by polyadenylation)."""
+    if len(loc.spans) != 1:
+        return False
+    nt = seq[loc.start - 1:loc.end]
+    nt = (_revcomp(nt) if loc.strand == -1 else nt)[codon_start - 1:].upper()
+    rem = len(nt) % 3
+    return rem in (1, 2) and nt[-rem:] in ("T", "TA")
+
+
+def boundary(entry: str, features: list[Feature], seq: str, h: Hsp, ref: tuple) -> tuple[list[Finding], list[dict]]:
+    """Compare CDS / rRNA / tRNA of an entry (sequence *seq*) with the reference annotation through HSP *h*.
+
+    For a circular reference the CLI aligns to the genome plus its first part again, so HSP positions
+    beyond the genome length are taken modulo the length.
+    """
     summary, record = ref
+    qlen, rlen = len(seq), len(record.seq)
+    wrap = lambda p: (p - 1) % rlen + 1
+
+    def from_ref(rpos):
+        q = s2q(h, rpos)
+        return q if q is not None else s2q(h, rpos + rlen)
+
     findings: list[Finding] = []
     rules: list[dict] = []
     for feat in features:
@@ -115,19 +149,31 @@ def boundary(entry: str, features: list[Feature], qlen: int, h: Hsp, ref: tuple)
         high_span = max(loc.spans, key=lambda s: s.end)
         qlow, qhigh = loc.start, loc.end
         plow, phigh = low_span.partial_start, high_span.partial_end
-        slow, shigh = q2s(h, qlow), q2s(h, qhigh)
-        if slow is None or shigh is None:
+        raw_low, raw_high = q2s(h, qlow), q2s(h, qhigh)
+        if raw_low is None or raw_high is None:
             add("NOT_COMPARED", "feature end outside the aligned region")
             continue
+        if (raw_low - 1) // rlen != (raw_high - 1) // rlen:
+            add("NOT_COMPARED", "the feature spans the origin of the reference")
+            continue
+        slow, shigh = wrap(raw_low), wrap(raw_high)
         a, b = sorted((slow, shigh))
-        cands = [(_overlap(parts, a, b), parts, strand, crosses) for parts, strand, crosses in _ref_features(record, feat.key)]
+        cands = [(_overlap(parts, a, b), parts, strand, crosses, mixed)
+                 for parts, strand, crosses, mixed in _ref_features(record, feat.key)]
         cands = [c for c in cands if c[0] > 0]
         if not cands:
             add("NOT_COMPARED", f"no {feat.key} of the reference overlaps it")
             continue
-        _, parts, rstrand, crosses = max(cands, key=lambda c: c[0])
+        _, parts, rstrand, crosses, mixed = max(cands, key=lambda c: c[0])
+        if mixed:
+            add("NOT_COMPARED", "the reference feature is on both strands (trans-spliced); compare by hand")
+            continue
         if crosses:
             add("NOT_COMPARED", "the reference feature crosses the origin")
+            continue
+        multi = len(parts) > 1
+        if multi and len(loc.spans) == 1:
+            add("NOT_COMPARED", f"the reference {feat.key} has more than one part (intron); compare by hand")
             continue
         fstrand = loc.strand * h.strand
         if fstrand != rstrand:
@@ -140,52 +186,63 @@ def boundary(entry: str, features: list[Feature], qlen: int, h: Hsp, ref: tuple)
             e5, e3 = (qlow, plow, slow), (qhigh, phigh, shigh)
         else:
             e5, e3 = (qhigh, phigh, shigh), (qlow, plow, slow)
+        have = _int(feat.get("codon_start"))
         problems = []
         for name, (qpos, partial, spos), rpos in (("5'", e5, r5), ("3'", e3, r3)):
             if partial:
-                inside = s2q(h, rpos)
+                inside = from_ref(rpos)
                 if inside is not None:
                     problems.append(("BOUNDARY", f"{name} end is partial, but the reference {feat.key} ends at "
                                                  f"{inside} inside the sequence"))
             elif spos != rpos:
-                diff = abs(spos - rpos)
-                if feat.key == "CDS" and name == "3'" and diff <= 2:
-                    problems.append(("INCOMPLETE_STOP", f"3' end differs by {diff} from the reference "
-                                                        "(incomplete stop codon?)"))
+                short = (rpos - spos) * rstrand            # > 0: the submitted CDS stops before the reference
+                if feat.key == "CDS" and name == "3'" and short in (1, 2) and _incomplete_stop(seq, loc, have):
+                    problems.append(("INCOMPLETE_STOP", f"3' end {short} base(s) short of the reference stop "
+                                                        "(incomplete stop codon T/TA)"))
                 else:
                     problems.append(("BOUNDARY", f"{name} end maps to {spos}, reference {feat.key} at {rpos}"))
-        codon_start = None
-        if feat.key == "CDS" and e5[1]:
-            d = abs(e5[2] - r5)
-            expected = (3 - d % 3) % 3 + 1
-            have = int(feat.get("codon_start") or 1)
-            if have != expected:
-                codon_start = expected
-                problems.append(("CODON_START", f"codon_start {have}, the reference frame gives {expected}"))
 
-        proposal = ""
-        if summary.refseq and len(loc.spans) == 1 and any(r in ("BOUNDARY", "CODON_START") for r, _ in problems):
-            q5, q3 = s2q(h, r5), s2q(h, r3)
+        # the location to propose (RefSeq only, one span on both sides)
+        new = None
+        can_propose = summary.refseq and len(loc.spans) == 1 and not multi
+        if can_propose and any(r == "BOUNDARY" for r, _ in problems):
+            q5, q3 = from_ref(r5), from_ref(r3)
             if loc.strand == 1:
-                nl, pl = (q5, False) if q5 is not None else (1, True)
-                nh, ph = (q3, False) if q3 is not None else (qlen, True)
+                (nl, pl), (nh, ph) = ((q5, False) if q5 else (1, True)), ((q3, False) if q3 else (qlen, True))
+                new5 = (nl, pl)
             else:
-                nl, pl = (q3, False) if q3 is not None else (1, True)
-                nh, ph = (q5, False) if q5 is not None else (qlen, True)
+                (nl, pl), (nh, ph) = ((q3, False) if q3 else (1, True)), ((q5, False) if q5 else (qlen, True))
+                new5 = (nh, ph)
             new = f"{'<' if pl else ''}{nl}..{'>' if ph else ''}{nh}"
             new = f"complement({new})" if loc.strand == -1 else new
+            if new == loc_text:
+                new = None
+        # codon_start for the final location: 1 for a complete 5' end, else from the reference frame
+        codon_start = None
+        if feat.key == "CDS" and not multi:
+            q5pos, p5 = new5 if new else (e5[0], e5[1])
+            expected = 1
+            if p5:
+                raw = q2s(h, q5pos)
+                expected = None if raw is None else (3 - abs(wrap(raw) - r5) % 3) % 3 + 1
+            if expected is not None and expected != have:
+                codon_start = expected
+                problems.append(("CODON_START", f"codon_start {have}, the reference frame gives {expected}"
+                                                + (" for the proposed location" if new else "")))
+        proposal = ""
+        if can_propose and (new or codon_start is not None):
             note = f"{summary.accession} {feat.key} {rlow}..{rhigh}{'' if rstrand == 1 else ' (complement)'}"
             common = {"name": f"{entry} {feat.key} {loc_text}", "enabled": False, "entry": re.escape(entry),
                       "feature": feat.key}
-            if new != loc_text and any(r == "BOUNDARY" for r, _ in problems):
-                rules.append({"action": "replace_location", **common, "where_location": _escape_loc(loc_text),
-                              "pattern": loc_text, "replacement": new, "note": note})
-                proposal = new
+            # set_value first: it selects the feature by its current location, which replace_location changes
             if codon_start is not None:
                 rules.append({"action": "set_value", **common, "qualifier": "codon_start",
                               "where_location": _escape_loc(loc_text), "value": str(codon_start),
                               "add_if_missing": True, "note": note})
-                proposal = (proposal + " " if proposal else "") + f"codon_start {codon_start}"
+            if new:
+                rules.append({"action": "replace_location", **common, "where_location": _escape_loc(loc_text),
+                              "pattern": loc_text, "replacement": new, "note": note})
+            proposal = " ".join(([new] if new else []) + ([f"codon_start {codon_start}"] if codon_start else []))
         for result, detail in problems:
             add(result, detail, proposal if result in ("BOUNDARY", "CODON_START") else "")
     return findings, rules
