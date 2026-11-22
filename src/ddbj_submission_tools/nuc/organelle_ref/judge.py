@@ -10,7 +10,7 @@ from dataclasses import dataclass
 
 from ddbj_submission_tools.nuc.mssann.annotation import Feature
 from ddbj_submission_tools.nuc.mssann.location import LocationError, parse_location
-from ddbj_submission_tools.nuc.organelle_ref.align import Hsp, q2s, s2q
+from ddbj_submission_tools.nuc.organelle_ref.align import Hsp, project, q2s
 from ddbj_submission_tools.nuc.organelle_ref.refs import RefSummary
 
 FINDING_RESULTS = frozenset({"PARTIAL_MAP", "SPECIES_MISMATCH", "OTHER_SPECIES_MATCH", "LOW_IDENTITY",
@@ -119,15 +119,19 @@ def boundary(entry: str, features: list[Feature], seq: str, h: Hsp, ref: tuple) 
     """Compare CDS / rRNA / tRNA of an entry (sequence *seq*) with the reference annotation through HSP *h*.
 
     For a circular reference the CLI aligns to the genome plus its first part again, so HSP positions
-    beyond the genome length are taken modulo the length.
+    beyond the genome length are taken modulo the length. The reference feature ends are placed on the
+    query by the reference coordinates, also where they fall outside the HSP (marked "estimated").
     """
     summary, record = ref
     qlen, rlen = len(seq), len(record.seq)
     wrap = lambda p: (p - 1) % rlen + 1
 
-    def from_ref(rpos):
-        q = s2q(h, rpos)
-        return q if q is not None else s2q(h, rpos + rlen)
+    def from_ref(rpos, low):
+        """(query position, bases beyond the HSP) for reference position *rpos*; may lie outside 1..qlen."""
+        return min((project(h, r, low) for r in (rpos, rpos + rlen)), key=lambda x: x[1])
+
+    inside = lambda q: 1 <= q <= qlen
+    est = lambda d: f" (estimated, {d} bases beyond the alignment)" if d else ""
 
     findings: list[Finding] = []
     rules: list[dict] = []
@@ -181,38 +185,36 @@ def boundary(entry: str, features: list[Feature], seq: str, h: Hsp, ref: tuple) 
             continue
         rlow, rhigh = min(s for s, _ in parts), max(e for _, e in parts)
         r5, r3 = (rlow, rhigh) if rstrand == 1 else (rhigh, rlow)
-        # the submitted ends in gene orientation: (query position, partial, reference position)
+        # the submitted ends in gene orientation: (query position, partial, low end in query coordinates)
         if loc.strand == 1:
-            e5, e3 = (qlow, plow, slow), (qhigh, phigh, shigh)
+            e5, e3 = (qlow, plow, True), (qhigh, phigh, False)
         else:
-            e5, e3 = (qhigh, phigh, shigh), (qlow, plow, slow)
+            e5, e3 = (qhigh, phigh, False), (qlow, plow, True)
+        (q5, d5), (q3, d3) = from_ref(r5, e5[2]), from_ref(r3, e3[2])
         have = _int(feat.get("codon_start"))
         problems = []
-        for name, (qpos, partial, spos), rpos in (("5'", e5, r5), ("3'", e3, r3)):
+        for name, (qpos, partial, _), rpos, (qr, d) in (("5'", e5, r5, (q5, d5)), ("3'", e3, r3, (q3, d3))):
             if partial:
-                inside = from_ref(rpos)
-                if inside is not None:
-                    problems.append(("BOUNDARY", f"{name} end is partial, but the reference {feat.key} ends at "
-                                                 f"{inside} inside the sequence"))
-            elif spos != rpos:
-                short = (rpos - spos) * rstrand            # > 0: the submitted CDS stops before the reference
+                if inside(qr):
+                    problems.append(("BOUNDARY", f"{name} end is partial, but the reference {feat.key} end "
+                                                 f"({rpos}) is at {qr} inside the sequence{est(d)}"))
+            elif qr != qpos:
+                short = (qr - qpos) * loc.strand           # > 0: the submitted CDS stops before the reference
                 if feat.key == "CDS" and name == "3'" and short in (1, 2) and _incomplete_stop(seq, loc, have):
                     problems.append(("INCOMPLETE_STOP", f"3' end {short} base(s) short of the reference stop "
                                                         "(incomplete stop codon T/TA)"))
                 else:
-                    problems.append(("BOUNDARY", f"{name} end maps to {spos}, reference {feat.key} at {rpos}"))
+                    problems.append(("BOUNDARY", f"{name} end at {qpos}, the reference {feat.key} end ({rpos}) "
+                                                 f"is at {qr}{est(d)}"))
 
         # the location to propose (RefSeq only, one span on both sides)
         new = None
         can_propose = summary.refseq and len(loc.spans) == 1 and not multi
         if can_propose and any(r == "BOUNDARY" for r, _ in problems):
-            q5, q3 = from_ref(r5), from_ref(r3)
-            if loc.strand == 1:
-                (nl, pl), (nh, ph) = ((q5, False) if q5 else (1, True)), ((q3, False) if q3 else (qlen, True))
-                new5 = (nl, pl)
-            else:
-                (nl, pl), (nh, ph) = ((q3, False) if q3 else (1, True)), ((q5, False) if q5 else (qlen, True))
-                new5 = (nh, ph)
+            lowq, highq = (q5, q3) if loc.strand == 1 else (q3, q5)
+            nl, pl = (lowq, False) if inside(lowq) else (1, True)
+            nh, ph = (highq, False) if inside(highq) else (qlen, True)
+            new5 = (nl, pl) if loc.strand == 1 else (nh, ph)
             new = f"{'<' if pl else ''}{nl}..{'>' if ph else ''}{nh}"
             new = f"complement({new})" if loc.strand == -1 else new
             if new == loc_text:
@@ -222,16 +224,16 @@ def boundary(entry: str, features: list[Feature], seq: str, h: Hsp, ref: tuple) 
         if feat.key == "CDS" and not multi:
             q5pos, p5 = new5 if new else (e5[0], e5[1])
             expected = 1
-            if p5:
-                raw = q2s(h, q5pos)
-                expected = None if raw is None else (3 - abs(wrap(raw) - r5) % 3) % 3 + 1
+            if p5:                                      # bases of the reference CDS before the first one here
+                expected = (3 - abs(q5pos - q5) % 3) % 3 + 1
             if expected is not None and expected != have:
                 codon_start = expected
                 problems.append(("CODON_START", f"codon_start {have}, the reference frame gives {expected}"
                                                 + (" for the proposed location" if new else "")))
         proposal = ""
         if can_propose and (new or codon_start is not None):
-            note = f"{summary.accession} {feat.key} {rlow}..{rhigh}{'' if rstrand == 1 else ' (complement)'}"
+            note = f"{summary.accession} {feat.key} {rlow}..{rhigh}{'' if rstrand == 1 else ' (complement)'}" + \
+                (" (ends placed by reference coordinates beyond the alignment)" if d5 or d3 else "")
             common = {"name": f"{entry} {feat.key} {loc_text}", "enabled": False, "entry": re.escape(entry),
                       "feature": feat.key}
             # set_value first: it selects the feature by its current location, which replace_location changes

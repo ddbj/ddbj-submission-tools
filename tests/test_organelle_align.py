@@ -40,3 +40,16 @@ def test_best_hit_per_reference_and_no_hit(tmp_path):
     other = "".join(rng2.choice("ACGT") for _ in range(3000))
     hits = align.best_hits({"q": REF[1000:1600], "z": other[:500]}, {"R": REF, "S": other}, tmp_path)
     assert set(hits["q"]) == {"R"} and set(hits["z"]) == {"S"}
+
+
+def test_project_inside_gap_and_outside(tmp_path):
+    q = REF[1000:1300] + REF[1303:1600]            # ref 1301..1303 deleted in the query
+    h = align.best_hits({"q": q}, {"R": REF}, tmp_path)["q"]["R"]
+    assert align.project(h, 1200) == (200, 0)
+    assert align.project(h, 1302, low=True)[0] == 301 and align.project(h, 1302, low=False)[0] == 300
+    assert align.project(h, 900) == (-100, 101) and align.project(h, 1700) == (697, 100)
+
+
+def test_project_outside_on_minus_strand(tmp_path):
+    h = align.best_hits({"q": revcomp(REF[1000:1600])}, {"R": REF}, tmp_path)["q"]["R"]
+    assert align.project(h, 1650) == (-49, 50) and align.project(h, 950) == (651, 51)

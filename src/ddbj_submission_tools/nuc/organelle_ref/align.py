@@ -60,6 +60,26 @@ def s2q(h: Hsp, spos: int) -> int | None:
     return None
 
 
+def project(h: Hsp, spos: int, low: bool = True) -> tuple[int, int]:
+    """Query position of reference position *spos*, and how many bases it lies beyond the HSP (0 = aligned).
+
+    Outside the HSP the reference coordinates are carried on without indels, so the position may be
+    below 1 or past the query end. A reference base deleted in the query gives the first query base
+    after it (*low*, the low end of a feature in query coordinates) or the last one before it.
+    """
+    lo, hi = sorted((h.sstart, h.send))
+    if lo <= spos <= hi:
+        last = h.qstart - 1
+        for q, s in h.pairs():
+            if q is not None:
+                last = q
+            if s == spos:
+                return (q, 0) if q is not None else (last + 1 if low else last, 0)
+    d = lo - spos if spos < lo else spos - hi
+    at_qstart = (spos < lo) == (h.strand == 1)
+    return (h.qstart - d if at_qstart else h.qend + d), d
+
+
 def _write_fasta(path: Path, seqs: dict[str, str]) -> None:
     with open(path, "w") as fh:
         for name, seq in seqs.items():

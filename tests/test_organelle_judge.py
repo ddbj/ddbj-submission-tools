@@ -213,3 +213,21 @@ def test_query_spanning_the_origin_maps_through_it(tmp_path):
     assert results(findings) == ["NOT_COMPARED"] and "overlaps" in findings[0].detail
     findings, _ = judge.boundary("q", [feat("rRNA", "250..350")], q, h, make_ref())  # 2950..3000 + 1..50: wraps
     assert results(findings) == ["NOT_COMPARED"] and "origin" in findings[0].detail
+
+
+@needs_blast
+def test_reference_end_beyond_the_alignment_is_placed_by_reference_coordinates(tmp_path):
+    rng = random.Random(99)
+    q = "".join(rng.choice("ACGT") for _ in range(120)) + REF[1120:1600]   # query 121.. = ref 1121..; 1..120 diverged
+    h = hit(tmp_path, q)
+    assert h.qstart > 101                                                  # ref CDS start 1101 is not aligned
+    findings, rules = judge.boundary("q", [feat("CDS", "125..400")], q, h, make_ref())
+    assert results(findings) == ["BOUNDARY"] and "estimated" in findings[0].detail
+    assert [r["replacement"] for r in rules] == ["101..400"]               # not <1..400
+
+
+@needs_blast
+def test_reference_end_in_a_query_gap_is_not_a_boundary(tmp_path):
+    q = REF[1000:1100] + REF[1101:1600]                                    # ref 1101 (CDS start) deleted
+    findings, rules = judge.boundary("q", [feat("CDS", "101..399")], q, hit(tmp_path, q), make_ref())
+    assert (findings, rules) == ([], [])
