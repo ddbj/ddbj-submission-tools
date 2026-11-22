@@ -22,12 +22,11 @@ DDBJ への登録を支援する Python ツール群。現在は塩基配列（n
 
 #### スクリプト（python -m）
 
-単機能の検査・修正・参照用スクリプト。コマンドとしては入らないので、`python -m ddbj_submission_tools.nuc.<名前>` で実行する（使い方は `--help`）。Claude Code のプラグインで入れた場合は `ddbj-tools-python -m ddbj_submission_tools.nuc.<名前>`。`check.organelle_ref` は BLAST+（`blastn`、`makeblastdb`）を使う。pip で入れた場合は BLAST+ を別に入れるか、コンテナ（BLAST+ 入り）で実行する。
+単機能の検査・修正・参照用スクリプト。コマンドとしては入らないので、`python -m ddbj_submission_tools.nuc.<名前>` で実行する（使い方は `--help`）。Claude Code のプラグインで入れた場合は `ddbj-tools-python -m ddbj_submission_tools.nuc.<名前>`。
 
 | 名前 | 用途 |
 |---|---|
 | `check.assembly_gap` | FASTA の N の連続と assembly_gap を照合する。ギャップの長さの分布から estimated_length（known / unknown）を提案する |
-| `check.organelle_ref` | オルガネラの遺伝子配列を、同じ属の公開完全長ゲノム（NCBI）と手元の blastn で照らし、同定ミスの疑いと CDS・rRNA・tRNA の境界のずれを報告する。直し方の案を `fix.edit` のルール（すべて無効）で出す。NCBI に送るのは属名だけ。BLAST+ が必要 |
 | `check.mat_peptide` | mat_peptide を、それが属する CDS と照らして確かめる |
 | `check.short_complete_cds` | 指定したアミノ酸長より短い complete の CDS を挙げる |
 | `check.strain` | 保存機関のコードで始まる strain を確かめる（NCBI の `coll_dump.txt` を `--coll-dump` で渡す） |
@@ -891,12 +890,11 @@ Python tools that help DDBJ submissions. They currently cover nucleotide sequenc
 
 #### Scripts (python -m)
 
-Single-purpose check, fix and lookup scripts. They are not installed as commands: run them with `python -m ddbj_submission_tools.nuc.<name>` (see `--help`). With the Claude Code plugin, use `ddbj-tools-python -m ddbj_submission_tools.nuc.<name>`. `check.organelle_ref` needs BLAST+ (`blastn`, `makeblastdb`): install it separately with pip installs, or use the container (BLAST+ included).
+Single-purpose check, fix and lookup scripts. They are not installed as commands: run them with `python -m ddbj_submission_tools.nuc.<name>` (see `--help`). With the Claude Code plugin, use `ddbj-tools-python -m ddbj_submission_tools.nuc.<name>`.
 
 | Name | Purpose |
 |---|---|
 | `check.assembly_gap` | Checks assembly_gap features against the runs of N in the FASTA, and suggests estimated_length (known / unknown) from the distribution of gap lengths |
-| `check.organelle_ref` | Checks organelle gene sequences against complete organelle genomes of the same genus (NCBI) with a local blastn: possible misidentification, and CDS / rRNA / tRNA boundaries. Writes proposed fixes as `fix.edit` rules (all disabled). Sends only the genus name. Needs BLAST+ |
 | `check.mat_peptide` | Checks mat_peptide features against the CDS they belong to |
 | `check.short_complete_cds` | Lists complete CDS shorter than a given amino-acid length |
 | `check.strain` | Checks strain values that start with a culture collection code (pass NCBI's `coll_dump.txt` with `--coll-dump`) |
