@@ -66,18 +66,22 @@ def organelle_filter(value: str) -> str:
     raise ValueError(f"no complete-genome search for organelle '{value}'")
 
 
-def pick_one_per_species(summaries: list[RefSummary], claimed: str | None,
+def pick_one_per_species(summaries: list[RefSummary], claimed: str | set | None,
                          max_species: int) -> tuple[list[RefSummary], int]:
-    """One genome per species (RefSeq first), species with RefSeq first, then search order; claimed always kept."""
+    """One genome per species (RefSeq first), species with RefSeq first, then search order.
+
+    Claimed species (one name or a set) are always kept, even past *max_species*.
+    """
+    claimed = {claimed} if isinstance(claimed, str) else set(claimed or ())
     best: dict[str, RefSummary] = {}
     for s in summaries:
         cur = best.get(s.species)
         if cur is None or (s.refseq and not cur.refseq):
             best[s.species] = s
     ordered = sorted(best.values(), key=lambda s: not s.refseq)          # stable: keeps search order otherwise
-    picked = ordered[:max_species]
-    if claimed in best and best[claimed] not in picked:
-        picked = picked[:max_species - 1] + [best[claimed]] if max_species > 0 else [best[claimed]]
+    kept = [s for s in ordered if s.species in claimed]
+    others = [s for s in ordered if s.species not in claimed]
+    picked = others[:max(0, max_species - len(kept))] + kept
     return picked, len(ordered) - len(picked)
 
 
