@@ -4,7 +4,7 @@ build-backend = "hatchling.build"
 
 [project]
 name = "ddbj-submission-tools"
-version = "0.3.0"
+version = "0.4.0"
 description = "Tools to help DDBJ submissions. Nucleotide sequences (MSS): GFF3 canonicalization, MSS conversion, annotation fixes"
 readme = "README.md"
 license = "MIT"
