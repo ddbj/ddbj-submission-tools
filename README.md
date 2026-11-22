@@ -20,6 +20,27 @@ DDBJ への登録を支援する Python ツール群。現在は塩基配列（n
 
 \* **mss_builder** と **batch_wgs_builder** には生物学的注釈 (CDSなどの遺伝子アノテーション情報) を行う機能はありません。塩基配列のみを登録するためのファイルを生成します。
 
+#### スクリプト（python -m）
+
+単機能の検査・修正・参照用スクリプト。コマンドとしては入らないので、`python -m ddbj_submission_tools.nuc.<名前>` で実行する（使い方は `--help`）。Claude Code のプラグインで入れた場合は `ddbj-tools-python -m ddbj_submission_tools.nuc.<名前>`。
+
+| 名前 | 用途 |
+|---|---|
+| `check.assembly_gap` | FASTA の N の連続と assembly_gap を照合する。ギャップの長さの分布から estimated_length（known / unknown）を提案する |
+| `check.mat_peptide` | mat_peptide を、それが属する CDS と照らして確かめる |
+| `check.short_complete_cds` | 指定したアミノ酸長より短い complete の CDS を挙げる |
+| `check.strain` | 保存機関のコードで始まる strain を確かめる（NCBI の `coll_dump.txt` を `--coll-dump` で渡す） |
+| `check.rrna` / `check.trna` | rRNA・tRNA の配列を FASTA で取り出し、名前を確かめる |
+| `check.review` | .ann を見直し、確かめるべき項目を挙げる |
+| `check.ann_set` | 1 件の登録に属する複数の .ann をまとめて要約する |
+| `fix.assembly_gap` | assembly_gap のない N の連続に assembly_gap を足す |
+| `fix.edit` | JSON の規則で .ann をまとめて編集する |
+| `fix.empty_qualifier` | qualifier のない feature 行に一時的な qualifier を入れる・外す |
+| `inspect.cds_seq` / `inspect.region` | CDS（翻訳も可）・任意の位置の配列を取り出す |
+| `inspect.cds_locus_tag` | entry の CDS を位置と locus_tag の一覧にする |
+| `inspect.source_location` / `inspect.source_organism` | entry の source の位置・organism を出す |
+| `inspect.submitter` | COMMON の SUBMITTER（ab_name か email）を出す |
+
 ### 共通
 
 | ツール | 概要 |
@@ -866,6 +887,27 @@ Python tools that help DDBJ submissions. They currently cover nucleotide sequenc
 | **gff2mss** | Generates MSS files from canonical INSDC GFF3 + FASTA |
 | **ann_fix** | Resolves ddbj-validator findings in the .ann |
 | **gff_from_tool** / **gff_normalize** / **gff_repair** / **gff_validate** / **flatfile2gff** | GFF3 conversion, canonicalization, repair and validation ([GFF3 tools](#gff3-tools)) |
+
+#### Scripts (python -m)
+
+Single-purpose check, fix and lookup scripts. They are not installed as commands: run them with `python -m ddbj_submission_tools.nuc.<name>` (see `--help`). With the Claude Code plugin, use `ddbj-tools-python -m ddbj_submission_tools.nuc.<name>`.
+
+| Name | Purpose |
+|---|---|
+| `check.assembly_gap` | Checks assembly_gap features against the runs of N in the FASTA, and suggests estimated_length (known / unknown) from the distribution of gap lengths |
+| `check.mat_peptide` | Checks mat_peptide features against the CDS they belong to |
+| `check.short_complete_cds` | Lists complete CDS shorter than a given amino-acid length |
+| `check.strain` | Checks strain values that start with a culture collection code (pass NCBI's `coll_dump.txt` with `--coll-dump`) |
+| `check.rrna` / `check.trna` | Extracts rRNA / tRNA sequences as FASTA and checks their names |
+| `check.review` | Reviews an .ann and lists items to check |
+| `check.ann_set` | Summarizes the .ann files of one submission |
+| `fix.assembly_gap` | Adds assembly_gap features for runs of N that have none |
+| `fix.edit` | Edits .ann files in batch with a JSON rule file |
+| `fix.empty_qualifier` | Puts a temporary qualifier on feature lines that have none, or takes it out |
+| `inspect.cds_seq` / `inspect.region` | Extracts CDS sequences (or translations) / the sequence of any location |
+| `inspect.cds_locus_tag` | Lists the CDS of an entry with location and locus_tag |
+| `inspect.source_location` / `inspect.source_organism` | Prints the location / organism of an entry's source |
+| `inspect.submitter` | Prints SUBMITTER values (ab_name or email) of COMMON |
 
 ### Common
 
