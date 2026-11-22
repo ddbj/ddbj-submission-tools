@@ -1,0 +1,13 @@
+# Separator exceptions for culture collection numbers in strain
+#
+# Normally a strain value that starts with a culture collection code
+# (coll_dump.txt column 1, column 2 contains "c") needs a space between
+# the code and the number: "JCM 11017". Codes listed here use another
+# separator instead.
+#
+# Format: tab-separated, one entry per line
+#   code<TAB>separator<TAB>example<TAB>reason<TAB>added (YYYY-MM-DD)
+# The separator column is written literally ("-" for a hyphen).
+# Lines starting with "#" and blank lines are ignored.
+#
+NIES	-	NIES-1234	NIES numbers are written with a hyphen, without a space	2026-10-14
