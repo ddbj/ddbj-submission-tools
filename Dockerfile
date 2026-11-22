@@ -15,10 +15,6 @@ RUN apt-get update && apt-get install -y --no-install-recommends wget \
  && apt-get purge -y wget && apt-get autoremove -y \
  && rm -rf /var/lib/apt/lists/*
 
-# BLAST+ for nuc.check.organelle_ref
-RUN apt-get update && apt-get install -y --no-install-recommends ncbi-blast+ \
- && rm -rf /var/lib/apt/lists/*
-
 # Third-party dependencies first (cached on source-only changes).
 COPY requirements.txt ./
 RUN pip install --no-cache-dir -r requirements.txt
