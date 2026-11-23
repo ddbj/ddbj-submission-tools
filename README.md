@@ -35,6 +35,7 @@ DDBJ への登録を支援する Python ツール群。現在は塩基配列（n
 | `check.ann_set` | 1 件の登録に属する複数の .ann をまとめて要約する |
 | `fix.assembly_gap` | assembly_gap のない N の連続に assembly_gap を足す |
 | `fix.edit` | JSON の規則で .ann をまとめて編集する |
+| `fix.partial_ends` | 開始/終止コドンのない CDS の端と、CDS と同じ位置で終わる mRNA の端を partial（`<` `>`）にする。コドンは transl_table（なければ 1）による |
 | `fix.empty_qualifier` | qualifier のない feature 行に一時的な qualifier を入れる・外す |
 | `inspect.cds_seq` / `inspect.region` | CDS（翻訳も可）・任意の位置の配列を取り出す |
 | `inspect.cds_locus_tag` | entry の CDS を位置と locus_tag の一覧にする |
@@ -903,6 +904,7 @@ Single-purpose check, fix and lookup scripts. They are not installed as commands
 | `check.ann_set` | Summarizes the .ann files of one submission |
 | `fix.assembly_gap` | Adds assembly_gap features for runs of N that have none |
 | `fix.edit` | Edits .ann files in batch with a JSON rule file |
+| `fix.partial_ends` | Marks CDS ends without a start/stop codon (per transl_table, default 1) and mRNA ends that coincide with a CDS end as partial (`<` / `>`) |
 | `fix.empty_qualifier` | Puts a temporary qualifier on feature lines that have none, or takes it out |
 | `inspect.cds_seq` / `inspect.region` | Extracts CDS sequences (or translations) / the sequence of any location |
 | `inspect.cds_locus_tag` | Lists the CDS of an entry with location and locus_tag |
