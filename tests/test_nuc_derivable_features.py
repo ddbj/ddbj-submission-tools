@@ -112,3 +112,23 @@ def test_cli_dry_run_and_outdir(tmp_path):
     assert (out / "s.ann").read_text() == ("e1\tsource\t1..1000\torganism\tExamplea testa\n"
                                            "\tmRNA\t100..400\tlocus_tag\tEXA_0001\n"
                                            "\tCDS\t150..350\tlocus_tag\tEXA_0001\n")
+
+
+def test_all_drops_every_feature_of_the_keys(tmp_path):
+    feats = [("misc_RNA", "join(100..200,300..400)"), ("intron", "201..299", ("note", "source:AUGUSTUS")),
+             ("mRNA", "join(100..200,300..400)"), ("3'UTR", "180..400")]
+    path = tmp_path / "s.ann"
+    path.write_text("e1\tsource\t1..1000\torganism\tExamplea testa\n"
+                    + "".join(f"\t{k}\t{l}\t{q[0][0] if q else 'locus_tag'}\t{q[0][1] if q else 'x'}\n"
+                              for k, l, *q in feats))
+    ann = AnnFile.read(path)
+    results = df.drop(ann, df.DEFAULT_KEYS, everything=True)
+    assert [f.key for f in ann.features()] == ["source", "misc_RNA", "mRNA"]
+    assert all(r.dropped for r in results)
+
+
+def test_all_still_skips_organelles(tmp_path):
+    left, _ = run(tmp_path, GENE, source=(("organism", "Examplea testa"), ("organelle", "mitochondrion")))
+    assert len(left) == len(GENE)
+    path = tmp_path / "s.ann"
+    assert df.main([str(path), "--all", "--dry-run"]) == 0

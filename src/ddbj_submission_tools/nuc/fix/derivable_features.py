@@ -25,6 +25,9 @@ Usage:
     ... --outdir DIR | --in-place   (--in-place keeps FILE.ann.orig)
     --keys exon,intron                only these feature keys (default exon,intron,5'UTR,3'UTR)
     --allow-qualifier note            also drop features with this qualifier (after checking its values)
+    --all                             drop every feature of the keys, derivable or not (organelle and
+                                      virus entries are still skipped); only when the submitter wants
+                                      none of these features
 
 The decisions are written to stdout as TSV (entry, feature, location, action, reason).
 Exit code: 0 done, 2 usage or file error.
@@ -84,8 +87,12 @@ def _skip_reason(quals: list[tuple[str, str]]) -> str | None:
     return None
 
 
-def drop(ann: AnnFile, keys=DEFAULT_KEYS, allow=()) -> list[Result]:
-    """Delete the derivable features in place; return a Result per feature of the given keys."""
+def drop(ann: AnnFile, keys=DEFAULT_KEYS, allow=(), everything: bool = False) -> list[Result]:
+    """Delete the derivable features in place; return a Result per feature of the given keys.
+
+    everything=True (--all) drops every feature of the keys, derivable or not; organelle and
+    virus entries are still skipped.
+    """
     feats = ann.features()
     common = [q for f in feats if f.entry == "COMMON" and f.key in ("source", "DIVISION")
               for q in f.qualifiers(ann.rows)]
@@ -112,6 +119,10 @@ def drop(ann: AnnFile, keys=DEFAULT_KEYS, allow=()) -> list[Result]:
                 continue
             s = _span(f.location)
             extra = sorted({k for k, _ in f.qualifiers(ann.rows)} - PLAIN_QUALIFIERS - set(allow))
+            if everything:
+                results.append(Result(entry, f.key, f.location, True, "--all"))
+                doomed.append(f)
+                continue
             if s is None:
                 reason = "mixed-strand or unreadable location"
             elif extra:
@@ -139,6 +150,9 @@ def parse_args(argv=None):
     ap.add_argument("--allow-qualifier", action="append", default=[], metavar="KEY",
                     help="also drop features carrying this qualifier (e.g. note, when every note is a "
                          "converter's 'source:AUGUSTUS'); repeatable")
+    ap.add_argument("--all", action="store_true",
+                    help="drop every feature of the keys, also those that are not derivable or carry "
+                         "other qualifiers (organelle and virus entries are still skipped)")
     mode = ap.add_mutually_exclusive_group(required=True)
     mode.add_argument("--dry-run", action="store_true", help="report only; write nothing")
     mode.add_argument("--outdir", type=Path, help="write the new .ann to this directory")
@@ -160,7 +174,7 @@ def main(argv=None) -> int:
     if args.outdir and (args.outdir / args.ann.name).resolve() == args.ann.resolve():
         print(f"Error: --outdir is the input directory: {args.outdir}", file=sys.stderr)
         return 2
-    results = drop(ann, keys, args.allow_qualifier)
+    results = drop(ann, keys, args.allow_qualifier, args.all)
     print("#entry\tfeature\tlocation\taction\treason")
     for r in results:
         print(f"{r.entry}\t{r.feature}\t{r.location}\t{'drop' if r.dropped else 'keep'}\t{r.reason}")
