@@ -11,7 +11,7 @@ ROOT = Path(__file__).resolve().parents[1]
 # The portal (nuc) calls these by name; never rename them.
 COMMANDS = {"egapx2mss", "mss_builder", "mss2ff", "batch_wgs_builder", "tsa2mss", "ann_meta",
             "gff2mss", "ann_fix", "gff_from_tool", "gff_normalize", "gff_repair", "gff_validate",
-            "flatfile2gff", "ddbj-auth"}
+            "flatfile2gff"}
 
 
 def test_commands_unchanged_and_loadable():

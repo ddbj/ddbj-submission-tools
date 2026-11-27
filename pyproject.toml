@@ -4,7 +4,7 @@ build-backend = "hatchling.build"
 
 [project]
 name = "ddbj-submission-tools"
-version = "0.7.0"
+version = "0.8.0"
 description = "Tools to help DDBJ submissions. Nucleotide sequences (MSS): GFF3 canonicalization, MSS conversion, annotation fixes"
 readme = "README.md"
 license = "MIT"
@@ -35,8 +35,6 @@ gff_normalize     = "ddbj_submission_tools.nuc.ddbj_gff.normalize.cli:main"
 gff_repair        = "ddbj_submission_tools.nuc.ddbj_gff.repair.cli:main"
 gff_validate      = "ddbj_submission_tools.nuc.ddbj_gff.validate.cli:main"
 flatfile2gff      = "ddbj_submission_tools.nuc.ddbj_gff.flatfile.cli:main"
-# DDBJ account login (device flow)
-ddbj-auth         = "ddbj_submission_tools.auth.cli:main"
 
 [tool.hatch.build.targets.wheel]
 packages = ["src/ddbj_submission_tools"]
