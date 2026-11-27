@@ -47,7 +47,6 @@ DDBJ への登録を支援する Python ツール群。現在は塩基配列（n
 
 | ツール | 概要 |
 |---|---|
-| **ddbj-auth** | DDBJ アカウントにコマンドラインからログインし、API 用のトークンを出す（[ddbj-auth の使い方](#ddbj-auth-の使い方)） |
 
 > English documentation is available in the [second half of this page](#english).
 
@@ -781,47 +780,6 @@ ann_meta apply --ann NAME.ann --common common.json --entries entries.tsv --out N
 `{"issues": [{"field": ..., "entry": ..., "message": ...}]}`、出力は書かない。`forbidden_char`、`unknown_qualifier`、`reserved_qualifier`、
 `bad_source_identifier`、`bad_shape: ...`、`bad_entries_tsv: ...`、`entry_missing_from_table: ...` など）。
 
-## ddbj-auth の使い方
-
-DDBJ アカウント（Keycloak）にコマンドラインからログインし、DDBJ の API（kura など）用のアクセストークンを出します。ログインはデバイスフローで、表示された URL をどの端末のブラウザで開いても承認できます。手元の端末でも、ブラウザのないリモートサーバーでも同じ手順です。
-
-```bash
-ddbj-auth login --for kura [--env staging|production] [--offline]   # URL とコードが出るので、ブラウザで承認する
-ddbj-auth token --for kura                                          # アクセストークンを標準出力に出す
-ddbj-auth aws-credentials --for kura                                # 一時的な S3 の認証情報（aws cli の credential_process 用）
-ddbj-auth status                                                    # ログインの状態（トークンは表示しない）
-ddbj-auth logout [--for kura]                                       # IdP 側でも失効させ、手元から消す
-```
-
-- 今は API ごとにログインします（組み込みは `kura`）。表にない API は `--client-id` と `--audience` で指定できます。`--env` の既定は `production` です。
-- `--offline` を付けると、IdP のセッションが切れても使える更新用トークン（offline token）を求めます（クライアントが許可している場合）。
-- 更新用トークンは `${XDG_CONFIG_HOME:-~/.config}/ddbj/<env>/<api>.json`（権限 600）に置きます。アクセストークンは保存せず、`token` のたびに取り直します。
-- 環境変数 `DDBJ_TOKEN` があれば `token` はそれを返します。ただし `iss` と `aud` が `--env` と `--for` に合わなければエラーにします。
-- トークンはコマンドの中で使い、表示しないでください：`curl -H "Authorization: Bearer $(ddbj-auth token --for kura)" ...`
-- 注意：共用のアカウントでは使わない。使い終わったら `ddbj-auth logout` する。自分で始めたログインのコードだけを承認する（他人が作ったコードを承認させる攻撃があり得るため）。
-- 終了コード：`0` 成功、`1` ログインが要る・IdP や STS のエラー・検査の不一致、`2` 使い方の誤り。
-
-### kura を aws cli・boto3・rclone で使う
-
-`ddbj-auth aws-credentials --for kura` は、kura 宛てのトークンを kura の STS で一時的な S3 の認証情報に替え、aws cli の `credential_process` の形（JSON）で出します。`~/.aws/config` に次のように書くと、aws cli、boto3、rclone がそのまま kura を使えます。認証情報は期限の前に自動で取り直されるので、長い転送も途中で止まりません。
-
-```ini
-[profile kura]
-region = us-east-1
-endpoint_url = https://kura-s3.ddbj.nig.ac.jp
-credential_process = ddbj-auth aws-credentials --for kura
-```
-
-```bash
-ddbj-auth login --for kura
-ddbj-auth status                                   # sub の値が自分のバケット名
-aws --profile kura s3 cp genome.fna s3://<sub>/NSUB000000/
-```
-
-- staging では `endpoint_url = https://kura-s3-staging.ddbj.nig.ac.jp` と `--env staging` を使います。
-- 届くのは本人のバケットだけです（他人のバケットは `AccessDenied`）。
-- `credential_process` は PATH を使わないことがあるので、`ddbj-auth` が PATH にない環境では絶対パスで書いてください。
-
 ## mss2ff の使い方
 
 MSS アノテーションファイル（`.ann` または `.annt.tsv`）と FASTA ファイルから DDBJ Flat File を生成します。
@@ -917,7 +875,6 @@ Single-purpose check, fix and lookup scripts. They are not installed as commands
 
 | Tool | Description |
 |---|---|
-| **ddbj-auth** | Logs in to your DDBJ account from the command line and prints tokens for DDBJ APIs ([ddbj-auth Usage](#ddbj-auth-usage)) |
 
 ---
 
@@ -1540,47 +1497,6 @@ For `MAG` / `MAG-WGS`, `isolate` is used by default; an explicit `SOURCE_IDENTIF
 `DBLINK` must also include a `sequence read archive` entry.
 
 ---
-
-## ddbj-auth Usage
-
-Logs in to your DDBJ account (Keycloak) from the command line and prints access tokens for DDBJ APIs (kura, ...). Login uses the device flow: approve the shown URL in a browser on any device. It works the same on a local terminal and on a remote server without a browser.
-
-```bash
-ddbj-auth login --for kura [--env staging|production] [--offline]   # approve the URL and code in a browser
-ddbj-auth token --for kura                                          # prints an access token on stdout
-ddbj-auth aws-credentials --for kura                                # temporary S3 credentials (aws cli credential_process)
-ddbj-auth status                                                    # login state (never the tokens)
-ddbj-auth logout [--for kura]                                       # revokes at the IdP and removes it locally
-```
-
-- One login per API for now (built in: `kura`); other APIs with `--client-id` and `--audience`. `--env` defaults to `production`.
-- `--offline` asks for an offline token that survives the IdP session (if the client allows it).
-- The refresh token is kept in `${XDG_CONFIG_HOME:-~/.config}/ddbj/<env>/<api>.json` (mode 600). Access tokens are not stored; `token` gets a fresh one each time.
-- If `DDBJ_TOKEN` is set, `token` prints it, after checking that its `iss` and `aud` match `--env` and `--for`.
-- Use the token inside a command, never print it: `curl -H "Authorization: Bearer $(ddbj-auth token --for kura)" ...`
-- Do not use it on a shared account; run `ddbj-auth logout` when done; approve only codes you started yourself.
-- Exit codes: `0` success; `1` login needed, IdP or STS error, or check failed; `2` usage error.
-
-### Using kura with aws cli, boto3 or rclone
-
-`ddbj-auth aws-credentials --for kura` exchanges a kura token for temporary S3 credentials at the kura STS and prints them in the `credential_process` format of aws cli. With this in `~/.aws/config`, aws cli, boto3 and rclone use kura directly. The credentials are renewed before they expire, so long transfers do not stop.
-
-```ini
-[profile kura]
-region = us-east-1
-endpoint_url = https://kura-s3.ddbj.nig.ac.jp
-credential_process = ddbj-auth aws-credentials --for kura
-```
-
-```bash
-ddbj-auth login --for kura
-ddbj-auth status                                   # the sub value is your bucket name
-aws --profile kura s3 cp genome.fna s3://<sub>/NSUB000000/
-```
-
-- For staging, use `endpoint_url = https://kura-s3-staging.ddbj.nig.ac.jp` and `--env staging`.
-- Only your own bucket is reachable (other buckets give `AccessDenied`).
-- `credential_process` may not use your PATH: give the absolute path to `ddbj-auth` if it is not on the default PATH.
 
 ## mss2ff Usage
 
