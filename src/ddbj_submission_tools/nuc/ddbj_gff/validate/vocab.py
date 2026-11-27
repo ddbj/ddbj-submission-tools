@@ -40,14 +40,14 @@ def _read_feature_mapping() -> tuple[frozenset[str], dict[str, str], dict[str, t
             so_term = cols[1]
             terms.add(so_term)
             insdc = cols[3] if len(cols) > 3 and cols[3] else ""
-            quals = tuple(c for c in cols[4:6] if c)  # 列5,6 (Qualifier 1,2)
+            quals = tuple(c for c in cols[4:6] if c)  # columns 5 and 6 (Qualifier 1, 2)
             if not insdc:
                 continue
             if so_term not in mapping:
                 mapping[so_term] = insdc
                 qualifiers[so_term] = quals
             elif _qual_rank(quals) > _qual_rank(qualifiers.get(so_term, ())):
-                qualifiers[so_term] = quals  # 重複: concrete > placeholder > empty
+                qualifiers[so_term] = quals  # duplicates: concrete > placeholder > empty
     return frozenset(terms), mapping, qualifiers
 
 
