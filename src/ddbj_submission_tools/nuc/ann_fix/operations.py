@@ -24,8 +24,8 @@ DEFAULTS: dict[str, tuple[str, dict]] = {
     "ANN0645": ("collapse-repeats", {}),   # single-use feature repeated (e.g. KEYWORD per keyword)
 }
 IGNORABLE: dict[str, str] = {
-    "ANN2520": "同一遺伝子のアイソフォームが locus_tag を共有（想定どおり）",
-    "ANN2542": "/gene 無しの locus_tag 共有（gff2mss の仕様。放置してよい）",
+    "ANN2520": "isoforms of one gene share a locus_tag (expected)",
+    "ANN2542": "locus_tag shared without /gene (by design in gff2mss output; no action needed)",
 }
 OPERATIONS = {"misc", "artificial-location", "drop", "overlap-drop", "overlap-misc", "collapse-repeats"}
 FILE_OPS = {"collapse-repeats"}         # run once on the whole file, not per finding

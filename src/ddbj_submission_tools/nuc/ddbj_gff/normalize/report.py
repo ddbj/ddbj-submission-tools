@@ -7,7 +7,7 @@ from dataclasses import dataclass, field
 class Change:
     action: str    # add-directive | rename-type | add-qualifier | approx-region
                    # | unmapped-type | needs-manual | no-taxid
-    target: str    # feature id / seqid / directive 名
+    target: str    # feature id / seqid / directive name
     message: str
 
 
